@@ -23,22 +23,50 @@ function parseTemperatureFromText(text) {
 
   // A leading "-" only counts as a minus sign when it isn't just a hyphen
   // glued onto the previous word by the STT (e.g. "ammon-146" should read
-  // as 146, not -146) — a letter immediately before it disqualifies it.
-  const NOT_AFTER_LETTER = "(?<![a-z])";
+  // as 146, not -146), and not a bare separator between two back-to-back
+  // degree readings (a self-correction rendered as "140 degrees -130
+  // degrees" — see below, that "-130" means "corrected to 130", not
+  // "negative 130"). A letter or digit immediately before it, or the word
+  // "degree(s)" right before it, disqualifies it as a minus sign.
+  const NOT_A_MINUS_SIGN_HERE = "(?<![a-z0-9])(?<!degrees\\s)(?<!degree\\s)";
 
   // Prefer a number immediately followed by "degree(s)" (optionally with
   // a unit word/letter), since that's the actual reading, not e.g. a
   // count of items mentioned in the same sentence.
   const strongPattern = new RegExp(
-    `${NOT_AFTER_LETTER}(-?\\d+(?:\\.\\d+)?)\\s*degrees?\\s*(fahrenheit|celsius|f\\b|c\\b)?`,
+    `${NOT_A_MINUS_SIGN_HERE}(-?\\d+(?:\\.\\d+)?)\\s*degrees?\\s*(fahrenheit|celsius|f\\b|c\\b)?`,
     "gi"
   );
   const matches = [...lower.matchAll(strongPattern)];
 
   let numberMatch = matches[0];
+  if (numberMatch) {
+    // Self-correction handling: a cook who corrects themselves ("one forty
+    // no, one thirty degrees") means the LAST number, not the first. When
+    // AssemblyAI gives each number its own "degrees" (often because it
+    // renders each as "140°" / "130°", normalized to "degrees" above),
+    // that produces multiple strongPattern matches back to back with only
+    // a short connector between them — a hyphen, comma, or a word like
+    // "no"/"sorry"/"wait"/"or". Walk forward through any such chain and
+    // keep the last link. A real second reading (a different location or
+    // food item named in between, as in the run-on multi-reading test)
+    // breaks the chain, so that case still correctly keeps its first
+    // reading — see parseTemperatureFromText.test.js for both cases.
+    const isCorrectionConnector = (between) =>
+      /^[\s,-]*$/.test(between) || /^[\s,-]*\b(no|sorry|wait|or)\b[\s,-]*$/i.test(between);
+    for (let i = 1; i < matches.length; i++) {
+      const prevEnd = numberMatch.index + numberMatch[0].length;
+      const between = lower.slice(prevEnd, matches[i].index);
+      if (isCorrectionConnector(between)) {
+        numberMatch = matches[i];
+      } else {
+        break;
+      }
+    }
+  }
   if (!numberMatch) {
     // Fall back to the first standalone number anywhere in the sentence.
-    const anyNumber = lower.match(new RegExp(`${NOT_AFTER_LETTER}-?\\d+(?:\\.\\d+)?`));
+    const anyNumber = lower.match(new RegExp(`${NOT_A_MINUS_SIGN_HERE}-?\\d+(?:\\.\\d+)?`));
     if (!anyNumber) return { value: null, unit: null };
     return { value: Number(anyNumber[0]), unit: lower.includes("celsius") ? "C" : "F" };
   }
