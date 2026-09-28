@@ -3,15 +3,18 @@
 import { useCallback, useRef, useState } from "react";
 import { parseTemperatureFromText } from "@/lib/parseTemperatureFromText";
 
-// Lowered from 5 after a live run showed the AssemblyAI async-v2 queue
-// backing up under sustained concurrent load (see route.js's comment on
-// pollUntilDone). Gentler concurrency plus that longer per-job timeout
-// makes a full run of the expanded test set survive a slow patch instead
-// of reporting false "timed out" failures.
-const CONCURRENCY = 3;
+// Lowered from 5 (then 3) after live runs showed the AssemblyAI async-v2
+// queue backing up under sustained concurrent load, and a long unattended
+// run holding many simultaneous connections made the browser tab shed
+// requests wholesale ("Failed to fetch" on ~645/648 clips with no
+// AssemblyAI-side error at all) once backgrounded for an extended stretch.
+// Fewer simultaneous connections plus the retry wrapper above make a full
+// run of the expanded test set survive both kinds of hiccup.
+const CONCURRENCY = 2;
 
-async function transcribeClip(url) {
+async function transcribeClipOnce(url) {
   const audioResp = await fetch(url);
+  if (!audioResp.ok) throw new Error(`clip fetch failed (${audioResp.status})`);
   const audioBuf = await audioResp.arrayBuffer();
   const resp = await fetch("/api/dev/transcribe", {
     method: "POST",
@@ -21,6 +24,26 @@ async function transcribeClip(url) {
   const data = await resp.json();
   if (!resp.ok) throw new Error(data.error || "transcribe failed");
   return data.text;
+}
+
+// A run against ~650 real clips takes long enough (each one is a real
+// AssemblyAI round trip) that transient hiccups are expected: the async
+// queue running slow, or the browser tab getting backgrounded for a long
+// stretch and having a fetch or two get dropped ("Failed to fetch" with no
+// AssemblyAI-side cause at all). One flaky attempt shouldn't count as a
+// real accuracy failure and corrupt the measured number, so retry a few
+// times with backoff before giving up on a clip.
+async function transcribeClip(url, { attempts = 3 } = {}) {
+  let lastErr;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await transcribeClipOnce(url);
+    } catch (err) {
+      lastErr = err;
+      if (i < attempts - 1) await new Promise((r) => setTimeout(r, 2000 * (i + 1)));
+    }
+  }
+  throw lastErr;
 }
 
 export default function AccuracyTestPage() {
