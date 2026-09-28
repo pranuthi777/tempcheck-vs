@@ -41,8 +41,10 @@ vs. amber vs. red every time.
 - **`src/app/api/token/route.js`** — server-side only; mints a short-lived AssemblyAI session token so the real API key never reaches the browser.
 - **`src/lib/agentConfig.js`** — the system prompt and the `log_reading` tool schema sent to the agent.
 - **`src/lib/useVoiceAgent.js`** — owns the WebSocket lifecycle: mic streaming, playback, tool-call handling, transcript captions, barge-in/interruption handling.
-- **`src/lib/ruleEngine.js`** + **`src/lib/foodCategories.js`** — the actual safety logic. Zero LLM calls. Fully unit tested (`npm test`).
-- **`src/lib/haccpPdf.js`** — generates the inspector-ready HACCP log PDF from the exact readings captured in the session.
+- **`src/lib/ruleEngine.js`** + **`src/lib/foodCategories.js`** — the actual safety logic, covering cold/hot holding, poultry, ground/injected meat, whole-muscle meat, fish/seafood/eggs, and reheating, each citing its specific FDA Food Code section. Zero LLM calls. Fully unit tested (`npm test`).
+- **`src/lib/coolingEngine.js`** — the two-stage cooling curve (135°F→70°F within 2h, then →41°F within 6h total, FDA 3-501.14(A)), pairing a spoken "cooling start" reading with a later "cooling check" for the same item.
+- **`src/lib/haccpPdf.js`** — generates the inspector-ready HACCP-style log PDF, with every reading's FDA citation, from the exact readings captured in the session.
+- **`src/lib/audioCues.js`** + **`src/components/BigDisplay.js`** — hands-free extras: a beep on every log (a distinct alert tone for amber/red), and a full-screen, glanceable big-display mode. Push-to-talk (for loud kitchens) lives in `useVoiceAgent.js`.
 
 ## Running it locally
 
@@ -76,7 +78,7 @@ Beyond unit tests, the live deployment was driven with real synthesized speech t
 - The accuracy test set is synthesized (TTS voices + procedurally generated noise), not real kitchen recordings — see `docs/accuracy.md` for why, and how to regenerate/verify it yourself.
 - A few STT mis-transcriptions in the accuracy set involve the TTS voice leaving a number partly spelled out (e.g. "one 45" instead of "145"); recovering that would need English-number-word parsing, not just a regex fix — noted rather than patched under deadline pressure (see `docs/accuracy.md`).
 - Continuous background noise (a running hood fan, a dishwasher, steady kitchen hiss) is handled well; transient, speech-like noise (a fryer basket going in, a shouting coworker) is noticeably harder for the STT — measured at 52.8% and 47.2% respectively vs. 88–100% for steadier noise types (see `docs/accuracy.md`).
-- Cooling-curve tracking (135°F→70°F within 2h, then →41°F within another 4h) is not yet automated; only point-in-time readings are checked so far.
+- Cooling-curve tracking (135°F→70°F within 2h, then →41°F within 6h total — FDA Food Code 3-501.14(A)) is automated (`src/lib/coolingEngine.js`, unit tested), but pairs only a start and one later check reading — it assumes temperature only decreased in between rather than independently confirming an intermediate point, and the pending "cooling in progress" state lives only for the current session (not saved across a reload, unlike the rest of the shift log).
 - Shift persistence is local to one browser (localStorage) — it survives a reload or crashed tab on the same device, but not a switch to a different device or a cleared browser profile; no multi-device or multi-user backend yet.
 - The internal `/api/dev/transcribe` accuracy-harness endpoint is off by default in any fresh deployment (`ENABLE_DEV_HARNESS` must be explicitly set) and rate-limited per IP when enabled — not linked from the cook-facing UI, and not reachable at all without that env var set.
 

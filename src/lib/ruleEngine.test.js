@@ -83,3 +83,19 @@ test("very cold cooler reading is 'safe' by the cold-holding rule (colder is nev
   // correctly comes back red.
   assert.equal(evaluateReading({ location: "steam table", temperatureF: -10 }).status, "red");
 });
+
+test("every recognized category cites its specific FDA Food Code section", () => {
+  const cases = [
+    { location: "walk-in cooler", temperatureF: 38, citation: "3-501.16(A)(2)" },
+    { location: "steam table", temperatureF: 140, citation: "3-501.16(A)(1)" },
+    { foodItem: "chicken breast", temperatureF: 165, citation: "3-401.11(A)(2)" },
+    { foodItem: "ground beef", temperatureF: 155, citation: "3-401.11(A)(3)" },
+    { foodItem: "steak", temperatureF: 145, citation: "3-401.11(A)(1)/(B)" },
+    { foodItem: "salmon", temperatureF: 145, citation: "3-401.11(A)(1)" },
+    { readingType: "reheating", foodItem: "soup", temperatureF: 170, citation: "3-403.11(A)" },
+  ];
+  for (const { citation, ...input } of cases) {
+    const r = evaluateReading(input);
+    assert.ok(r.citation && r.citation.includes(citation), `expected citation containing ${citation}, got ${r.citation}`);
+  }
+});

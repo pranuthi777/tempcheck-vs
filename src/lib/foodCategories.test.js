@@ -1,0 +1,15 @@
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const { resolveCategory } = require("./foodCategories");
+
+test("newly added item types resolve to the right category", () => {
+  assert.equal(resolveCategory({ foodItem: "tri-tip" }), "whole_muscle");
+  assert.equal(resolveCategory({ foodItem: "lobster" }), "fish_seafood");
+  assert.equal(resolveCategory({ foodItem: "chicken wings" }), "poultry");
+  assert.equal(resolveCategory({ foodItem: "chorizo" }), "ground_meat");
+  assert.equal(resolveCategory({ foodItem: "oysters" }), "fish_seafood");
+});
+
+test("an unrecognized item still falls back to unknown, never a guess", () => {
+  assert.equal(resolveCategory({ foodItem: "quinoa salad" }), "unknown");
+});

@@ -34,14 +34,18 @@ const { resolveCategory, CATEGORY_LABELS } = require("./foodCategories");
 // cold_holding is "safe at or BELOW threshold"; everything else is
 // "safe at or ABOVE threshold". amberBandF is our own early-warning buffer,
 // not an FDA number — see the file header.
+// citation is the specific FDA Food Code (2022 edition) section for that
+// limit — the same sections cited in the file header — shown in the log
+// and the exported PDF so a reading's regulatory basis is never just
+// asserted, it's pointed at.
 const LIMITS = {
-  cold_holding: { direction: "at_or_below", safeAt: 41, amberBandF: 4 },
-  hot_holding: { direction: "at_or_above", safeAt: 135, amberBandF: 5 },
-  poultry: { direction: "at_or_above", safeAt: 165, amberBandF: 5 },
-  ground_meat: { direction: "at_or_above", safeAt: 155, amberBandF: 5 },
-  whole_muscle: { direction: "at_or_above", safeAt: 145, amberBandF: 5 },
-  fish_seafood: { direction: "at_or_above", safeAt: 145, amberBandF: 5 },
-  reheating: { direction: "at_or_above", safeAt: 165, amberBandF: 5 },
+  cold_holding: { direction: "at_or_below", safeAt: 41, amberBandF: 4, citation: "FDA Food Code 3-501.16(A)(2)" },
+  hot_holding: { direction: "at_or_above", safeAt: 135, amberBandF: 5, citation: "FDA Food Code 3-501.16(A)(1)" },
+  poultry: { direction: "at_or_above", safeAt: 165, amberBandF: 5, citation: "FDA Food Code 3-401.11(A)(2)" },
+  ground_meat: { direction: "at_or_above", safeAt: 155, amberBandF: 5, citation: "FDA Food Code 3-401.11(A)(3)" },
+  whole_muscle: { direction: "at_or_above", safeAt: 145, amberBandF: 5, citation: "FDA Food Code 3-401.11(A)(1)/(B)" },
+  fish_seafood: { direction: "at_or_above", safeAt: 145, amberBandF: 5, citation: "FDA Food Code 3-401.11(A)(1)" },
+  reheating: { direction: "at_or_above", safeAt: 165, amberBandF: 5, citation: "FDA Food Code 3-403.11(A)" },
 };
 
 const CORRECTIVE_ACTIONS = {
@@ -70,7 +74,8 @@ function round1(n) {
  * @param {{location?:string, foodItem?:string, readingType?:string, temperatureF:number}} input
  * @returns {{
  *   category: string, categoryLabel: string, status: 'safe'|'amber'|'red'|'unknown',
- *   limitF: number|null, correctiveAction: string|null, message: string
+ *   limitF: number|null, correctiveAction: string|null, message: string,
+ *   citation: string|null
  * }}
  */
 function evaluateReading(input) {
@@ -86,6 +91,7 @@ function evaluateReading(input) {
       limitF: null,
       correctiveAction: "Could not parse a numeric temperature — ask the cook to repeat the reading.",
       message: "No valid temperature was captured.",
+      citation: null,
     };
   }
 
@@ -102,6 +108,7 @@ function evaluateReading(input) {
       correctiveAction:
         "That reading is outside any plausible kitchen temperature range — ask the cook to repeat it before logging.",
       message: `${round1(temperatureF)}°F is implausible and was not saved.`,
+      citation: null,
     };
   }
 
@@ -113,6 +120,7 @@ function evaluateReading(input) {
       limitF: null,
       correctiveAction: CORRECTIVE_ACTIONS.unknown,
       message: `${round1(temperatureF)}°F logged, but the item/location wasn't recognized. A manager should classify it.`,
+      citation: null,
     };
   }
 
@@ -143,6 +151,7 @@ function evaluateReading(input) {
     limitF: limit.safeAt,
     correctiveAction: status === "safe" ? null : CORRECTIVE_ACTIONS[category],
     message,
+    citation: limit.citation,
   };
 }
 

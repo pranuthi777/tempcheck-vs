@@ -2,9 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { evaluateReading } from "./ruleEngine";
+import { evaluateCoolingCheck, COOLING_CITATION } from "./coolingEngine";
 import { buildSessionUpdate } from "./agentConfig";
 import { PCMPlayer } from "./audioPlayer";
 import { startMicCapture } from "./micCapture";
+
+function coolingKey(args) {
+  return (args.location || args.food_item || "").toLowerCase().trim();
+}
 
 function celsiusToFahrenheit(c) {
   return Math.round(((c * 9) / 5 + 32) * 10) / 10;
@@ -33,6 +38,11 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
   const deliberateCloseRef = useRef(false);
   const resumeAttemptedRef = useRef(false);
   const openSocketRef = useRef(null);
+  // Pending cooling-curve starts, keyed by normalized location/food_item —
+  // see coolingEngine.js. Lives only for the session (not persisted across
+  // a reload, a known, disclosed limitation); a start not yet matched by a
+  // check just means that item's cooling progress isn't being tracked.
+  const coolingPendingRef = useRef(new Map());
 
   // Push-to-talk: in a very loud kitchen, always-on listening can pick up
   // too much background noise/chatter. micOpenRef gates whether captured
@@ -75,12 +85,74 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
             : args.temperature_value;
       }
 
-      const evaluation = evaluateReading({
-        location: args.location,
-        foodItem: args.food_item,
-        readingType: args.reading_type,
-        temperatureF,
-      });
+      let evaluation;
+      let coolingStage = null; // "start" | "check" | null, for the dashboard/log to badge
+
+      if (args.reading_type === "cooling_start") {
+        coolingStage = "start";
+        const key = coolingKey(args);
+        if (key && Number.isFinite(temperatureF)) {
+          coolingPendingRef.current.set(key, {
+            startTemperatureF: temperatureF,
+            startTimestamp: Date.now(),
+          });
+        }
+        evaluation = {
+          category: "cooling",
+          categoryLabel: "Cooling (in progress)",
+          status: "safe",
+          limitF: null,
+          correctiveAction: null,
+          message: Number.isFinite(temperatureF)
+            ? `Cooling started at ${temperatureF}°F. Must reach 70°F within 2h, then 41°F within 6h total.`
+            : "Cooling start logged, but no valid starting temperature was captured.",
+          citation: COOLING_CITATION,
+        };
+      } else if (args.reading_type === "cooling_check") {
+        coolingStage = "check";
+        const key = coolingKey(args);
+        const pending = key ? coolingPendingRef.current.get(key) : null;
+        if (!pending || !Number.isFinite(temperatureF)) {
+          evaluation = {
+            category: "cooling",
+            categoryLabel: "Cooling (in progress)",
+            status: "unknown",
+            limitF: null,
+            correctiveAction: "Log the cooling starting temperature first, then check again.",
+            message: "No matching cooling-start reading was found for this item.",
+            citation: COOLING_CITATION,
+          };
+        } else {
+          const result = evaluateCoolingCheck({
+            startTemperatureF: pending.startTemperatureF,
+            startTimestamp: pending.startTimestamp,
+            checkTemperatureF: temperatureF,
+            checkTimestamp: Date.now(),
+          });
+          evaluation = {
+            category: "cooling",
+            categoryLabel: "Cooling check",
+            status: result.status,
+            limitF: null,
+            correctiveAction: result.correctiveAction,
+            message: result.message,
+            citation: result.citation,
+          };
+          // A violation or a compliant final reading both resolve this
+          // cooling pair; an "amber" (still in progress, on track) leaves
+          // it pending so a later check can pair against the same start.
+          if (result.status !== "amber") {
+            coolingPendingRef.current.delete(key);
+          }
+        }
+      } else {
+        evaluation = evaluateReading({
+          location: args.location,
+          foodItem: args.food_item,
+          readingType: args.reading_type,
+          temperatureF,
+        });
+      }
 
       const record = {
         id: msg.call_id || crypto.randomUUID(),
@@ -90,6 +162,7 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
         rawArgs: args,
         temperatureF,
         cookText: lastUserTextRef.current,
+        coolingStage,
         ...evaluation,
       };
 

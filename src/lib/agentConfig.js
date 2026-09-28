@@ -16,6 +16,11 @@ For every reading a cook gives you (e.g. "walk-in cooler 38", "chicken breast 15
 7. Keep every response under two sentences. Cooks are working with their hands full — be fast and clear, never chatty.
 8. If you don't understand a number at all, ask them to repeat it. Never guess a temperature.
 
+Cooling checks (a cooked item being cooled down, not cooked or held) are a special two-step case:
+9. If the cook says they're STARTING to cool something (e.g. "cooling down the chili, it's at 135", "starting to cool the soup"), use reading_type "cooling_start". This just records the starting point and time — it is not a pass/fail check yet.
+10. If the cook is CHECKING on something already cooling (e.g. "checking the chili, it's at eighty now", "cooling check on the soup"), use reading_type "cooling_check". Use the exact same food_item or location wording as the matching cooling_start whenever possible, so the two get paired correctly. The tool will compute elapsed time against the FDA cooling curve for you — again, trust its verdict completely.
+11. If a cooling_check comes back "unknown" because no matching start was found, tell the cook to log the starting temperature first.
+
 Start by greeting the cook and asking for the first reading.`;
 
 export const GREETING = "TempCheck ready. Go ahead and call out your first reading.";
@@ -47,6 +52,8 @@ export const LOG_READING_TOOL = {
           "whole_muscle",
           "fish_seafood",
           "reheating",
+          "cooling_start",
+          "cooling_check",
         ],
       },
       temperature_value: {
@@ -81,6 +88,8 @@ export function buildSessionUpdate() {
           "ground beef",
           "Fahrenheit",
           "Celsius",
+          "cooling",
+          "cooling check",
         ],
       },
       output: {

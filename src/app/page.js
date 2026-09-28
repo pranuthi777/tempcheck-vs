@@ -307,7 +307,10 @@ export default function Home() {
                 <p className="text-2xl font-bold">
                   {Number.isFinite(r.temperatureF) ? `${r.temperatureF}°F` : "—"}
                 </p>
-                <p className="text-xs opacity-70">{r.categoryLabel}</p>
+                <p className="text-xs opacity-70">
+                  {r.categoryLabel}
+                  {r.coolingStage === "start" && " — cooling in progress"}
+                </p>
               </div>
             ))}
           </div>
@@ -334,6 +337,7 @@ export default function Home() {
                 <th className="text-left px-3 py-2 font-medium">Temp</th>
                 <th className="text-left px-3 py-2 font-medium">Status</th>
                 <th className="text-left px-3 py-2 font-medium">Corrective Action</th>
+                <th className="text-left px-3 py-2 font-medium">FDA Section</th>
                 <th className="text-left px-3 py-2 font-medium">Cook&apos;s Words</th>
               </tr>
             </thead>
@@ -343,7 +347,14 @@ export default function Home() {
                   <td className="px-3 py-2 text-slate-400 whitespace-nowrap">
                     {new Date(r.timestamp).toLocaleTimeString()}
                   </td>
-                  <td className="px-3 py-2">{r.location || r.foodItem || "—"}</td>
+                  <td className="px-3 py-2">
+                    {r.location || r.foodItem || "—"}
+                    {r.coolingStage && (
+                      <span className="ml-1.5 text-xs text-sky-400">
+                        ({r.coolingStage === "start" ? "cooling start" : "cooling check"})
+                      </span>
+                    )}
+                  </td>
                   <td className="px-3 py-2 font-mono">
                     {Number.isFinite(r.temperatureF) ? `${r.temperatureF}°F` : "—"}
                   </td>
@@ -357,12 +368,13 @@ export default function Home() {
                     </span>
                   </td>
                   <td className="px-3 py-2 text-slate-300">{r.correctiveAction || "—"}</td>
+                  <td className="px-3 py-2 text-slate-500 whitespace-nowrap">{r.citation || "—"}</td>
                   <td className="px-3 py-2 text-slate-500 italic">{r.cookText || "—"}</td>
                 </tr>
               ))}
               {readings.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-3 py-6 text-center text-slate-500">
+                  <td colSpan={7} className="px-3 py-6 text-center text-slate-500">
                     No readings yet.
                   </td>
                 </tr>

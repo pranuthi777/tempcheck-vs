@@ -20,28 +20,32 @@ export function exportHaccpPdf(readings, { shiftStart, shiftEnd } = {}) {
 
   const rows = readings.map((r) => [
     new Date(r.timestamp).toLocaleTimeString(),
-    r.location || r.foodItem || "—",
+    (r.location || r.foodItem || "—") + (r.coolingStage ? ` (${r.coolingStage === "start" ? "cooling start" : "cooling check"})` : ""),
     r.categoryLabel || "—",
     Number.isFinite(r.temperatureF) ? `${r.temperatureF}°F` : "—",
     (r.status || "unknown").toUpperCase(),
     r.correctiveAction || "—",
+    r.citation || "—",
     r.cookText || "—",
   ]);
 
   autoTable(doc, {
     startY: 100,
-    head: [["Time", "Location / Item", "Category", "Temp", "Status", "Corrective Action", "Cook's Words"]],
+    head: [
+      ["Time", "Location / Item", "Category", "Temp", "Status", "Corrective Action", "FDA Section", "Cook's Words"],
+    ],
     body: rows,
-    styles: { fontSize: 8, cellPadding: 4, overflow: "linebreak" },
+    styles: { fontSize: 7.5, cellPadding: 3.5, overflow: "linebreak" },
     headStyles: { fillColor: [30, 41, 59] },
     columnStyles: {
-      0: { cellWidth: 55 },
-      1: { cellWidth: 85 },
-      2: { cellWidth: 75 },
-      3: { cellWidth: 40 },
-      4: { cellWidth: 45 },
-      5: { cellWidth: 140 },
-      6: { cellWidth: 110 },
+      0: { cellWidth: 46 },
+      1: { cellWidth: 78 },
+      2: { cellWidth: 58 },
+      3: { cellWidth: 34 },
+      4: { cellWidth: 38 },
+      5: { cellWidth: 98 },
+      6: { cellWidth: 78 },
+      7: { cellWidth: 72 },
     },
     didParseCell: (data) => {
       if (data.section === "body" && data.column.index === 4) {
@@ -65,7 +69,7 @@ export function exportHaccpPdf(readings, { shiftStart, shiftEnd } = {}) {
   );
   doc.setTextColor(120);
   doc.text(
-    "Point-in-time temperature checks only. Does not automate cooling-curve time windows (e.g. 135°F→70°F within 2h) — log those manually until that feature ships.",
+    "Cooling-curve checks (135°F→70°F within 2h, then →41°F within 6h total, FDA Food Code 3-501.14(A)) pair a \"cooling start\" reading with a later \"cooling check\" reading for the same item and assume the temperature only decreased in between — they don't independently confirm an intermediate point.",
     40,
     finalY + 40,
     { maxWidth: 520 }
