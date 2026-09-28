@@ -7,8 +7,19 @@ import { buildSessionUpdate } from "./agentConfig";
 import { PCMPlayer } from "./audioPlayer";
 import { startMicCapture } from "./micCapture";
 
-function coolingKey(args) {
-  return (args.location || args.food_item || "").toLowerCase().trim();
+// Verified live: a real cooling_check tool call came back with BOTH
+// food_item and location set (the model filled in location from earlier
+// context even though the cook never mentioned it for that reading), while
+// the matching cooling_start call had only food_item. A single "prefer one
+// field" key would have failed to pair them whichever field it preferred,
+// so a cooling_start is indexed under BOTH of its non-empty fields, and a
+// cooling_check matches on either one — food_item first since that's the
+// more specific/stable identifier for what's actually cooling.
+function coolingKeys(args) {
+  const keys = [];
+  if (args.food_item) keys.push("item:" + args.food_item.toLowerCase().trim());
+  if (args.location) keys.push("loc:" + args.location.toLowerCase().trim());
+  return keys;
 }
 
 function celsiusToFahrenheit(c) {
@@ -90,12 +101,10 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
 
       if (args.reading_type === "cooling_start") {
         coolingStage = "start";
-        const key = coolingKey(args);
-        if (key && Number.isFinite(temperatureF)) {
-          coolingPendingRef.current.set(key, {
-            startTemperatureF: temperatureF,
-            startTimestamp: Date.now(),
-          });
+        const keys = coolingKeys(args);
+        if (keys.length > 0 && Number.isFinite(temperatureF)) {
+          const pendingRecord = { startTemperatureF: temperatureF, startTimestamp: Date.now() };
+          for (const k of keys) coolingPendingRef.current.set(k, pendingRecord);
         }
         evaluation = {
           category: "cooling",
@@ -110,8 +119,12 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
         };
       } else if (args.reading_type === "cooling_check") {
         coolingStage = "check";
-        const key = coolingKey(args);
-        const pending = key ? coolingPendingRef.current.get(key) : null;
+        const keys = coolingKeys(args);
+        let pending = null;
+        for (const k of keys) {
+          pending = coolingPendingRef.current.get(k);
+          if (pending) break;
+        }
         if (!pending || !Number.isFinite(temperatureF)) {
           evaluation = {
             category: "cooling",
@@ -141,8 +154,13 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
           // A violation or a compliant final reading both resolve this
           // cooling pair; an "amber" (still in progress, on track) leaves
           // it pending so a later check can pair against the same start.
+          // Clear every key that was pointing at this record (it may have
+          // been indexed under both food_item and location), not just the
+          // one this particular check happened to match on.
           if (result.status !== "amber") {
-            coolingPendingRef.current.delete(key);
+            for (const [k, v] of coolingPendingRef.current.entries()) {
+              if (v === pending) coolingPendingRef.current.delete(k);
+            }
           }
         }
       } else {
