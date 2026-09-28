@@ -27,6 +27,8 @@ export default function Home() {
   const [restoredNotice, setRestoredNotice] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [bigDisplay, setBigDisplay] = useState(false);
+  const [dateFilter, setDateFilter] = useState("all");
+  const [stationFilter, setStationFilter] = useState("all");
   const shiftStartRef = useRef(null);
   const shiftEndRef = useRef(null);
   const soundEnabledRef = useRef(true);
@@ -140,6 +142,39 @@ export default function Home() {
 
   const isLive = status === "listening" || status === "connecting" || status === "reconnecting";
 
+  // Distinct dates and stations/items present in the current log, for the
+  // PDF export filters below. "Station" here means whatever the cook named
+  // — a location ("walk-in cooler") or a food item ("chicken breast") —
+  // since that's the only grouping the app actually has.
+  const availableDates = useMemo(() => {
+    const set = new Set(readings.map((r) => new Date(r.timestamp).toLocaleDateString()));
+    return Array.from(set).sort();
+  }, [readings]);
+
+  const availableStations = useMemo(() => {
+    const set = new Set(readings.map((r) => r.location || r.foodItem || "Unspecified"));
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [readings]);
+
+  const filteredReadings = useMemo(() => {
+    return readings.filter((r) => {
+      if (dateFilter !== "all" && new Date(r.timestamp).toLocaleDateString() !== dateFilter) return false;
+      if (stationFilter !== "all" && (r.location || r.foodItem || "Unspecified") !== stationFilter) return false;
+      return true;
+    });
+  }, [readings, dateFilter, stationFilter]);
+
+  const handleExportPdf = useCallback(() => {
+    const parts = [];
+    if (dateFilter !== "all") parts.push(dateFilter);
+    if (stationFilter !== "all") parts.push(stationFilter);
+    exportHaccpPdf(filteredReadings, {
+      shiftStart: shiftStartRef.current,
+      shiftEnd: shiftEndRef.current,
+      filterDescription: parts.length > 0 ? parts.join(" — ") : null,
+    });
+  }, [filteredReadings, dateFilter, stationFilter]);
+
   if (bigDisplay) {
     return (
       <BigDisplay
@@ -177,19 +212,53 @@ export default function Home() {
             </button>
           )}
           <button
-            onClick={() =>
-              exportHaccpPdf(readings, {
-                shiftStart: shiftStartRef.current,
-                shiftEnd: shiftEndRef.current,
-              })
-            }
-            disabled={readings.length === 0}
+            onClick={handleExportPdf}
+            disabled={filteredReadings.length === 0}
             className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:hover:bg-slate-800 font-semibold transition"
           >
-            Export HACCP PDF
+            Export HACCP PDF{dateFilter !== "all" || stationFilter !== "all" ? " (filtered)" : ""}
           </button>
         </div>
       </header>
+
+      {readings.length > 0 && (
+        <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 -mt-2">
+          <span className="uppercase tracking-wide font-semibold text-slate-500">PDF filters:</span>
+          <label className="flex items-center gap-1.5">
+            Date
+            <select
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200"
+            >
+              <option value="all">All dates</option>
+              {availableDates.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex items-center gap-1.5">
+            Station / item
+            <select
+              value={stationFilter}
+              onChange={(e) => setStationFilter(e.target.value)}
+              className="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200"
+            >
+              <option value="all">All stations</option>
+              {availableStations.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </label>
+          <span>
+            {filteredReadings.length} of {readings.length} reading{readings.length === 1 ? "" : "s"} match
+          </span>
+        </div>
+      )}
 
       {/* Hands-free controls: sound cues, big kitchen-display mode, and an
           optional push-to-talk mode for very loud kitchens where always-on
