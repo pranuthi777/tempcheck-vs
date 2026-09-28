@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useVoiceAgent } from "@/lib/useVoiceAgent";
 import { exportHaccpPdf } from "@/lib/haccpPdf";
 import { loadShift, saveShift, clearShift } from "@/lib/shiftStorage";
+import { playLogBeep, playAlertTone } from "@/lib/audioCues";
+import BigDisplay from "@/components/BigDisplay";
 
 const STATUS_STYLES = {
   safe: "bg-emerald-500/15 border-emerald-500 text-emerald-300",
@@ -23,8 +25,14 @@ export default function Home() {
   const [readings, setReadings] = useState([]);
   const [transcript, setTranscript] = useState([]);
   const [restoredNotice, setRestoredNotice] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [bigDisplay, setBigDisplay] = useState(false);
   const shiftStartRef = useRef(null);
   const shiftEndRef = useRef(null);
+  const soundEnabledRef = useRef(true);
+  useEffect(() => {
+    soundEnabledRef.current = soundEnabled;
+  }, [soundEnabled]);
 
   // Restore an in-progress (or just-ended, not-yet-exported) shift from
   // localStorage on load — so a crashed tab or accidental reload doesn't
@@ -63,13 +71,32 @@ export default function Home() {
   const onReading = useCallback((record) => {
     setRestoredNotice(false);
     setReadings((prev) => [record, ...prev]);
+    if (soundEnabledRef.current) {
+      if (record.status === "amber" || record.status === "red") {
+        playAlertTone(record.status);
+      } else {
+        playLogBeep();
+      }
+    }
   }, []);
 
   const onTranscriptLine = useCallback((line) => {
     setTranscript((prev) => [...prev.slice(-30), line]);
   }, []);
 
-  const { status, error, userCaption, agentCaption, connect, disconnect } = useVoiceAgent({
+  const {
+    status,
+    error,
+    userCaption,
+    agentCaption,
+    connect,
+    disconnect,
+    pushToTalk,
+    setPushToTalk,
+    talking,
+    startTalking,
+    stopTalking,
+  } = useVoiceAgent({
     onReading,
     onTranscriptLine,
   });
@@ -113,6 +140,17 @@ export default function Home() {
 
   const isLive = status === "listening" || status === "connecting" || status === "reconnecting";
 
+  if (bigDisplay) {
+    return (
+      <BigDisplay
+        latestReading={readings[0] || null}
+        summary={summary}
+        isLive={isLive}
+        onExit={() => setBigDisplay(false)}
+      />
+    );
+  }
+
   return (
     <main className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-4 py-6 gap-6">
       <header className="flex flex-wrap items-center justify-between gap-4">
@@ -153,6 +191,59 @@ export default function Home() {
         </div>
       </header>
 
+      {/* Hands-free controls: sound cues, big kitchen-display mode, and an
+          optional push-to-talk mode for very loud kitchens where always-on
+          listening picks up too much background noise. */}
+      <div className="flex flex-wrap items-center gap-3 text-sm border-t border-b border-slate-800 py-2">
+        <button
+          onClick={() => setSoundEnabled((v) => !v)}
+          className="flex items-center gap-1.5 text-slate-300 hover:text-white transition"
+          title="Beep on log, alert tone on amber/red"
+        >
+          <span>{soundEnabled ? "🔊" : "🔇"}</span>
+          <span>Sound {soundEnabled ? "on" : "off"}</span>
+        </button>
+        <button
+          onClick={() => setBigDisplay(true)}
+          className="flex items-center gap-1.5 text-slate-300 hover:text-white transition"
+          title="Full-screen, glanceable from across the kitchen"
+        >
+          <span>⛶</span>
+          <span>Big display</span>
+        </button>
+        <label className="flex items-center gap-1.5 text-slate-300 cursor-pointer ml-auto">
+          <input
+            type="checkbox"
+            checked={pushToTalk}
+            onChange={(e) => setPushToTalk(e.target.checked)}
+            className="accent-emerald-500"
+          />
+          <span>Push-to-talk (loud kitchen)</span>
+        </label>
+        {pushToTalk && isLive && (
+          <button
+            onMouseDown={startTalking}
+            onMouseUp={stopTalking}
+            onMouseLeave={stopTalking}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              startTalking();
+            }}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              stopTalking();
+            }}
+            className={`px-4 py-1.5 rounded-lg font-semibold select-none transition ${
+              talking
+                ? "bg-emerald-500 text-white"
+                : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+            }`}
+          >
+            {talking ? "🎙️ Listening — release when done" : "Hold to talk"}
+          </button>
+        )}
+      </div>
+
       {restoredNotice && (
         <div className="rounded-lg border border-sky-800 bg-sky-950/50 text-sky-300 text-sm px-3 py-2">
           Restored {readings.length} reading{readings.length === 1 ? "" : "s"} from before this
@@ -185,7 +276,11 @@ export default function Home() {
         {agentCaption && <p className="text-sky-300">🔊 {agentCaption}</p>}
         {!userCaption && !agentCaption && (
           <p className="text-slate-500">
-            {isLive ? "Listening for a reading…" : "Press Start Shift and call out a reading."}
+            {!isLive
+              ? "Press Start Shift and call out a reading."
+              : pushToTalk
+              ? "Hold the talk button and call out a reading."
+              : "Listening for a reading…"}
           </p>
         )}
       </div>

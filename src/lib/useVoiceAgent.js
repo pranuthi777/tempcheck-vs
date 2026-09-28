@@ -34,6 +34,36 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
   const resumeAttemptedRef = useRef(false);
   const openSocketRef = useRef(null);
 
+  // Push-to-talk: in a very loud kitchen, always-on listening can pick up
+  // too much background noise/chatter. micOpenRef gates whether captured
+  // mic chunks actually get sent up the WebSocket — the AudioWorklet itself
+  // keeps running either way (tearing down/rebuilding the audio graph on
+  // every press would be slow and glitchy), so toggling this is instant.
+  // Default true = continuous listening, today's default experience.
+  const micOpenRef = useRef(true);
+  const [pushToTalk, setPushToTalkState] = useState(false);
+  const [talking, setTalking] = useState(false);
+
+  const setPushToTalk = useCallback((enabled) => {
+    setPushToTalkState(enabled);
+    // Switching INTO push-to-talk starts muted until the button is held;
+    // switching back to continuous re-opens the mic immediately.
+    micOpenRef.current = !enabled;
+    setTalking(false);
+  }, []);
+
+  const startTalking = useCallback(() => {
+    if (!pushToTalk) return;
+    micOpenRef.current = true;
+    setTalking(true);
+  }, [pushToTalk]);
+
+  const stopTalking = useCallback(() => {
+    if (!pushToTalk) return;
+    micOpenRef.current = false;
+    setTalking(false);
+  }, [pushToTalk]);
+
   const handleToolCall = useCallback(
     (msg) => {
       const args = msg.arguments || {};
@@ -214,7 +244,11 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
     try {
       playerRef.current = new PCMPlayer();
       await openSocket(null);
+      // Reset the mic gate for this session: open (continuous) unless
+      // push-to-talk was already selected before Start Shift was pressed.
+      micOpenRef.current = !pushToTalk;
       stopMicRef.current = await startMicCapture((base64Chunk) => {
+        if (!micOpenRef.current) return;
         const ws = wsRef.current;
         if (ws && ws.readyState === WebSocket.OPEN) {
           ws.send(JSON.stringify({ type: "input.audio", audio: base64Chunk }));
@@ -224,7 +258,7 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
       setError(String(err.message || err));
       setStatus("error");
     }
-  }, [openSocket]);
+  }, [openSocket, pushToTalk]);
 
   const disconnect = useCallback(() => {
     deliberateCloseRef.current = true;
@@ -239,5 +273,17 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
     setStatus("ended");
   }, []);
 
-  return { status, error, userCaption, agentCaption, connect, disconnect };
+  return {
+    status,
+    error,
+    userCaption,
+    agentCaption,
+    connect,
+    disconnect,
+    pushToTalk,
+    setPushToTalk,
+    talking,
+    startTalking,
+    stopTalking,
+  };
 }
