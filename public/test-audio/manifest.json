@@ -1,0 +1,4052 @@
+[
+  {
+    "file": "cold01_v1_clean.wav",
+    "phrase": "walk in cooler thirty eight degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 38,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold01_v1_moderate.wav",
+    "phrase": "walk in cooler thirty eight degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 38,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold01_v1_heavy.wav",
+    "phrase": "walk in cooler thirty eight degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 38,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold01_v2_clean.wav",
+    "phrase": "walk in cooler thirty eight degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 38,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold01_v2_moderate.wav",
+    "phrase": "walk in cooler thirty eight degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 38,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold01_v2_heavy.wav",
+    "phrase": "walk in cooler thirty eight degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 38,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold01_v3_clean.wav",
+    "phrase": "walk in cooler thirty eight degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 38,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold01_v3_moderate.wav",
+    "phrase": "walk in cooler thirty eight degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 38,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold01_v3_heavy.wav",
+    "phrase": "walk in cooler thirty eight degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 38,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold02_v1_clean.wav",
+    "phrase": "reach in cooler forty one degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "reach-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 41,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold02_v1_moderate.wav",
+    "phrase": "reach in cooler forty one degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "reach-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 41,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold02_v1_heavy.wav",
+    "phrase": "reach in cooler forty one degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "reach-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 41,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold02_v2_clean.wav",
+    "phrase": "reach in cooler forty one degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "reach-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 41,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold02_v2_moderate.wav",
+    "phrase": "reach in cooler forty one degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "reach-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 41,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold02_v2_heavy.wav",
+    "phrase": "reach in cooler forty one degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "reach-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 41,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold02_v3_clean.wav",
+    "phrase": "reach in cooler forty one degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "reach-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 41,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold02_v3_moderate.wav",
+    "phrase": "reach in cooler forty one degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "reach-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 41,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold02_v3_heavy.wav",
+    "phrase": "reach in cooler forty one degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "reach-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 41,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold03_v1_clean.wav",
+    "phrase": "walk in cooler forty eight degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 48,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold03_v1_moderate.wav",
+    "phrase": "walk in cooler forty eight degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 48,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold03_v1_heavy.wav",
+    "phrase": "walk in cooler forty eight degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 48,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold03_v2_clean.wav",
+    "phrase": "walk in cooler forty eight degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 48,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold03_v2_moderate.wav",
+    "phrase": "walk in cooler forty eight degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 48,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold03_v2_heavy.wav",
+    "phrase": "walk in cooler forty eight degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 48,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold03_v3_clean.wav",
+    "phrase": "walk in cooler forty eight degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 48,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold03_v3_moderate.wav",
+    "phrase": "walk in cooler forty eight degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 48,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold03_v3_heavy.wav",
+    "phrase": "walk in cooler forty eight degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 48,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold04_v1_clean.wav",
+    "phrase": "salad bar thirty six degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "salad bar",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 36,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold04_v1_moderate.wav",
+    "phrase": "salad bar thirty six degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "salad bar",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 36,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold04_v1_heavy.wav",
+    "phrase": "salad bar thirty six degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "salad bar",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 36,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold04_v2_clean.wav",
+    "phrase": "salad bar thirty six degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "salad bar",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 36,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold04_v2_moderate.wav",
+    "phrase": "salad bar thirty six degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "salad bar",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 36,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold04_v2_heavy.wav",
+    "phrase": "salad bar thirty six degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "salad bar",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 36,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold04_v3_clean.wav",
+    "phrase": "salad bar thirty six degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "salad bar",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 36,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold04_v3_moderate.wav",
+    "phrase": "salad bar thirty six degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "salad bar",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 36,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold04_v3_heavy.wav",
+    "phrase": "salad bar thirty six degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "salad bar",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 36,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold05_v1_clean.wav",
+    "phrase": "prep cooler forty four degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "prep cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 44,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold05_v1_moderate.wav",
+    "phrase": "prep cooler forty four degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "prep cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 44,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold05_v1_heavy.wav",
+    "phrase": "prep cooler forty four degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "prep cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 44,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold05_v2_clean.wav",
+    "phrase": "prep cooler forty four degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "prep cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 44,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold05_v2_moderate.wav",
+    "phrase": "prep cooler forty four degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "prep cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 44,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold05_v2_heavy.wav",
+    "phrase": "prep cooler forty four degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "prep cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 44,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold05_v3_clean.wav",
+    "phrase": "prep cooler forty four degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "prep cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 44,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold05_v3_moderate.wav",
+    "phrase": "prep cooler forty four degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "prep cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 44,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold05_v3_heavy.wav",
+    "phrase": "prep cooler forty four degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "prep cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 44,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot01_v1_clean.wav",
+    "phrase": "steam table one thirty six",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 136,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot01_v1_moderate.wav",
+    "phrase": "steam table one thirty six",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 136,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot01_v1_heavy.wav",
+    "phrase": "steam table one thirty six",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 136,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot01_v2_clean.wav",
+    "phrase": "steam table one thirty six",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 136,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot01_v2_moderate.wav",
+    "phrase": "steam table one thirty six",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 136,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot01_v2_heavy.wav",
+    "phrase": "steam table one thirty six",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 136,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot01_v3_clean.wav",
+    "phrase": "steam table one thirty six",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 136,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot01_v3_moderate.wav",
+    "phrase": "steam table one thirty six",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 136,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot01_v3_heavy.wav",
+    "phrase": "steam table one thirty six",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 136,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot02_v1_clean.wav",
+    "phrase": "hot well one twenty degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "hot well",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 120,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot02_v1_moderate.wav",
+    "phrase": "hot well one twenty degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "hot well",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 120,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot02_v1_heavy.wav",
+    "phrase": "hot well one twenty degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "hot well",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 120,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot02_v2_clean.wav",
+    "phrase": "hot well one twenty degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "hot well",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 120,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot02_v2_moderate.wav",
+    "phrase": "hot well one twenty degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "hot well",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 120,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot02_v2_heavy.wav",
+    "phrase": "hot well one twenty degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "hot well",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 120,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot02_v3_clean.wav",
+    "phrase": "hot well one twenty degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "hot well",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 120,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot02_v3_moderate.wav",
+    "phrase": "hot well one twenty degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "hot well",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 120,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot02_v3_heavy.wav",
+    "phrase": "hot well one twenty degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "hot well",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 120,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot03_v1_clean.wav",
+    "phrase": "steam table one forty two degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 142,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot03_v1_moderate.wav",
+    "phrase": "steam table one forty two degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 142,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot03_v1_heavy.wav",
+    "phrase": "steam table one forty two degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 142,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot03_v2_clean.wav",
+    "phrase": "steam table one forty two degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 142,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot03_v2_moderate.wav",
+    "phrase": "steam table one forty two degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 142,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot03_v2_heavy.wav",
+    "phrase": "steam table one forty two degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 142,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot03_v3_clean.wav",
+    "phrase": "steam table one forty two degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 142,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot03_v3_moderate.wav",
+    "phrase": "steam table one forty two degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 142,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot03_v3_heavy.wav",
+    "phrase": "steam table one forty two degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 142,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry01_v1_clean.wav",
+    "phrase": "chicken breast one sixty five degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "chicken breast",
+      "reading_type": null,
+      "temperature_value": 165,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry01_v1_moderate.wav",
+    "phrase": "chicken breast one sixty five degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "chicken breast",
+      "reading_type": null,
+      "temperature_value": 165,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry01_v1_heavy.wav",
+    "phrase": "chicken breast one sixty five degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "chicken breast",
+      "reading_type": null,
+      "temperature_value": 165,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry01_v2_clean.wav",
+    "phrase": "chicken breast one sixty five degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "chicken breast",
+      "reading_type": null,
+      "temperature_value": 165,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry01_v2_moderate.wav",
+    "phrase": "chicken breast one sixty five degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "chicken breast",
+      "reading_type": null,
+      "temperature_value": 165,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry01_v2_heavy.wav",
+    "phrase": "chicken breast one sixty five degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "chicken breast",
+      "reading_type": null,
+      "temperature_value": 165,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry01_v3_clean.wav",
+    "phrase": "chicken breast one sixty five degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "chicken breast",
+      "reading_type": null,
+      "temperature_value": 165,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry01_v3_moderate.wav",
+    "phrase": "chicken breast one sixty five degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "chicken breast",
+      "reading_type": null,
+      "temperature_value": 165,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry01_v3_heavy.wav",
+    "phrase": "chicken breast one sixty five degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "chicken breast",
+      "reading_type": null,
+      "temperature_value": 165,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry02_v1_clean.wav",
+    "phrase": "chicken one fifty two degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 152,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry02_v1_moderate.wav",
+    "phrase": "chicken one fifty two degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 152,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry02_v1_heavy.wav",
+    "phrase": "chicken one fifty two degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 152,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry02_v2_clean.wav",
+    "phrase": "chicken one fifty two degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 152,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry02_v2_moderate.wav",
+    "phrase": "chicken one fifty two degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 152,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry02_v2_heavy.wav",
+    "phrase": "chicken one fifty two degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 152,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry02_v3_clean.wav",
+    "phrase": "chicken one fifty two degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 152,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry02_v3_moderate.wav",
+    "phrase": "chicken one fifty two degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 152,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry02_v3_heavy.wav",
+    "phrase": "chicken one fifty two degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 152,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry03_v1_clean.wav",
+    "phrase": "turkey one seventy degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "turkey",
+      "reading_type": null,
+      "temperature_value": 170,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry03_v1_moderate.wav",
+    "phrase": "turkey one seventy degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "turkey",
+      "reading_type": null,
+      "temperature_value": 170,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry03_v1_heavy.wav",
+    "phrase": "turkey one seventy degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "turkey",
+      "reading_type": null,
+      "temperature_value": 170,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry03_v2_clean.wav",
+    "phrase": "turkey one seventy degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "turkey",
+      "reading_type": null,
+      "temperature_value": 170,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry03_v2_moderate.wav",
+    "phrase": "turkey one seventy degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "turkey",
+      "reading_type": null,
+      "temperature_value": 170,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry03_v2_heavy.wav",
+    "phrase": "turkey one seventy degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "turkey",
+      "reading_type": null,
+      "temperature_value": 170,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry03_v3_clean.wav",
+    "phrase": "turkey one seventy degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "turkey",
+      "reading_type": null,
+      "temperature_value": 170,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry03_v3_moderate.wav",
+    "phrase": "turkey one seventy degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "turkey",
+      "reading_type": null,
+      "temperature_value": 170,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry03_v3_heavy.wav",
+    "phrase": "turkey one seventy degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "turkey",
+      "reading_type": null,
+      "temperature_value": 170,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground01_v1_clean.wav",
+    "phrase": "ground beef one fifty five degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "ground beef",
+      "reading_type": null,
+      "temperature_value": 155,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground01_v1_moderate.wav",
+    "phrase": "ground beef one fifty five degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "ground beef",
+      "reading_type": null,
+      "temperature_value": 155,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground01_v1_heavy.wav",
+    "phrase": "ground beef one fifty five degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "ground beef",
+      "reading_type": null,
+      "temperature_value": 155,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground01_v2_clean.wav",
+    "phrase": "ground beef one fifty five degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "ground beef",
+      "reading_type": null,
+      "temperature_value": 155,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground01_v2_moderate.wav",
+    "phrase": "ground beef one fifty five degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "ground beef",
+      "reading_type": null,
+      "temperature_value": 155,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground01_v2_heavy.wav",
+    "phrase": "ground beef one fifty five degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "ground beef",
+      "reading_type": null,
+      "temperature_value": 155,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground01_v3_clean.wav",
+    "phrase": "ground beef one fifty five degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "ground beef",
+      "reading_type": null,
+      "temperature_value": 155,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground01_v3_moderate.wav",
+    "phrase": "ground beef one fifty five degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "ground beef",
+      "reading_type": null,
+      "temperature_value": 155,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground01_v3_heavy.wav",
+    "phrase": "ground beef one fifty five degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "ground beef",
+      "reading_type": null,
+      "temperature_value": 155,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground02_v1_clean.wav",
+    "phrase": "ground beef one forty nine degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "ground beef",
+      "reading_type": null,
+      "temperature_value": 149,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground02_v1_moderate.wav",
+    "phrase": "ground beef one forty nine degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "ground beef",
+      "reading_type": null,
+      "temperature_value": 149,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground02_v1_heavy.wav",
+    "phrase": "ground beef one forty nine degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "ground beef",
+      "reading_type": null,
+      "temperature_value": 149,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground02_v2_clean.wav",
+    "phrase": "ground beef one forty nine degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "ground beef",
+      "reading_type": null,
+      "temperature_value": 149,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground02_v2_moderate.wav",
+    "phrase": "ground beef one forty nine degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "ground beef",
+      "reading_type": null,
+      "temperature_value": 149,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground02_v2_heavy.wav",
+    "phrase": "ground beef one forty nine degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "ground beef",
+      "reading_type": null,
+      "temperature_value": 149,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground02_v3_clean.wav",
+    "phrase": "ground beef one forty nine degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "ground beef",
+      "reading_type": null,
+      "temperature_value": 149,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground02_v3_moderate.wav",
+    "phrase": "ground beef one forty nine degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "ground beef",
+      "reading_type": null,
+      "temperature_value": 149,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground02_v3_heavy.wav",
+    "phrase": "ground beef one forty nine degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "ground beef",
+      "reading_type": null,
+      "temperature_value": 149,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground03_v1_clean.wav",
+    "phrase": "sausage one sixty degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "sausage",
+      "reading_type": null,
+      "temperature_value": 160,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground03_v1_moderate.wav",
+    "phrase": "sausage one sixty degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "sausage",
+      "reading_type": null,
+      "temperature_value": 160,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground03_v1_heavy.wav",
+    "phrase": "sausage one sixty degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "sausage",
+      "reading_type": null,
+      "temperature_value": 160,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground03_v2_clean.wav",
+    "phrase": "sausage one sixty degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "sausage",
+      "reading_type": null,
+      "temperature_value": 160,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground03_v2_moderate.wav",
+    "phrase": "sausage one sixty degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "sausage",
+      "reading_type": null,
+      "temperature_value": 160,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground03_v2_heavy.wav",
+    "phrase": "sausage one sixty degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "sausage",
+      "reading_type": null,
+      "temperature_value": 160,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground03_v3_clean.wav",
+    "phrase": "sausage one sixty degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "sausage",
+      "reading_type": null,
+      "temperature_value": 160,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground03_v3_moderate.wav",
+    "phrase": "sausage one sixty degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "sausage",
+      "reading_type": null,
+      "temperature_value": 160,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground03_v3_heavy.wav",
+    "phrase": "sausage one sixty degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "sausage",
+      "reading_type": null,
+      "temperature_value": 160,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "whole01_v1_clean.wav",
+    "phrase": "steak one forty five degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "steak",
+      "reading_type": null,
+      "temperature_value": 145,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "whole01_v1_moderate.wav",
+    "phrase": "steak one forty five degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "steak",
+      "reading_type": null,
+      "temperature_value": 145,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "whole01_v1_heavy.wav",
+    "phrase": "steak one forty five degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "steak",
+      "reading_type": null,
+      "temperature_value": 145,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "whole01_v2_clean.wav",
+    "phrase": "steak one forty five degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "steak",
+      "reading_type": null,
+      "temperature_value": 145,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "whole01_v2_moderate.wav",
+    "phrase": "steak one forty five degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "steak",
+      "reading_type": null,
+      "temperature_value": 145,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "whole01_v2_heavy.wav",
+    "phrase": "steak one forty five degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "steak",
+      "reading_type": null,
+      "temperature_value": 145,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "whole01_v3_clean.wav",
+    "phrase": "steak one forty five degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "steak",
+      "reading_type": null,
+      "temperature_value": 145,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "whole01_v3_moderate.wav",
+    "phrase": "steak one forty five degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "steak",
+      "reading_type": null,
+      "temperature_value": 145,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "whole01_v3_heavy.wav",
+    "phrase": "steak one forty five degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "steak",
+      "reading_type": null,
+      "temperature_value": 145,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "whole02_v1_clean.wav",
+    "phrase": "pork loin one thirty degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "pork loin",
+      "reading_type": null,
+      "temperature_value": 130,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "whole02_v1_moderate.wav",
+    "phrase": "pork loin one thirty degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "pork loin",
+      "reading_type": null,
+      "temperature_value": 130,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "whole02_v1_heavy.wav",
+    "phrase": "pork loin one thirty degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "pork loin",
+      "reading_type": null,
+      "temperature_value": 130,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "whole02_v2_clean.wav",
+    "phrase": "pork loin one thirty degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "pork loin",
+      "reading_type": null,
+      "temperature_value": 130,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "whole02_v2_moderate.wav",
+    "phrase": "pork loin one thirty degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "pork loin",
+      "reading_type": null,
+      "temperature_value": 130,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "whole02_v2_heavy.wav",
+    "phrase": "pork loin one thirty degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "pork loin",
+      "reading_type": null,
+      "temperature_value": 130,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "whole02_v3_clean.wav",
+    "phrase": "pork loin one thirty degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "pork loin",
+      "reading_type": null,
+      "temperature_value": 130,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "whole02_v3_moderate.wav",
+    "phrase": "pork loin one thirty degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "pork loin",
+      "reading_type": null,
+      "temperature_value": 130,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "whole02_v3_heavy.wav",
+    "phrase": "pork loin one thirty degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "pork loin",
+      "reading_type": null,
+      "temperature_value": 130,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "fish01_v1_clean.wav",
+    "phrase": "salmon one forty six degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "salmon",
+      "reading_type": null,
+      "temperature_value": 146,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "fish01_v1_moderate.wav",
+    "phrase": "salmon one forty six degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "salmon",
+      "reading_type": null,
+      "temperature_value": 146,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "fish01_v1_heavy.wav",
+    "phrase": "salmon one forty six degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "salmon",
+      "reading_type": null,
+      "temperature_value": 146,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "fish01_v2_clean.wav",
+    "phrase": "salmon one forty six degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "salmon",
+      "reading_type": null,
+      "temperature_value": 146,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "fish01_v2_moderate.wav",
+    "phrase": "salmon one forty six degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "salmon",
+      "reading_type": null,
+      "temperature_value": 146,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "fish01_v2_heavy.wav",
+    "phrase": "salmon one forty six degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "salmon",
+      "reading_type": null,
+      "temperature_value": 146,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "fish01_v3_clean.wav",
+    "phrase": "salmon one forty six degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "salmon",
+      "reading_type": null,
+      "temperature_value": 146,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "fish01_v3_moderate.wav",
+    "phrase": "salmon one forty six degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "salmon",
+      "reading_type": null,
+      "temperature_value": 146,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "fish01_v3_heavy.wav",
+    "phrase": "salmon one forty six degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "salmon",
+      "reading_type": null,
+      "temperature_value": 146,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "fish02_v1_clean.wav",
+    "phrase": "eggs one thirty eight degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "eggs",
+      "reading_type": null,
+      "temperature_value": 138,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "fish02_v1_moderate.wav",
+    "phrase": "eggs one thirty eight degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "eggs",
+      "reading_type": null,
+      "temperature_value": 138,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "fish02_v1_heavy.wav",
+    "phrase": "eggs one thirty eight degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "eggs",
+      "reading_type": null,
+      "temperature_value": 138,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "fish02_v2_clean.wav",
+    "phrase": "eggs one thirty eight degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "eggs",
+      "reading_type": null,
+      "temperature_value": 138,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "fish02_v2_moderate.wav",
+    "phrase": "eggs one thirty eight degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "eggs",
+      "reading_type": null,
+      "temperature_value": 138,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "fish02_v2_heavy.wav",
+    "phrase": "eggs one thirty eight degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "eggs",
+      "reading_type": null,
+      "temperature_value": 138,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "fish02_v3_clean.wav",
+    "phrase": "eggs one thirty eight degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "eggs",
+      "reading_type": null,
+      "temperature_value": 138,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "fish02_v3_moderate.wav",
+    "phrase": "eggs one thirty eight degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "eggs",
+      "reading_type": null,
+      "temperature_value": 138,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "fish02_v3_heavy.wav",
+    "phrase": "eggs one thirty eight degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "eggs",
+      "reading_type": null,
+      "temperature_value": 138,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "reheat01_v1_clean.wav",
+    "phrase": "reheating soup one seventy degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "soup",
+      "reading_type": "reheating",
+      "temperature_value": 170,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "reheat01_v1_moderate.wav",
+    "phrase": "reheating soup one seventy degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "soup",
+      "reading_type": "reheating",
+      "temperature_value": 170,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "reheat01_v1_heavy.wav",
+    "phrase": "reheating soup one seventy degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "soup",
+      "reading_type": "reheating",
+      "temperature_value": 170,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "reheat01_v2_clean.wav",
+    "phrase": "reheating soup one seventy degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "soup",
+      "reading_type": "reheating",
+      "temperature_value": 170,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "reheat01_v2_moderate.wav",
+    "phrase": "reheating soup one seventy degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "soup",
+      "reading_type": "reheating",
+      "temperature_value": 170,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "reheat01_v2_heavy.wav",
+    "phrase": "reheating soup one seventy degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "soup",
+      "reading_type": "reheating",
+      "temperature_value": 170,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "reheat01_v3_clean.wav",
+    "phrase": "reheating soup one seventy degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "soup",
+      "reading_type": "reheating",
+      "temperature_value": 170,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "reheat01_v3_moderate.wav",
+    "phrase": "reheating soup one seventy degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "soup",
+      "reading_type": "reheating",
+      "temperature_value": 170,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "reheat01_v3_heavy.wav",
+    "phrase": "reheating soup one seventy degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "soup",
+      "reading_type": "reheating",
+      "temperature_value": 170,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "celsius01_v1_clean.wav",
+    "phrase": "walk in cooler three degrees celsius",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 3,
+      "temperature_unit": "C"
+    },
+    "notes": null
+  },
+  {
+    "file": "celsius01_v1_moderate.wav",
+    "phrase": "walk in cooler three degrees celsius",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 3,
+      "temperature_unit": "C"
+    },
+    "notes": null
+  },
+  {
+    "file": "celsius01_v1_heavy.wav",
+    "phrase": "walk in cooler three degrees celsius",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 3,
+      "temperature_unit": "C"
+    },
+    "notes": null
+  },
+  {
+    "file": "celsius01_v2_clean.wav",
+    "phrase": "walk in cooler three degrees celsius",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 3,
+      "temperature_unit": "C"
+    },
+    "notes": null
+  },
+  {
+    "file": "celsius01_v2_moderate.wav",
+    "phrase": "walk in cooler three degrees celsius",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 3,
+      "temperature_unit": "C"
+    },
+    "notes": null
+  },
+  {
+    "file": "celsius01_v2_heavy.wav",
+    "phrase": "walk in cooler three degrees celsius",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 3,
+      "temperature_unit": "C"
+    },
+    "notes": null
+  },
+  {
+    "file": "celsius01_v3_clean.wav",
+    "phrase": "walk in cooler three degrees celsius",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 3,
+      "temperature_unit": "C"
+    },
+    "notes": null
+  },
+  {
+    "file": "celsius01_v3_moderate.wav",
+    "phrase": "walk in cooler three degrees celsius",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 3,
+      "temperature_unit": "C"
+    },
+    "notes": null
+  },
+  {
+    "file": "celsius01_v3_heavy.wav",
+    "phrase": "walk in cooler three degrees celsius",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 3,
+      "temperature_unit": "C"
+    },
+    "notes": null
+  },
+  {
+    "file": "celsius02_v1_clean.wav",
+    "phrase": "chicken seventy four degrees celsius",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 74,
+      "temperature_unit": "C"
+    },
+    "notes": null
+  },
+  {
+    "file": "celsius02_v1_moderate.wav",
+    "phrase": "chicken seventy four degrees celsius",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 74,
+      "temperature_unit": "C"
+    },
+    "notes": null
+  },
+  {
+    "file": "celsius02_v1_heavy.wav",
+    "phrase": "chicken seventy four degrees celsius",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 74,
+      "temperature_unit": "C"
+    },
+    "notes": null
+  },
+  {
+    "file": "celsius02_v2_clean.wav",
+    "phrase": "chicken seventy four degrees celsius",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 74,
+      "temperature_unit": "C"
+    },
+    "notes": null
+  },
+  {
+    "file": "celsius02_v2_moderate.wav",
+    "phrase": "chicken seventy four degrees celsius",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 74,
+      "temperature_unit": "C"
+    },
+    "notes": null
+  },
+  {
+    "file": "celsius02_v2_heavy.wav",
+    "phrase": "chicken seventy four degrees celsius",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 74,
+      "temperature_unit": "C"
+    },
+    "notes": null
+  },
+  {
+    "file": "celsius02_v3_clean.wav",
+    "phrase": "chicken seventy four degrees celsius",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 74,
+      "temperature_unit": "C"
+    },
+    "notes": null
+  },
+  {
+    "file": "celsius02_v3_moderate.wav",
+    "phrase": "chicken seventy four degrees celsius",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 74,
+      "temperature_unit": "C"
+    },
+    "notes": null
+  },
+  {
+    "file": "celsius02_v3_heavy.wav",
+    "phrase": "chicken seventy four degrees celsius",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 74,
+      "temperature_unit": "C"
+    },
+    "notes": null
+  },
+  {
+    "file": "correction01_v1_clean.wav",
+    "phrase": "walk in cooler thirty eight no wait forty eight degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 48,
+      "temperature_unit": "F"
+    },
+    "notes": "self-correction, final number should be used"
+  },
+  {
+    "file": "correction01_v1_moderate.wav",
+    "phrase": "walk in cooler thirty eight no wait forty eight degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 48,
+      "temperature_unit": "F"
+    },
+    "notes": "self-correction, final number should be used"
+  },
+  {
+    "file": "correction01_v1_heavy.wav",
+    "phrase": "walk in cooler thirty eight no wait forty eight degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 48,
+      "temperature_unit": "F"
+    },
+    "notes": "self-correction, final number should be used"
+  },
+  {
+    "file": "correction01_v2_clean.wav",
+    "phrase": "walk in cooler thirty eight no wait forty eight degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 48,
+      "temperature_unit": "F"
+    },
+    "notes": "self-correction, final number should be used"
+  },
+  {
+    "file": "correction01_v2_moderate.wav",
+    "phrase": "walk in cooler thirty eight no wait forty eight degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 48,
+      "temperature_unit": "F"
+    },
+    "notes": "self-correction, final number should be used"
+  },
+  {
+    "file": "correction01_v2_heavy.wav",
+    "phrase": "walk in cooler thirty eight no wait forty eight degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 48,
+      "temperature_unit": "F"
+    },
+    "notes": "self-correction, final number should be used"
+  },
+  {
+    "file": "correction01_v3_clean.wav",
+    "phrase": "walk in cooler thirty eight no wait forty eight degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 48,
+      "temperature_unit": "F"
+    },
+    "notes": "self-correction, final number should be used"
+  },
+  {
+    "file": "correction01_v3_moderate.wav",
+    "phrase": "walk in cooler thirty eight no wait forty eight degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 48,
+      "temperature_unit": "F"
+    },
+    "notes": "self-correction, final number should be used"
+  },
+  {
+    "file": "correction01_v3_heavy.wav",
+    "phrase": "walk in cooler thirty eight no wait forty eight degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 48,
+      "temperature_unit": "F"
+    },
+    "notes": "self-correction, final number should be used"
+  },
+  {
+    "file": "correction02_v1_clean.wav",
+    "phrase": "chicken one fifty no sorry one sixty five degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 165,
+      "temperature_unit": "F"
+    },
+    "notes": "self-correction"
+  },
+  {
+    "file": "correction02_v1_moderate.wav",
+    "phrase": "chicken one fifty no sorry one sixty five degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 165,
+      "temperature_unit": "F"
+    },
+    "notes": "self-correction"
+  },
+  {
+    "file": "correction02_v1_heavy.wav",
+    "phrase": "chicken one fifty no sorry one sixty five degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 165,
+      "temperature_unit": "F"
+    },
+    "notes": "self-correction"
+  },
+  {
+    "file": "correction02_v2_clean.wav",
+    "phrase": "chicken one fifty no sorry one sixty five degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 165,
+      "temperature_unit": "F"
+    },
+    "notes": "self-correction"
+  },
+  {
+    "file": "correction02_v2_moderate.wav",
+    "phrase": "chicken one fifty no sorry one sixty five degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 165,
+      "temperature_unit": "F"
+    },
+    "notes": "self-correction"
+  },
+  {
+    "file": "correction02_v2_heavy.wav",
+    "phrase": "chicken one fifty no sorry one sixty five degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 165,
+      "temperature_unit": "F"
+    },
+    "notes": "self-correction"
+  },
+  {
+    "file": "correction02_v3_clean.wav",
+    "phrase": "chicken one fifty no sorry one sixty five degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 165,
+      "temperature_unit": "F"
+    },
+    "notes": "self-correction"
+  },
+  {
+    "file": "correction02_v3_moderate.wav",
+    "phrase": "chicken one fifty no sorry one sixty five degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 165,
+      "temperature_unit": "F"
+    },
+    "notes": "self-correction"
+  },
+  {
+    "file": "correction02_v3_heavy.wav",
+    "phrase": "chicken one fifty no sorry one sixty five degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "chicken",
+      "reading_type": null,
+      "temperature_value": 165,
+      "temperature_unit": "F"
+    },
+    "notes": "self-correction"
+  },
+  {
+    "file": "unknown01_v1_clean.wav",
+    "phrase": "quinoa salad sixty degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "quinoa salad",
+      "reading_type": null,
+      "temperature_value": 60,
+      "temperature_unit": "F"
+    },
+    "notes": "unrecognized item, expect unknown category"
+  },
+  {
+    "file": "unknown01_v1_moderate.wav",
+    "phrase": "quinoa salad sixty degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "quinoa salad",
+      "reading_type": null,
+      "temperature_value": 60,
+      "temperature_unit": "F"
+    },
+    "notes": "unrecognized item, expect unknown category"
+  },
+  {
+    "file": "unknown01_v1_heavy.wav",
+    "phrase": "quinoa salad sixty degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "quinoa salad",
+      "reading_type": null,
+      "temperature_value": 60,
+      "temperature_unit": "F"
+    },
+    "notes": "unrecognized item, expect unknown category"
+  },
+  {
+    "file": "unknown01_v2_clean.wav",
+    "phrase": "quinoa salad sixty degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "quinoa salad",
+      "reading_type": null,
+      "temperature_value": 60,
+      "temperature_unit": "F"
+    },
+    "notes": "unrecognized item, expect unknown category"
+  },
+  {
+    "file": "unknown01_v2_moderate.wav",
+    "phrase": "quinoa salad sixty degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "quinoa salad",
+      "reading_type": null,
+      "temperature_value": 60,
+      "temperature_unit": "F"
+    },
+    "notes": "unrecognized item, expect unknown category"
+  },
+  {
+    "file": "unknown01_v2_heavy.wav",
+    "phrase": "quinoa salad sixty degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "quinoa salad",
+      "reading_type": null,
+      "temperature_value": 60,
+      "temperature_unit": "F"
+    },
+    "notes": "unrecognized item, expect unknown category"
+  },
+  {
+    "file": "unknown01_v3_clean.wav",
+    "phrase": "quinoa salad sixty degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "quinoa salad",
+      "reading_type": null,
+      "temperature_value": 60,
+      "temperature_unit": "F"
+    },
+    "notes": "unrecognized item, expect unknown category"
+  },
+  {
+    "file": "unknown01_v3_moderate.wav",
+    "phrase": "quinoa salad sixty degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "quinoa salad",
+      "reading_type": null,
+      "temperature_value": 60,
+      "temperature_unit": "F"
+    },
+    "notes": "unrecognized item, expect unknown category"
+  },
+  {
+    "file": "unknown01_v3_heavy.wav",
+    "phrase": "quinoa salad sixty degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "quinoa salad",
+      "reading_type": null,
+      "temperature_value": 60,
+      "temperature_unit": "F"
+    },
+    "notes": "unrecognized item, expect unknown category"
+  },
+  {
+    "file": "twoDigit01_v1_clean.wav",
+    "phrase": "walk in cooler thirty nine degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 39,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "twoDigit01_v1_moderate.wav",
+    "phrase": "walk in cooler thirty nine degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 39,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "twoDigit01_v1_heavy.wav",
+    "phrase": "walk in cooler thirty nine degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 39,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "twoDigit01_v2_clean.wav",
+    "phrase": "walk in cooler thirty nine degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 39,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "twoDigit01_v2_moderate.wav",
+    "phrase": "walk in cooler thirty nine degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 39,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "twoDigit01_v2_heavy.wav",
+    "phrase": "walk in cooler thirty nine degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 39,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "twoDigit01_v3_clean.wav",
+    "phrase": "walk in cooler thirty nine degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 39,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "twoDigit01_v3_moderate.wav",
+    "phrase": "walk in cooler thirty nine degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 39,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "twoDigit01_v3_heavy.wav",
+    "phrase": "walk in cooler thirty nine degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "walk-in cooler",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 39,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "threeDigit01_v1_clean.wav",
+    "phrase": "steam table one hundred and thirty five degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 135,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "threeDigit01_v1_moderate.wav",
+    "phrase": "steam table one hundred and thirty five degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 135,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "threeDigit01_v1_heavy.wav",
+    "phrase": "steam table one hundred and thirty five degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 135,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "threeDigit01_v2_clean.wav",
+    "phrase": "steam table one hundred and thirty five degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 135,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "threeDigit01_v2_moderate.wav",
+    "phrase": "steam table one hundred and thirty five degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 135,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "threeDigit01_v2_heavy.wav",
+    "phrase": "steam table one hundred and thirty five degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 135,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "threeDigit01_v3_clean.wav",
+    "phrase": "steam table one hundred and thirty five degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 135,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "threeDigit01_v3_moderate.wav",
+    "phrase": "steam table one hundred and thirty five degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 135,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "threeDigit01_v3_heavy.wav",
+    "phrase": "steam table one hundred and thirty five degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "steam table",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 135,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot04_v1_clean.wav",
+    "phrase": "hot box one twenty eight degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "hot box",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 128,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot04_v1_moderate.wav",
+    "phrase": "hot box one twenty eight degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "hot box",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 128,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot04_v1_heavy.wav",
+    "phrase": "hot box one twenty eight degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "hot box",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 128,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot04_v2_clean.wav",
+    "phrase": "hot box one twenty eight degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "hot box",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 128,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot04_v2_moderate.wav",
+    "phrase": "hot box one twenty eight degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "hot box",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 128,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot04_v2_heavy.wav",
+    "phrase": "hot box one twenty eight degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "hot box",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 128,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot04_v3_clean.wav",
+    "phrase": "hot box one twenty eight degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "hot box",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 128,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot04_v3_moderate.wav",
+    "phrase": "hot box one twenty eight degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "hot box",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 128,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "hot04_v3_heavy.wav",
+    "phrase": "hot box one twenty eight degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "hot box",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": 128,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry04_v1_clean.wav",
+    "phrase": "duck one sixty eight degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "duck",
+      "reading_type": null,
+      "temperature_value": 168,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry04_v1_moderate.wav",
+    "phrase": "duck one sixty eight degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "duck",
+      "reading_type": null,
+      "temperature_value": 168,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry04_v1_heavy.wav",
+    "phrase": "duck one sixty eight degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "duck",
+      "reading_type": null,
+      "temperature_value": 168,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry04_v2_clean.wav",
+    "phrase": "duck one sixty eight degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "duck",
+      "reading_type": null,
+      "temperature_value": 168,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry04_v2_moderate.wav",
+    "phrase": "duck one sixty eight degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "duck",
+      "reading_type": null,
+      "temperature_value": 168,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry04_v2_heavy.wav",
+    "phrase": "duck one sixty eight degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "duck",
+      "reading_type": null,
+      "temperature_value": 168,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry04_v3_clean.wav",
+    "phrase": "duck one sixty eight degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "duck",
+      "reading_type": null,
+      "temperature_value": 168,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry04_v3_moderate.wav",
+    "phrase": "duck one sixty eight degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "duck",
+      "reading_type": null,
+      "temperature_value": 168,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "poultry04_v3_heavy.wav",
+    "phrase": "duck one sixty eight degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "duck",
+      "reading_type": null,
+      "temperature_value": 168,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold06_v1_clean.wav",
+    "phrase": "walk in freezer negative five degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "walk-in freezer",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": -5,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold06_v1_moderate.wav",
+    "phrase": "walk in freezer negative five degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "walk-in freezer",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": -5,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold06_v1_heavy.wav",
+    "phrase": "walk in freezer negative five degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "walk-in freezer",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": -5,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold06_v2_clean.wav",
+    "phrase": "walk in freezer negative five degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "walk-in freezer",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": -5,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold06_v2_moderate.wav",
+    "phrase": "walk in freezer negative five degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "walk-in freezer",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": -5,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold06_v2_heavy.wav",
+    "phrase": "walk in freezer negative five degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "walk-in freezer",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": -5,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold06_v3_clean.wav",
+    "phrase": "walk in freezer negative five degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": "walk-in freezer",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": -5,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold06_v3_moderate.wav",
+    "phrase": "walk in freezer negative five degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": "walk-in freezer",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": -5,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "cold06_v3_heavy.wav",
+    "phrase": "walk in freezer negative five degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": "walk-in freezer",
+      "food_item": null,
+      "reading_type": null,
+      "temperature_value": -5,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground04_v1_clean.wav",
+    "phrase": "meatballs one fifty eight degrees",
+    "voice": "v1",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "meatballs",
+      "reading_type": null,
+      "temperature_value": 158,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground04_v1_moderate.wav",
+    "phrase": "meatballs one fifty eight degrees",
+    "voice": "v1",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "meatballs",
+      "reading_type": null,
+      "temperature_value": 158,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground04_v1_heavy.wav",
+    "phrase": "meatballs one fifty eight degrees",
+    "voice": "v1",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "meatballs",
+      "reading_type": null,
+      "temperature_value": 158,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground04_v2_clean.wav",
+    "phrase": "meatballs one fifty eight degrees",
+    "voice": "v2",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "meatballs",
+      "reading_type": null,
+      "temperature_value": 158,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground04_v2_moderate.wav",
+    "phrase": "meatballs one fifty eight degrees",
+    "voice": "v2",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "meatballs",
+      "reading_type": null,
+      "temperature_value": 158,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground04_v2_heavy.wav",
+    "phrase": "meatballs one fifty eight degrees",
+    "voice": "v2",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "meatballs",
+      "reading_type": null,
+      "temperature_value": 158,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground04_v3_clean.wav",
+    "phrase": "meatballs one fifty eight degrees",
+    "voice": "v3",
+    "noise_condition": "clean",
+    "snr_db": null,
+    "expected": {
+      "location": null,
+      "food_item": "meatballs",
+      "reading_type": null,
+      "temperature_value": 158,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground04_v3_moderate.wav",
+    "phrase": "meatballs one fifty eight degrees",
+    "voice": "v3",
+    "noise_condition": "moderate",
+    "snr_db": 12,
+    "expected": {
+      "location": null,
+      "food_item": "meatballs",
+      "reading_type": null,
+      "temperature_value": 158,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  },
+  {
+    "file": "ground04_v3_heavy.wav",
+    "phrase": "meatballs one fifty eight degrees",
+    "voice": "v3",
+    "noise_condition": "heavy",
+    "snr_db": 4,
+    "expected": {
+      "location": null,
+      "food_item": "meatballs",
+      "reading_type": null,
+      "temperature_value": 158,
+      "temperature_unit": "F"
+    },
+    "notes": null
+  }
+]
