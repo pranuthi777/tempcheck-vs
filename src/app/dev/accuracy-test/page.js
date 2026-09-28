@@ -12,15 +12,38 @@ import { parseTemperatureFromText } from "@/lib/parseTemperatureFromText";
 // run of the expanded test set survive both kinds of hiccup.
 const CONCURRENCY = 2;
 
+// A browser fetch() has no built-in timeout: if the underlying connection
+// goes silent (observed live — the laptop running this harness slept
+// mid-run and some in-flight requests never resolved OR rejected on wake),
+// the promise just hangs forever. Since a worker awaits one clip at a time,
+// a single hung fetch permanently stalls that worker (and Cancel can't help
+// — the cancel check only runs between clips, never inside a still-pending
+// await). Wrap every fetch in an AbortController timeout so a dead
+// connection surfaces as a normal, retryable error instead of a silent
+// hang that requires a full page reload to recover from.
+async function fetchWithTimeout(url, options, timeoutMs) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function transcribeClipOnce(url) {
-  const audioResp = await fetch(url);
+  const audioResp = await fetchWithTimeout(url, {}, 30000);
   if (!audioResp.ok) throw new Error(`clip fetch failed (${audioResp.status})`);
   const audioBuf = await audioResp.arrayBuffer();
-  const resp = await fetch("/api/dev/transcribe", {
-    method: "POST",
-    headers: { "Content-Type": "application/octet-stream" },
-    body: audioBuf,
-  });
+  // The server side already gives itself up to 3 minutes to poll AssemblyAI
+  // (see api/dev/transcribe/route.js); give the client fetch a bit more
+  // headroom than that so a legitimately-slow-but-alive request isn't cut
+  // off right as the server was about to answer.
+  const resp = await fetchWithTimeout(
+    "/api/dev/transcribe",
+    { method: "POST", headers: { "Content-Type": "application/octet-stream" }, body: audioBuf },
+    210000
+  );
   const data = await resp.json();
   if (!resp.ok) throw new Error(data.error || "transcribe failed");
   return data.text;
