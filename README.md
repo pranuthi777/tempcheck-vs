@@ -43,7 +43,7 @@ vs. amber vs. red every time.
 - **`src/lib/useVoiceAgent.js`** — owns the WebSocket lifecycle: mic streaming, playback, tool-call handling, transcript captions, barge-in/interruption handling.
 - **`src/lib/ruleEngine.js`** + **`src/lib/foodCategories.js`** — the actual safety logic, covering cold/hot holding, poultry, ground/injected meat, whole-muscle meat, fish/seafood/eggs, and reheating, each citing its specific FDA Food Code section. Zero LLM calls. Fully unit tested (`npm test`).
 - **`src/lib/coolingEngine.js`** — the two-stage cooling curve (135°F→70°F within 2h, then →41°F within 6h total, FDA 3-501.14(A)), pairing a spoken "cooling start" reading with a later "cooling check" for the same item.
-- **`src/lib/haccpPdf.js`** — generates the inspector-ready HACCP-style log PDF, with every reading's FDA citation, from the exact readings captured in the session.
+- **`src/lib/haccpPdf.js`** — generates the inspector-ready HACCP-style log PDF: a letterhead-style header, a dedicated "Corrective Actions & Violations" section listing every amber/red reading with its FDA citation and the cook's exact spoken words as evidence, the full log, page numbers, and a manager sign-off line. Exportable filtered by date and by station/item from the dashboard.
 - **`src/lib/audioCues.js`** + **`src/components/BigDisplay.js`** — hands-free extras: a beep on every log (a distinct alert tone for amber/red), and a full-screen, glanceable big-display mode. Push-to-talk (for loud kitchens) lives in `useVoiceAgent.js`.
 
 ## Running it locally
