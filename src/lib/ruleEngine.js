@@ -17,13 +17,23 @@
  *    steaks/chops: 145°F (3 min rest for roasts; steaks/chops 145°F/15 sec)
  *  - 3-401.11(A)(1): fish, shellfish, eggs for immediate service: 145°F (15 sec)
  *  - 3-403.11(A): reheating for hot holding: 165°F within 2 hours
+ *
+ * IMPORTANT — what's regulatory vs. what's ours: the FDA Food Code itself is
+ * binary (compliant / violation) at the `safeAt` thresholds above — it does
+ * not define an "amber" tier. `amberBandF` below is our own invented
+ * early-warning buffer (a few degrees before the hard violation line), so a
+ * cook gets a heads-up before a reading actually crosses into "red." It is
+ * explicitly NOT a Food Code number and is labelled "borderline" in the
+ * message text, never presented as a regulatory limit — stated here plainly
+ * so it's never mistaken for one of the cited limits above.
  */
 
 const { resolveCategory, CATEGORY_LABELS } = require("./foodCategories");
 
 // [amberLow, safeThreshold] pairs per category. Direction differs:
 // cold_holding is "safe at or BELOW threshold"; everything else is
-// "safe at or ABOVE threshold".
+// "safe at or ABOVE threshold". amberBandF is our own early-warning buffer,
+// not an FDA number — see the file header.
 const LIMITS = {
   cold_holding: { direction: "at_or_below", safeAt: 41, amberBandF: 4 },
   hot_holding: { direction: "at_or_above", safeAt: 135, amberBandF: 5 },

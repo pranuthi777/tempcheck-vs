@@ -23,12 +23,23 @@ async function pollUntilDone(id, apiKey, { intervalMs = 1500, timeoutMs = 60000 
 
 export async function POST(request) {
   // This route spends real AssemblyAI credits per call and isn't needed by
-  // the cook-facing app at all — only by the internal accuracy harness. If
-  // DEV_HARNESS_SECRET is configured, require it so a public deployment
-  // link can't be used by strangers to burn API credits.
-  const requiredSecret = process.env.DEV_HARNESS_SECRET;
-  if (requiredSecret && request.headers.get("x-dev-secret") !== requiredSecret) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  // the cook-facing app at all — only by the internal accuracy harness.
+  //
+  // Security note (a prior version of this comment claimed a shared-secret
+  // header protected this route "against public abuse" — that was wrong,
+  // and worth stating plainly: a secret checked by a route that only a
+  // public browser page ever calls can't actually be secret, since it would
+  // have to be visible in that page's own client-side code or network
+  // requests to be sent at all. The real fix is safe-by-default: this route
+  // is disabled unless ENABLE_DEV_HARNESS=true is explicitly set in the
+  // deployment's environment (not a secret — just an on/off switch, safe to
+  // document publicly). A fresh deploy following this repo's own README
+  // therefore ships with this route OFF, not silently open.
+  if (process.env.ENABLE_DEV_HARNESS !== "true") {
+    return Response.json(
+      { error: "Dev harness disabled. Set ENABLE_DEV_HARNESS=true to enable it temporarily." },
+      { status: 404 }
+    );
   }
 
   const apiKey = process.env.ASSEMBLYAI_API_KEY;

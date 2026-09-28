@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useVoiceAgent } from "@/lib/useVoiceAgent";
 import { exportHaccpPdf } from "@/lib/haccpPdf";
+import { loadShift, saveShift, clearShift } from "@/lib/shiftStorage";
 
 const STATUS_STYLES = {
   safe: "bg-emerald-500/15 border-emerald-500 text-emerald-300",
@@ -21,10 +22,46 @@ const STATUS_DOT = {
 export default function Home() {
   const [readings, setReadings] = useState([]);
   const [transcript, setTranscript] = useState([]);
+  const [restoredNotice, setRestoredNotice] = useState(false);
   const shiftStartRef = useRef(null);
   const shiftEndRef = useRef(null);
 
+  // Restore an in-progress (or just-ended, not-yet-exported) shift from
+  // localStorage on load — so a crashed tab or accidental reload doesn't
+  // silently lose a shift's compliance record. See src/lib/shiftStorage.js.
+  useEffect(() => {
+    let cancelled = false;
+    // Deferred a tick so this never fires synchronously during the mount
+    // effect (avoids a same-render cascade) and so the server-rendered
+    // (always-empty) HTML never mismatches the client's first paint.
+    Promise.resolve().then(() => {
+      if (cancelled) return;
+      const saved = loadShift();
+      if (saved && saved.readings.length > 0) {
+        setReadings(saved.readings);
+        shiftStartRef.current = saved.shiftStart ?? null;
+        shiftEndRef.current = saved.shiftEnd ?? null;
+        setRestoredNotice(true);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Persist on every change so a mid-shift crash never loses more than the
+  // last render's worth of readings.
+  useEffect(() => {
+    if (readings.length === 0 && !shiftStartRef.current) return;
+    saveShift({
+      shiftStart: shiftStartRef.current,
+      shiftEnd: shiftEndRef.current,
+      readings,
+    });
+  }, [readings]);
+
   const onReading = useCallback((record) => {
+    setRestoredNotice(false);
     setReadings((prev) => [record, ...prev]);
   }, []);
 
@@ -38,6 +75,11 @@ export default function Home() {
   });
 
   const startShift = useCallback(() => {
+    // A brand-new shift replaces whatever was persisted, including a
+    // previously-restored, already-exported shift.
+    clearShift();
+    setReadings([]);
+    setRestoredNotice(false);
     shiftStartRef.current = Date.now();
     shiftEndRef.current = null;
     connect();
@@ -45,8 +87,13 @@ export default function Home() {
 
   const endShift = useCallback(() => {
     shiftEndRef.current = Date.now();
+    saveShift({
+      shiftStart: shiftStartRef.current,
+      shiftEnd: shiftEndRef.current,
+      readings,
+    });
     disconnect();
-  }, [disconnect]);
+  }, [disconnect, readings]);
 
   const summary = useMemo(() => {
     const counts = { safe: 0, amber: 0, red: 0, unknown: 0 };
@@ -105,6 +152,14 @@ export default function Home() {
           </button>
         </div>
       </header>
+
+      {restoredNotice && (
+        <div className="rounded-lg border border-sky-800 bg-sky-950/50 text-sky-300 text-sm px-3 py-2">
+          Restored {readings.length} reading{readings.length === 1 ? "" : "s"} from before this
+          page was reloaded — nothing was lost. Export the PDF whenever you&apos;re ready, or
+          press Start Shift to begin a new one.
+        </div>
+      )}
 
       <div className="flex items-center gap-2 text-sm">
         <span
