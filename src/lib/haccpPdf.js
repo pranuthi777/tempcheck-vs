@@ -47,7 +47,7 @@ export function exportHaccpPdf(readings, { shiftStart, shiftEnd, filterDescripti
   y += 13;
   if (shiftStart) {
     doc.text(
-      `Shift: ${new Date(shiftStart).toLocaleString()} → ${shiftEnd ? new Date(shiftEnd).toLocaleString() : "(in progress)"}`,
+      `Shift: ${new Date(shiftStart).toLocaleString()} to ${shiftEnd ? new Date(shiftEnd).toLocaleString() : "(in progress)"}`,
       MARGIN,
       y
     );
@@ -174,7 +174,7 @@ export function exportHaccpPdf(readings, { shiftStart, shiftEnd, filterDescripti
   );
   doc.setTextColor(120);
   doc.text(
-    "Cooling-curve checks (135°F→70°F within 2h, then →41°F within 6h total, FDA Food Code 3-501.14(A)) pair a \"cooling start\" reading with a later \"cooling check\" reading for the same item and assume the temperature only decreased in between — they don't independently confirm an intermediate point.",
+    "Cooling-curve checks (135°F to 70°F within 2h, then to 41°F within 6h total, FDA Food Code 3-501.14(A)) pair a \"cooling start\" reading with a later \"cooling check\" reading for the same item and assume the temperature only decreased in between — they don't independently confirm an intermediate point.",
     MARGIN,
     finalY + 38,
     { maxWidth: CONTENT_WIDTH }
