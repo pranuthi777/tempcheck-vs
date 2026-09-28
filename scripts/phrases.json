@@ -28,5 +28,11 @@
   { "id": "hot04", "phrase": "hot box one twenty eight degrees", "location": "hot box", "temperature_value": 128, "temperature_unit": "F" },
   { "id": "poultry04", "phrase": "duck one sixty eight degrees", "food_item": "duck", "temperature_value": 168, "temperature_unit": "F" },
   { "id": "cold06", "phrase": "walk in freezer negative five degrees", "location": "walk-in freezer", "temperature_value": -5, "temperature_unit": "F" },
-  { "id": "ground04", "phrase": "meatballs one fifty eight degrees", "food_item": "meatballs", "temperature_value": 158, "temperature_unit": "F" }
+  { "id": "ground04", "phrase": "meatballs one fifty eight degrees", "food_item": "meatballs", "temperature_value": 158, "temperature_unit": "F" },
+  { "id": "digits01", "phrase": "walk in cooler three eight degrees", "location": "walk-in cooler", "temperature_value": 38, "temperature_unit": "F", "notes": "number spoken digit-by-digit rather than as one word (\"three eight\" not \"thirty eight\")" },
+  { "id": "digits02", "phrase": "chicken one six five degrees", "food_item": "chicken", "temperature_value": 165, "temperature_unit": "F", "notes": "number spoken digit-by-digit" },
+  { "id": "correction03", "phrase": "steam table one forty no one thirty degrees", "location": "steam table", "temperature_value": 130, "temperature_unit": "F", "notes": "self-correction without \"sorry/wait\" filler word" },
+  { "id": "correction04", "phrase": "walk in freezer negative five sorry negative ten degrees", "location": "walk-in freezer", "temperature_value": -10, "temperature_unit": "F", "notes": "self-correction on a negative number" },
+  { "id": "celsius03", "phrase": "steam table fifty eight degrees celsius", "location": "steam table", "temperature_value": 58, "temperature_unit": "C", "notes": "hot-holding reading given in Celsius" },
+  { "id": "fast01", "phrase": "walk in cooler forty one degrees chicken one sixty five degrees ground beef one fifty five degrees", "location": "walk-in cooler", "temperature_value": 41, "temperature_unit": "F", "notes": "three readings run together fast with no pause, only the first is scored" }
 ]

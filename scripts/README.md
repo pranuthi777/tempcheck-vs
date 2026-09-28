@@ -3,8 +3,16 @@
 Dev-only tooling, not part of the deployed app (kept out of `dependencies`/
 `devDependencies` so Vercel builds stay lean).
 
-- **`generate_test_audio.py`** — regenerates `public/test-audio/`. Requires
-  `espeak-ng` (`apt-get install espeak-ng`) and `numpy`/`scipy`.
+- **`generate_test_audio.py`** — regenerates `public/test-audio/` (currently
+  648 clips across 4 test groups — baseline noise/voice matrix, accents,
+  fast speech, and extra real-kitchen noise types — see `docs/accuracy.md`).
+  Requires `espeak-ng` (`apt-get install espeak-ng`) and `numpy`/`scipy` for
+  the baseline voices and noise synthesis. The accent matrix's non-native
+  (German-accented English) voice additionally needs the `mbrola` engine and
+  its `de2` voice data: `apt-get install -y mbrola mbrola-de2` (this is a
+  separate download from `espeak-ng` itself — the plain `en-gb`/`en-029`/
+  `en-gb-scotland` accent voices used for British/Caribbean/Scottish don't
+  need it, only the mbrola-based one does).
 - **`cover.html`** + rendering the cover image — requires `playwright`
   installed ad hoc (`npm install --no-save playwright`), then:
 
