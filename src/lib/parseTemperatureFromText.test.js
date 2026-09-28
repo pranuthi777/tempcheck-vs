@@ -40,3 +40,30 @@ test("empty/undefined input does not throw", () => {
   assert.deepEqual(parseTemperatureFromText(""), { value: null, unit: null });
   assert.deepEqual(parseTemperatureFromText(undefined), { value: null, unit: null });
 });
+
+// Real bugs found by running the 270-clip noisy-kitchen accuracy harness
+// against the live AssemblyAI transcription API (not hypothetical cases):
+
+test("spelled-out 'negative' before a number is treated as a minus sign", () => {
+  assert.deepEqual(parseTemperatureFromText("walk in freezer negative 5 degrees"), {
+    value: -5,
+    unit: "F",
+  });
+  assert.deepEqual(parseTemperatureFromText("walk in 3 or negative 5 degrees"), {
+    value: -5,
+    unit: "F",
+  });
+});
+
+test("a hyphen glued onto the previous word is not read as a minus sign", () => {
+  // Real transcript: AssemblyAI rendered "salmon, 146 degrees" as
+  // "Ammon-146 degrees." — the hyphen belongs to the mis-transcribed word,
+  // not the number.
+  assert.deepEqual(parseTemperatureFromText("Ammon-146 degrees."), { value: 146, unit: "F" });
+});
+
+test("degree symbol is recognized as equivalent to the word 'degrees'", () => {
+  assert.deepEqual(parseTemperatureFromText("walk-in cooler 3°C."), { value: 3, unit: "C" });
+  assert.deepEqual(parseTemperatureFromText("Chicken, 74°C."), { value: 74, unit: "C" });
+  assert.deepEqual(parseTemperatureFromText("38°F"), { value: 38, unit: "F" });
+});

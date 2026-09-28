@@ -10,17 +10,35 @@
 function parseTemperatureFromText(text) {
   if (!text || typeof text !== "string") return { value: null, unit: null };
 
-  const lower = text.toLowerCase();
+  let lower = text.toLowerCase();
+
+  // AssemblyAI's inverse-text-normalization sometimes leaves "negative"
+  // spelled out instead of emitting a "-" sign (e.g. "negative 5 degrees").
+  // Normalize it to a literal minus so one numeric pattern handles both.
+  lower = lower.replace(/\bnegative\s+(?=\d)/g, "-");
+
+  // A "°" symbol is equivalent to the word "degrees" for our purposes
+  // (e.g. "3°C") — normalize it so the same pattern matches either form.
+  lower = lower.replace(/°\s*/g, " degrees ");
+
+  // A leading "-" only counts as a minus sign when it isn't just a hyphen
+  // glued onto the previous word by the STT (e.g. "ammon-146" should read
+  // as 146, not -146) — a letter immediately before it disqualifies it.
+  const NOT_AFTER_LETTER = "(?<![a-z])";
 
   // Prefer a number immediately followed by "degree(s)" (optionally with
   // a unit word/letter), since that's the actual reading, not e.g. a
   // count of items mentioned in the same sentence.
-  const matches = [...lower.matchAll(/(-?\d+(?:\.\d+)?)\s*degrees?\s*(fahrenheit|celsius|f\b|c\b)?/gi)];
+  const strongPattern = new RegExp(
+    `${NOT_AFTER_LETTER}(-?\\d+(?:\\.\\d+)?)\\s*degrees?\\s*(fahrenheit|celsius|f\\b|c\\b)?`,
+    "gi"
+  );
+  const matches = [...lower.matchAll(strongPattern)];
 
   let numberMatch = matches[0];
   if (!numberMatch) {
     // Fall back to the first standalone number anywhere in the sentence.
-    const anyNumber = lower.match(/-?\d+(?:\.\d+)?/);
+    const anyNumber = lower.match(new RegExp(`${NOT_AFTER_LETTER}-?\\d+(?:\\.\\d+)?`));
     if (!anyNumber) return { value: null, unit: null };
     return { value: Number(anyNumber[0]), unit: lower.includes("celsius") ? "C" : "F" };
   }
