@@ -22,6 +22,15 @@ async function pollUntilDone(id, apiKey, { intervalMs = 1500, timeoutMs = 60000 
 }
 
 export async function POST(request) {
+  // This route spends real AssemblyAI credits per call and isn't needed by
+  // the cook-facing app at all — only by the internal accuracy harness. If
+  // DEV_HARNESS_SECRET is configured, require it so a public deployment
+  // link can't be used by strangers to burn API credits.
+  const requiredSecret = process.env.DEV_HARNESS_SECRET;
+  if (requiredSecret && request.headers.get("x-dev-secret") !== requiredSecret) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const apiKey = process.env.ASSEMBLYAI_API_KEY;
   if (!apiKey) {
     return Response.json({ error: "ASSEMBLYAI_API_KEY not configured" }, { status: 500 });
