@@ -9,16 +9,23 @@ const ASSEMBLYAI_BASE = "https://api.assemblyai.com/v2";
 
 async function pollUntilDone(id, apiKey, { intervalMs = 1500, timeoutMs = 60000 } = {}) {
   const start = Date.now();
+  let lastStatus = "unknown";
+  let polls = 0;
   while (Date.now() - start < timeoutMs) {
     const resp = await fetch(`${ASSEMBLYAI_BASE}/transcript/${id}`, {
       headers: { Authorization: apiKey },
     });
     const data = await resp.json();
+    polls += 1;
+    lastStatus = data.status || `http_${resp.status}`;
     if (data.status === "completed") return data;
     if (data.status === "error") throw new Error(data.error || "Transcription failed");
     await new Promise((r) => setTimeout(r, intervalMs));
   }
-  throw new Error("Transcription timed out");
+  // Diagnostic detail: what status AssemblyAI reported on the LAST poll before
+  // we gave up, and how many polls we made. "queued" the whole time points to
+  // account-level concurrency/quota throttling upstream, not a bug here.
+  throw new Error(`Transcription timed out after ${polls} polls (last status: ${lastStatus})`);
 }
 
 export async function POST(request) {
