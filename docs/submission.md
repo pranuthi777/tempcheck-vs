@@ -61,9 +61,9 @@ could plausibly go into a real kitchen.
 
 ## Submission checklist
 - [ ] Title, short/long description, tags (above)
-- [ ] Cover image: `assets/cover.png`
+- [x] Cover image: `assets/cover.png`
 - [ ] Demo video (≤3 min, AI voiceover + captions)
-- [ ] Slide deck (PDF)
-- [ ] Public GitHub repo: https://github.com/pranuthi777/tempcheck-vs
-- [ ] Live demo URL: _pending Vercel fix_
-- [ ] Demo platform: Web (Next.js on Vercel)
+- [x] Slide deck (PDF): `assets/slides.pdf`
+- [x] Public GitHub repo: https://github.com/pranuthi777/tempcheck-vs
+- [x] Live demo URL: https://tempcheck-vsh.vercel.app
+- [x] Demo platform: Web (Next.js on Vercel)

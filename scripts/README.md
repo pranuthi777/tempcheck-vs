@@ -20,3 +20,21 @@ Dev-only tooling, not part of the deployed app (kept out of `dependencies`/
   })();
   "
   ```
+
+- **`slides.html`** — the 12-slide submission deck (`docs/slides-outline.md` as
+  HTML/CSS, real numbers filled in from `docs/accuracy.md`). Rendered to
+  `assets/slides.pdf` the same ad-hoc way, using `page.pdf()` instead of
+  `page.screenshot()` at a 1280x720 (16:9) page size:
+
+  ```bash
+  node -e "
+  const { chromium } = require('playwright');
+  (async () => {
+    const browser = await chromium.launch();
+    const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+    await page.goto('file://' + process.cwd() + '/scripts/slides.html', { waitUntil: 'networkidle' });
+    await page.pdf({ path: 'assets/slides.pdf', width: '1280px', height: '720px', printBackground: true, margin: { top:0, bottom:0, left:0, right:0 } });
+    await browser.close();
+  })();
+  "
+  ```
