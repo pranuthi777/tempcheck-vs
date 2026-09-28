@@ -21,6 +21,13 @@ const STATUS_DOT = {
   unknown: "bg-slate-400",
 };
 
+// No station-by-station check schedule is configured (that would need its
+// own setup UI), so the missed-check reminder uses one plain, honest
+// signal instead: how long it's been since ANY reading was logged during
+// a live shift. 45 minutes is a reasonable default gap for a kitchen that
+// should be checking something regularly, not a regulatory number.
+const MISSED_CHECK_MINUTES = 45;
+
 export default function Home() {
   const [readings, setReadings] = useState([]);
   const [transcript, setTranscript] = useState([]);
@@ -29,6 +36,10 @@ export default function Home() {
   const [bigDisplay, setBigDisplay] = useState(false);
   const [dateFilter, setDateFilter] = useState("all");
   const [stationFilter, setStationFilter] = useState("all");
+  // Mirrors shiftStartRef.current for the one place that needs to read it
+  // during render (the missed-check calculation below) — reading a ref's
+  // .current directly during render isn't allowed, only in effects/handlers.
+  const [shiftStartDisplay, setShiftStartDisplay] = useState(null);
   const shiftStartRef = useRef(null);
   const shiftEndRef = useRef(null);
   const soundEnabledRef = useRef(true);
@@ -51,6 +62,7 @@ export default function Home() {
         setReadings(saved.readings);
         shiftStartRef.current = saved.shiftStart ?? null;
         shiftEndRef.current = saved.shiftEnd ?? null;
+        setShiftStartDisplay(shiftStartRef.current);
         setRestoredNotice(true);
       }
     });
@@ -82,6 +94,18 @@ export default function Home() {
     }
   }, []);
 
+  // A manager (or the cook themselves) marks a flagged reading resolved
+  // once the corrective action has actually been taken — e.g. the product
+  // was moved to a colder unit or discarded. This is a separate, explicit
+  // step from logging the reading itself: the voice agent can't know
+  // whether the corrective action really happened, only that it was
+  // stated back to the cook.
+  const toggleResolved = useCallback((id) => {
+    setReadings((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, resolvedAt: r.resolvedAt ? null : Date.now() } : r))
+    );
+  }, []);
+
   const onTranscriptLine = useCallback((line) => {
     setTranscript((prev) => [...prev.slice(-30), line]);
   }, []);
@@ -111,6 +135,7 @@ export default function Home() {
     setRestoredNotice(false);
     shiftStartRef.current = Date.now();
     shiftEndRef.current = null;
+    setShiftStartDisplay(shiftStartRef.current);
     connect();
   }, [connect]);
 
@@ -141,6 +166,35 @@ export default function Home() {
   }, [readings]);
 
   const isLive = status === "listening" || status === "connecting" || status === "reconnecting";
+
+  // Ticks once a minute while a shift is live, purely to keep the "time
+  // since last reading" reminder below live-updating without any reading
+  // itself changing.
+  const [nowTick, setNowTick] = useState(() => Date.now());
+  useEffect(() => {
+    if (!isLive) return undefined;
+    const id = setInterval(() => setNowTick(Date.now()), 60000);
+    return () => clearInterval(id);
+  }, [isLive]);
+
+  // Manager daily summary: readings logged, flagged, still-unresolved
+  // corrective actions, and a plain missed-check signal (see
+  // MISSED_CHECK_MINUTES above) — the kind of one-glance rollup a manager
+  // checking in mid-shift actually wants, not just a raw reading count.
+  const managerSummary = useMemo(() => {
+    const flagged = readings.filter((r) => r.status === "amber" || r.status === "red");
+    const unresolved = flagged.filter((r) => !r.resolvedAt);
+    const lastReadingAt = readings[0]?.timestamp ?? null;
+    const referencePoint = lastReadingAt ?? shiftStartDisplay;
+    const minutesSinceLastReading = isLive && referencePoint ? Math.floor((nowTick - referencePoint) / 60000) : null;
+    return {
+      total: readings.length,
+      flaggedCount: flagged.length,
+      unresolvedCount: unresolved.length,
+      minutesSinceLastReading,
+      missedCheck: minutesSinceLastReading !== null && minutesSinceLastReading >= MISSED_CHECK_MINUTES,
+    };
+  }, [readings, isLive, nowTick, shiftStartDisplay]);
 
   // Distinct dates and stations/items present in the current log, for the
   // PDF export filters below. "Station" here means whatever the cook named
@@ -354,6 +408,37 @@ export default function Home() {
         )}
       </div>
 
+      {/* Manager summary */}
+      {readings.length > 0 && (
+        <section className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">
+            Manager Summary
+          </h2>
+          <div className="flex flex-wrap gap-6 text-sm">
+            <div>
+              <p className="text-2xl font-bold">{managerSummary.total}</p>
+              <p className="text-slate-500 text-xs">Readings logged</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{managerSummary.flaggedCount}</p>
+              <p className="text-slate-500 text-xs">Flagged (amber/red)</p>
+            </div>
+            <div>
+              <p className={`text-2xl font-bold ${managerSummary.unresolvedCount > 0 ? "text-amber-400" : ""}`}>
+                {managerSummary.unresolvedCount}
+              </p>
+              <p className="text-slate-500 text-xs">Corrective actions unresolved</p>
+            </div>
+          </div>
+          {managerSummary.missedCheck && (
+            <div className="mt-3 rounded-lg border border-amber-700 bg-amber-950/40 text-amber-300 text-sm px-3 py-2">
+              No reading logged in over {managerSummary.minutesSinceLastReading} minutes — check that
+              stations are still being monitored.
+            </div>
+          )}
+        </section>
+      )}
+
       {/* Status board */}
       <section>
         <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-2">
@@ -408,42 +493,62 @@ export default function Home() {
                 <th className="text-left px-3 py-2 font-medium">Corrective Action</th>
                 <th className="text-left px-3 py-2 font-medium">FDA Section</th>
                 <th className="text-left px-3 py-2 font-medium">Cook&apos;s Words</th>
+                <th className="text-left px-3 py-2 font-medium">Resolved</th>
               </tr>
             </thead>
             <tbody>
-              {readings.map((r) => (
-                <tr key={`${r.id}-${r.timestamp}`} className="border-t border-slate-800">
-                  <td className="px-3 py-2 text-slate-400 whitespace-nowrap">
-                    {new Date(r.timestamp).toLocaleTimeString()}
-                  </td>
-                  <td className="px-3 py-2">
-                    {r.location || r.foodItem || "—"}
-                    {r.coolingStage && (
-                      <span className="ml-1.5 text-xs text-sky-400">
-                        ({r.coolingStage === "start" ? "cooling start" : "cooling check"})
+              {readings.map((r) => {
+                const isFlagged = r.status === "amber" || r.status === "red";
+                return (
+                  <tr key={`${r.id}-${r.timestamp}`} className="border-t border-slate-800">
+                    <td className="px-3 py-2 text-slate-400 whitespace-nowrap">
+                      {new Date(r.timestamp).toLocaleTimeString()}
+                    </td>
+                    <td className="px-3 py-2">
+                      {r.location || r.foodItem || "—"}
+                      {r.coolingStage && (
+                        <span className="ml-1.5 text-xs text-sky-400">
+                          ({r.coolingStage === "start" ? "cooling start" : "cooling check"})
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 font-mono">
+                      {Number.isFinite(r.temperatureF) ? `${r.temperatureF}°F` : "—"}
+                    </td>
+                    <td className="px-3 py-2">
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                          STATUS_STYLES[r.status] || STATUS_STYLES.unknown
+                        }`}
+                      >
+                        {r.status}
                       </span>
-                    )}
-                  </td>
-                  <td className="px-3 py-2 font-mono">
-                    {Number.isFinite(r.temperatureF) ? `${r.temperatureF}°F` : "—"}
-                  </td>
-                  <td className="px-3 py-2">
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                        STATUS_STYLES[r.status] || STATUS_STYLES.unknown
-                      }`}
-                    >
-                      {r.status}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2 text-slate-300">{r.correctiveAction || "—"}</td>
-                  <td className="px-3 py-2 text-slate-500 whitespace-nowrap">{r.citation || "—"}</td>
-                  <td className="px-3 py-2 text-slate-500 italic">{r.cookText || "—"}</td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="px-3 py-2 text-slate-300">{r.correctiveAction || "—"}</td>
+                    <td className="px-3 py-2 text-slate-500 whitespace-nowrap">{r.citation || "—"}</td>
+                    <td className="px-3 py-2 text-slate-500 italic">{r.cookText || "—"}</td>
+                    <td className="px-3 py-2">
+                      {isFlagged ? (
+                        <button
+                          onClick={() => toggleResolved(r.id)}
+                          className={`px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap transition ${
+                            r.resolvedAt
+                              ? "bg-emerald-500/15 text-emerald-300 border border-emerald-700"
+                              : "bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700"
+                          }`}
+                        >
+                          {r.resolvedAt ? "✓ Resolved" : "Mark resolved"}
+                        </button>
+                      ) : (
+                        <span className="text-slate-600">—</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
               {readings.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-3 py-6 text-center text-slate-500">
+                  <td colSpan={8} className="px-3 py-6 text-center text-slate-500">
                     No readings yet.
                   </td>
                 </tr>

@@ -80,7 +80,9 @@ export function exportHaccpPdf(readings, { shiftStart, shiftEnd, filterDescripti
     autoTable(doc, {
       startY: y + 8,
       margin: { left: MARGIN, right: MARGIN },
-      head: [["Time", "Location / Item", "Temp", "Status", "Corrective Action", "Spoken Evidence (cook's exact words)"]],
+      head: [
+        ["Time", "Location / Item", "Temp", "Status", "Corrective Action", "Spoken Evidence (cook's exact words)", "Resolved"],
+      ],
       body: flagged.map((r) => [
         new Date(r.timestamp).toLocaleTimeString(),
         r.location || r.foodItem || "—",
@@ -88,22 +90,28 @@ export function exportHaccpPdf(readings, { shiftStart, shiftEnd, filterDescripti
         (r.status || "unknown").toUpperCase(),
         r.correctiveAction || "—",
         r.cookText ? `"${r.cookText}"` : "—",
+        r.resolvedAt ? `Yes, ${new Date(r.resolvedAt).toLocaleTimeString()}` : "No",
       ]),
-      styles: { fontSize: 8, cellPadding: 4, overflow: "linebreak" },
+      styles: { fontSize: 8, cellPadding: 3.5, overflow: "linebreak" },
       headStyles: { fillColor: [127, 29, 29] },
       columnStyles: {
-        0: { cellWidth: 48 },
-        1: { cellWidth: 90 },
-        2: { cellWidth: 40 },
-        3: { cellWidth: 42 },
-        4: { cellWidth: 150 },
-        5: { cellWidth: 152, fontStyle: "italic" },
+        0: { cellWidth: 42 },
+        1: { cellWidth: 78 },
+        2: { cellWidth: 34 },
+        3: { cellWidth: 36 },
+        4: { cellWidth: 130 },
+        5: { cellWidth: 130, fontStyle: "italic" },
+        6: { cellWidth: 52 },
       },
       didParseCell: (data) => {
         if (data.section === "body" && data.column.index === 3) {
           const v = String(data.cell.raw).toLowerCase();
           if (v === "red") data.cell.styles.textColor = [185, 28, 28];
           else if (v === "amber") data.cell.styles.textColor = [180, 120, 8];
+        }
+        if (data.section === "body" && data.column.index === 6) {
+          const v = String(data.cell.raw);
+          data.cell.styles.textColor = v.startsWith("Yes") ? [21, 128, 61] : [185, 28, 28];
         }
       },
     });
