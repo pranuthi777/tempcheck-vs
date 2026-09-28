@@ -64,7 +64,7 @@ export default function Home() {
     return Array.from(map.values());
   }, [readings]);
 
-  const isLive = status === "listening" || status === "connecting";
+  const isLive = status === "listening" || status === "connecting" || status === "reconnecting";
 
   return (
     <main className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-4 py-6 gap-6">
@@ -111,14 +111,16 @@ export default function Home() {
           className={`inline-block w-2.5 h-2.5 rounded-full ${
             status === "listening"
               ? "bg-emerald-400 animate-pulse"
-              : status === "connecting"
+              : status === "connecting" || status === "reconnecting"
               ? "bg-amber-400 animate-pulse"
               : status === "error"
               ? "bg-red-400"
               : "bg-slate-600"
           }`}
         />
-        <span className="text-slate-400 capitalize">{status}</span>
+        <span className="text-slate-400 capitalize">
+          {status === "reconnecting" ? "Reconnecting…" : status}
+        </span>
         {error && <span className="text-red-400">— {error}</span>}
       </div>
 

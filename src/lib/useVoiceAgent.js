@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { evaluateReading } from "./ruleEngine";
 import { buildSessionUpdate } from "./agentConfig";
 import { PCMPlayer } from "./audioPlayer";
@@ -13,11 +13,13 @@ function celsiusToFahrenheit(c) {
 /**
  * Owns the whole Voice Agent WebSocket lifecycle: connect, mic streaming,
  * playback, tool-call handling (running the deterministic rule engine),
- * and transcript captions. `onReading` is called once per logged reading
- * with the full evaluated record for the dashboard/log/PDF to consume.
+ * transcript captions, and a one-shot auto-reconnect (session.resume)
+ * if the socket drops unexpectedly (flaky wifi shouldn't kill a kitchen
+ * shift). `onReading` is called once per logged reading with the full
+ * evaluated record for the dashboard/log/PDF to consume.
  */
 export function useVoiceAgent({ onReading, onTranscriptLine }) {
-  const [status, setStatus] = useState("idle"); // idle | connecting | listening | error | ended
+  const [status, setStatus] = useState("idle"); // idle | connecting | listening | reconnecting | error | ended
   const [error, setError] = useState(null);
   const [userCaption, setUserCaption] = useState("");
   const [agentCaption, setAgentCaption] = useState("");
@@ -27,6 +29,10 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
   const stopMicRef = useRef(null);
   const pendingResultsRef = useRef([]); // [{call_id, result}]
   const lastUserTextRef = useRef("");
+  const sessionInfoRef = useRef(null); // { sessionId, resumeToken, expiresAt }
+  const deliberateCloseRef = useRef(false);
+  const resumeAttemptedRef = useRef(false);
+  const openSocketRef = useRef(null);
 
   const handleToolCall = useCallback(
     (msg) => {
@@ -87,6 +93,12 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
     (msg) => {
       switch (msg.type) {
         case "session.ready":
+          sessionInfoRef.current = {
+            sessionId: msg.session_id,
+            resumeToken: msg.resume_token,
+            readyAt: Date.now(),
+          };
+          resumeAttemptedRef.current = false;
           setStatus("listening");
           break;
         case "transcript.user.delta":
@@ -136,20 +148,21 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
     [flushPendingResults, handleToolCall, onTranscriptLine]
   );
 
-  const connect = useCallback(async () => {
-    setError(null);
-    setStatus("connecting");
-    try {
+  const openSocket = useCallback(
+    async (resumeSessionId) => {
       const tokenResp = await fetch("/api/token");
       const tokenData = await tokenResp.json();
       if (!tokenResp.ok) throw new Error(tokenData.error || "Failed to get token");
 
       const ws = new WebSocket(`wss://agents.assemblyai.com/v1/ws?token=${tokenData.token}`);
       wsRef.current = ws;
-      playerRef.current = new PCMPlayer();
 
       ws.onopen = () => {
-        ws.send(JSON.stringify(buildSessionUpdate()));
+        if (resumeSessionId) {
+          ws.send(JSON.stringify({ type: "session.resume", session_id: resumeSessionId }));
+        } else {
+          ws.send(JSON.stringify(buildSessionUpdate()));
+        }
       };
 
       ws.onmessage = (event) => {
@@ -164,15 +177,46 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
 
       ws.onerror = () => {
         setError("WebSocket connection error.");
-        setStatus("error");
       };
 
       ws.onclose = () => {
-        setStatus((s) => (s === "error" ? s : "ended"));
+        if (deliberateCloseRef.current) {
+          setStatus("ended");
+          return;
+        }
+        const info = sessionInfoRef.current;
+        const withinGrace = info && Date.now() - info.readyAt < 30000;
+        if (withinGrace && !resumeAttemptedRef.current) {
+          resumeAttemptedRef.current = true;
+          setStatus("reconnecting");
+          openSocketRef.current?.(info.sessionId).catch(() => {
+            setError("Reconnect failed — the session couldn't be resumed in time.");
+            setStatus("error");
+          });
+        } else {
+          setStatus("ended");
+        }
       };
+    },
+    [handleServerMessage]
+  );
 
+  useEffect(() => {
+    openSocketRef.current = openSocket;
+  }, [openSocket]);
+
+  const connect = useCallback(async () => {
+    setError(null);
+    setStatus("connecting");
+    deliberateCloseRef.current = false;
+    resumeAttemptedRef.current = false;
+    sessionInfoRef.current = null;
+    try {
+      playerRef.current = new PCMPlayer();
+      await openSocket(null);
       stopMicRef.current = await startMicCapture((base64Chunk) => {
-        if (ws.readyState === WebSocket.OPEN) {
+        const ws = wsRef.current;
+        if (ws && ws.readyState === WebSocket.OPEN) {
           ws.send(JSON.stringify({ type: "input.audio", audio: base64Chunk }));
         }
       });
@@ -180,9 +224,10 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
       setError(String(err.message || err));
       setStatus("error");
     }
-  }, [handleServerMessage]);
+  }, [openSocket]);
 
   const disconnect = useCallback(() => {
+    deliberateCloseRef.current = true;
     try {
       wsRef.current?.send(JSON.stringify({ type: "session.end" }));
     } catch {
