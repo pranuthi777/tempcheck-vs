@@ -119,7 +119,7 @@ export default function Home() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">TempCheck</h1>
           <p className="text-slate-400 text-sm">
-            Hands-free HACCP temperature logging, built on AssemblyAI&apos;s Voice Agent API.
+            Hands-free HACCP-style temperature logging, built on AssemblyAI&apos;s Voice Agent API.
           </p>
         </div>
         <div className="flex gap-2">

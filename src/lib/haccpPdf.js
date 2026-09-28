@@ -11,7 +11,7 @@ export function exportHaccpPdf(readings, { shiftStart, shiftEnd } = {}) {
   const generatedAt = new Date();
 
   doc.setFontSize(16);
-  doc.text("TempCheck — HACCP Temperature Log", 40, 40);
+  doc.text("TempCheck — HACCP-Style Temperature Log", 40, 40);
   doc.setFontSize(10);
   doc.setTextColor(90);
   doc.text(`Generated ${generatedAt.toLocaleString()}`, 40, 58);
@@ -61,6 +61,13 @@ export function exportHaccpPdf(readings, { shiftStart, shiftEnd } = {}) {
     `${readings.length} readings logged, ${flaggedCount} flagged for corrective action. All numbers above are exactly what the cook said and what was measured — none are estimated.`,
     40,
     finalY + 24,
+    { maxWidth: 520 }
+  );
+  doc.setTextColor(120);
+  doc.text(
+    "Point-in-time temperature checks only. Does not automate cooling-curve time windows (e.g. 135°F→70°F within 2h) — log those manually until that feature ships.",
+    40,
+    finalY + 40,
     { maxWidth: 520 }
   );
 

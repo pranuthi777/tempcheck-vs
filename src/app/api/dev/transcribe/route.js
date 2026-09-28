@@ -7,6 +7,36 @@
 
 const ASSEMBLYAI_BASE = "https://api.assemblyai.com/v2";
 
+// Best-effort rate limiting. This route spends real AssemblyAI credits per
+// call, so even with the safe-by-default ENABLE_DEV_HARNESS gate, turning
+// it on for a demo shouldn't mean "unlimited calls, on our credit card, for
+// anyone who finds the route." Honest caveat: this is in-memory per
+// serverless instance, not a shared/durable limiter — a cold start resets
+// it, and a platform running many instances gives each its own bucket. That
+// makes it a real deterrent against casual/automated hammering, not a hard
+// guarantee, which is the accurate way to describe it rather than claiming
+// more protection than a stateless serverless function can actually give.
+// Generous enough that the accuracy harness itself (hundreds of clips in
+// one sitting, from one IP) isn't the thing that trips it — this is a
+// circuit breaker against runaway/automated abuse, not a tight quota.
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+const RATE_LIMIT_MAX_PER_IP = 800;
+const rateLimitState = new Map(); // ip -> [timestamps]
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  const timestamps = (rateLimitState.get(ip) || []).filter(
+    (t) => now - t < RATE_LIMIT_WINDOW_MS
+  );
+  if (timestamps.length >= RATE_LIMIT_MAX_PER_IP) {
+    rateLimitState.set(ip, timestamps);
+    return true;
+  }
+  timestamps.push(now);
+  rateLimitState.set(ip, timestamps);
+  return false;
+}
+
 // timeoutMs was 60s originally; bumped to 3 minutes after a live run showed
 // AssemblyAI's async v2 queue occasionally backing up under sustained load
 // (a job that normally completes in ~2s took ~140s during one observed
@@ -53,6 +83,17 @@ export async function POST(request) {
     return Response.json(
       { error: "Dev harness disabled. Set ENABLE_DEV_HARNESS=true to enable it temporarily." },
       { status: 404 }
+    );
+  }
+
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    "unknown";
+  if (isRateLimited(ip)) {
+    return Response.json(
+      { error: `Rate limited: max ${RATE_LIMIT_MAX_PER_IP} calls per ${RATE_LIMIT_WINDOW_MS / 60000} min per IP.` },
+      { status: 429 }
     );
   }
 

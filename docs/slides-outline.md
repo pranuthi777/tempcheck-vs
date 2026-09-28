@@ -22,7 +22,8 @@
    + the exported HACCP PDF.
 9. **Business value** — every restaurant needs this log; turns a paper
    chore into a real-time, provable habit.
-10. **Originality** — one of ~280 submissions, none targeting food safety.
+10. **Originality** — a narrow, uncommon angle vs. the gallery's mostly
+    general-purpose copilots and dispatch/interview agents.
 11. **What's next** — cooling-curve time tracking, persistent multi-shift
     storage, phone/SIP deployment for kitchens without a browser open.
 12. **Links** — GitHub, live demo, video.

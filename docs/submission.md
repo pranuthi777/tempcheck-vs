@@ -53,11 +53,12 @@ keep temperature logs; most do it on paper, after the fact, from memory.
 TempCheck turns that into a hands-free, real-time, provably-checked habit —
 and the exported PDF is what an inspector already expects to see.
 
-**Originality.** Of ~280 hackathon submissions, none target food safety —
-most build general-purpose copilots, dispatch/fraud agents, or interview
-coaches. TempCheck is narrow on purpose: one workflow, done with enough
-rigor (deterministic rules, mandatory readback, measured accuracy) that it
-could plausibly go into a real kitchen.
+**Originality.** Browsing the hackathon gallery, the large majority of
+entries are general-purpose copilots, dispatch/fraud agents, or interview
+coaches — food-safety compliance is a narrow, uncommon angle by comparison.
+TempCheck is narrow on purpose: one workflow, done with enough rigor
+(deterministic rules, mandatory readback, measured accuracy) that it could
+plausibly go into a real kitchen.
 
 ## Submission checklist
 - [ ] Title, short/long description, tags (above)
