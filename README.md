@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# TempCheck — hands-free voice food-safety logging
 
-## Getting Started
+TempCheck is a voice agent for restaurant kitchens. A cook calls out a temperature reading while their hands are full ("walk-in cooler 38", "chicken breast 152", "steam table one twenty"), and TempCheck logs it, checks it against the FDA Food Code, and speaks back a confirmation — reading the exact number aloud so a misheard digit gets caught immediately, not at the next health inspection.
 
-First, run the development server:
+Built for the [AssemblyAI Voice Agent Hackathon](https://lablab.ai/ai-hackathons/assemblyai-voice-agent-hackathon) on lablab.ai.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Why this exists
+
+A misheard "38°F" logged as "48°F" is a food-safety failure, not a UX nitpick. Two design decisions follow directly from that:
+
+1. **The safety verdict is never up to the language model.** A plain, deterministic rule engine (`src/lib/ruleEngine.js`) checks every reading against published FDA Food Code limits. The voice agent's job is only to extract the spoken numbers and speak the verdict back — it never decides what's safe.
+2. **Every flagged number gets read back and confirmed**, and the cook can correct themselves mid-sentence ("38 — no wait, 48") before it's logged.
+
+## Architecture
+
+```
+Cook's voice
+   │  (mic, PCM16/24kHz)
+   ▼
+Browser  ──WebSocket──►  AssemblyAI Voice Agent API
+   │                          │  STT → LLM → TTS
+   │                          │  extracts: location, food item, temperature
+   │                          ▼
+   │                     tool.call "log_reading"
+   │◄─────────────────────────┘
+   ▼
+Deterministic rule engine (src/lib/ruleEngine.js)
+   │  FDA Food Code limits, pure functions, unit-tested
+   ▼
+tool.result → agent speaks back the verdict + corrective action
+   │
+   ▼
+Live dashboard (green/amber/red) + full log ──► Export HACCP PDF
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **`src/app/api/token/route.js`** — server-side only; mints a short-lived AssemblyAI session token so the real API key never reaches the browser.
+- **`src/lib/agentConfig.js`** — the system prompt and the `log_reading` tool schema sent to the agent.
+- **`src/lib/useVoiceAgent.js`** — owns the WebSocket lifecycle: mic streaming, playback, tool-call handling, transcript captions, barge-in/interruption handling.
+- **`src/lib/ruleEngine.js`** + **`src/lib/foodCategories.js`** — the actual safety logic. Zero LLM calls. Fully unit tested (`npm test`).
+- **`src/lib/haccpPdf.js`** — generates the inspector-ready HACCP log PDF from the exact readings captured in the session.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Running it locally
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+cp .env.example .env.local   # add your AssemblyAI API key
+npm run dev
+```
 
-## Learn More
+Open `http://localhost:3000`, click **Start Shift**, allow microphone access, and call out a reading.
 
-To learn more about Next.js, take a look at the following resources:
+## Tests
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm test
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Unit tests cover every FDA category, boundary values, unit conversion, unrecognized items, implausible readings, and non-numeric input — the rule engine never guesses.
 
-## Deploy on Vercel
+## Measured accuracy
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+See [`docs/accuracy.md`](docs/accuracy.md) for the real, measured number-capture accuracy against a noisy-kitchen test set — no invented statistics.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Status
+
+Actively being built through the hackathon deadline (Sep 30). See the commit history for progress.
