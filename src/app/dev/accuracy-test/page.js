@@ -3,7 +3,12 @@
 import { useCallback, useRef, useState } from "react";
 import { parseTemperatureFromText } from "@/lib/parseTemperatureFromText";
 
-const CONCURRENCY = 5;
+// Lowered from 5 after a live run showed the AssemblyAI async-v2 queue
+// backing up under sustained concurrent load (see route.js's comment on
+// pollUntilDone). Gentler concurrency plus that longer per-job timeout
+// makes a full run of the expanded test set survive a slow patch instead
+// of reporting false "timed out" failures.
+const CONCURRENCY = 3;
 
 async function transcribeClip(url) {
   const audioResp = await fetch(url);
@@ -78,13 +83,25 @@ export default function AccuracyTestPage() {
         transcription API and compares the extracted number to ground truth. Not part of the
         cook-facing app.
       </p>
-      <button
-        onClick={run}
-        disabled={running}
-        className="px-4 py-2 rounded bg-emerald-600 disabled:opacity-40 mb-4"
-      >
-        {running ? `Running… (${done}/${manifestLen})` : "Run accuracy test"}
-      </button>
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={run}
+          disabled={running}
+          className="px-4 py-2 rounded bg-emerald-600 disabled:opacity-40"
+        >
+          {running ? `Running… (${done}/${manifestLen})` : "Run accuracy test"}
+        </button>
+        {running && (
+          <button
+            onClick={() => {
+              cancelRef.current = true;
+            }}
+            className="px-4 py-2 rounded bg-red-700 hover:bg-red-600"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
 
       {results.length > 0 && (
         <>

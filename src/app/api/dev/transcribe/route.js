@@ -7,7 +7,14 @@
 
 const ASSEMBLYAI_BASE = "https://api.assemblyai.com/v2";
 
-async function pollUntilDone(id, apiKey, { intervalMs = 1500, timeoutMs = 60000 } = {}) {
+// timeoutMs was 60s originally; bumped to 3 minutes after a live run showed
+// AssemblyAI's async v2 queue occasionally backing up under sustained load
+// (a job that normally completes in ~2s took ~140s during one observed
+// spike, but DID complete correctly once it cleared) — see docs/accuracy.md
+// "A note on harness reliability" for the full story. The real-time Voice
+// Agent pipeline the cook-facing app actually uses is unaffected by this;
+// it's a separate endpoint and stayed fast throughout.
+async function pollUntilDone(id, apiKey, { intervalMs = 1500, timeoutMs = 180000 } = {}) {
   const start = Date.now();
   let lastStatus = "unknown";
   let polls = 0;
