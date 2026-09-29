@@ -47,6 +47,7 @@ export const LOG_READING_TOOL = {
         description: "Explicit category if the cook states it directly.",
         enum: [
           "cold_holding",
+          "freezer",
           "hot_holding",
           "poultry",
           "ground_meat",
@@ -82,6 +83,8 @@ export function buildSessionUpdate() {
         keyterms: [
           "walk-in cooler",
           "reach-in cooler",
+          "walk-in freezer",
+          "freezer",
           "steam table",
           "hot well",
           "chicken",

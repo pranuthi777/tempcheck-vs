@@ -10,6 +10,16 @@
  *
  * Limits are drawn from the FDA Food Code (2022 edition), specifically:
  *  - 3-501.16(A)(2): cold holding at 41°F (5°C) or below
+ *  - freezer (frozen storage): 0°F (-18°C) or below. Unlike the categories
+ *    above, this is NOT a numbered FDA Food Code critical-limit citation —
+ *    the Food Code doesn't set a numeric frozen-storage temperature as a
+ *    food-safety critical control point (food already frozen is already
+ *    safe; storage temperature past that point is a quality concern, not a
+ *    safety one). 0°F/-18°C is the standard published by FDA/USDA FSIS
+ *    consumer guidance ("freezing at 0°F (-18°C) keeps food safe
+ *    indefinitely" — FDA "Refrigerator & Freezer Storage Chart"). Cited
+ *    here as that guidance, not as a Food Code section, so it's never
+ *    mistaken for one.
  *  - 3-501.16(A)(1): hot holding at 135°F (57°C) or above
  *  - 3-401.11(A)(2): poultry, stuffed meats/pasta/poultry: 165°F (15 sec)
  *  - 3-401.11(A)(3): ground/injected meats: 155°F (15 sec)
@@ -48,6 +58,7 @@ const { resolveCategory, CATEGORY_LABELS } = require("./foodCategories");
 // asserted, it's pointed at.
 const LIMITS = {
   cold_holding: { direction: "at_or_below", safeAt: 41, amberBandF: 3, citation: "FDA Food Code 3-501.16(A)(2)" },
+  freezer: { direction: "at_or_below", safeAt: 0, amberBandF: 3, citation: "FDA/USDA FSIS frozen-storage guidance (not a numbered Food Code limit)" },
   hot_holding: { direction: "at_or_above", safeAt: 135, amberBandF: 5, citation: "FDA Food Code 3-501.16(A)(1)" },
   poultry: { direction: "at_or_above", safeAt: 165, amberBandF: 5, citation: "FDA Food Code 3-401.11(A)(2)" },
   ground_meat: { direction: "at_or_above", safeAt: 155, amberBandF: 5, citation: "FDA Food Code 3-401.11(A)(3)" },
@@ -59,6 +70,8 @@ const LIMITS = {
 const CORRECTIVE_ACTIONS = {
   cold_holding:
     "Move product to a colder unit or add ice immediately. If it's been above 41°F for more than 4 hours, discard it.",
+  freezer:
+    "Move product to a colder freezer immediately and check the door seal. If it's been above 0°F long enough to partially thaw, treat it as a cold-holding item from that point on, not frozen storage.",
   hot_holding:
     "Reheat to at least 165°F within 2 hours, or discard the product.",
   poultry: "Continue cooking until it reaches at least 165°F, then re-check.",

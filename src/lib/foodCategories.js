@@ -21,8 +21,13 @@ const ITEM_CATEGORY_MAP = {
   "salad bar": "cold_holding",
   "cold well": "cold_holding",
   "prep cooler": "cold_holding",
-  "walk-in freezer": "cold_holding",
-  freezer: "cold_holding",
+
+  // --- freezer (frozen storage) — its own category, not cold_holding: the
+  // safe range is 0°F/-18°C or colder, nowhere near the 41°F cold-holding
+  // line, so lumping them together would let a badly-warming freezer read
+  // as "safe" all the way up to 41°F. ---
+  "walk-in freezer": "freezer",
+  freezer: "freezer",
 
   // --- hot_holding locations ---
   "steam table": "hot_holding",
@@ -113,6 +118,7 @@ const ITEM_CATEGORY_MAP = {
 
 const CATEGORY_LABELS = {
   cold_holding: "Cold holding",
+  freezer: "Freezer (frozen storage)",
   hot_holding: "Hot holding",
   poultry: "Poultry (cooking)",
   ground_meat: "Ground/injected meat (cooking)",

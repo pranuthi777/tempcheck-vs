@@ -13,3 +13,11 @@ test("newly added item types resolve to the right category", () => {
 test("an unrecognized item still falls back to unknown, never a guess", () => {
   assert.equal(resolveCategory({ foodItem: "quinoa salad" }), "unknown");
 });
+
+test("freezer/walk-in freezer resolve to their own 'freezer' category, not cold_holding", () => {
+  assert.equal(resolveCategory({ location: "freezer" }), "freezer");
+  assert.equal(resolveCategory({ location: "walk-in freezer" }), "freezer");
+  // Everyday cold-holding units are unaffected.
+  assert.equal(resolveCategory({ location: "walk-in cooler" }), "cold_holding");
+  assert.equal(resolveCategory({ location: "reach-in fridge" }), "cold_holding");
+});

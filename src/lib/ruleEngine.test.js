@@ -85,6 +85,16 @@ test("fish/seafood/eggs: 145F-150F is amber, below 145F is red, above 150F is sa
   assert.equal(evaluateReading({ foodItem: "eggs", temperatureF: 138 }).status, "red");
 });
 
+test("freezer: keeps frozen at 0F or below; -3F-0F is amber, above 0F is red, well below is safe", () => {
+  assert.equal(evaluateReading({ location: "freezer", temperatureF: -10 }).status, "safe");
+  assert.equal(evaluateReading({ location: "walk-in freezer", temperatureF: -2 }).status, "amber");
+  assert.equal(evaluateReading({ location: "freezer", temperatureF: 0 }).status, "amber");
+  assert.equal(evaluateReading({ location: "freezer", temperatureF: 5 }).status, "red");
+  const r = evaluateReading({ location: "walk-in freezer", temperatureF: 10 });
+  assert.equal(r.category, "freezer");
+  assert.match(r.correctiveAction, /colder|discard|freezer/i);
+});
+
 test("hot holding: 135F-140F is amber, below 135F is red, above 140F is safe", () => {
   assert.equal(evaluateReading({ location: "steam table", temperatureF: 136 }).status, "amber");
   assert.equal(evaluateReading({ location: "steam table", temperatureF: 141 }).status, "safe");
