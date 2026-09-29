@@ -29,9 +29,23 @@ including a harness that broke three times before producing one that's trustwort
   and unit (`src/lib/parseTemperatureFromText.js`, unit tested) and compared to the
   ground truth in `public/test-audio/manifest.json`. A clip counts as correct only if
   both the number and the unit match exactly.
-- **What this does *not* measure:** the app's own safety net. Every flagged reading is
-  read back to the cook for confirmation before being logged — so a raw STT miss caught
-  at that step is not a safety failure in practice, only an STT accuracy statistic.
+- **What this does *not* measure — stated plainly, not softened:** this harness sends
+  each clip to AssemblyAI's **offline async `/v2` transcription API**, with **no
+  keyterms** and **no LLM tool-call step**, and scores the result with the app's own
+  regex parser (`parseTemperatureFromText.js`). So **88.0% below is a raw STT+parser
+  number, not an end-to-end product number.** It never exercises the two things that
+  differ in the real app: (1) the live Voice Agent's `keyterms` word-boost list, and
+  (2) the LLM's own field extraction from the transcript into a tool call — and the
+  README documents a real, live-confirmed gap in exactly that second step (the live
+  agent sometimes logs the *first* number instead of the corrected one on a
+  self-correction, even though this harness's parser gets the same phrasing right
+  every time — see `README.md`, "Known limitations"). In other words: this benchmark
+  skips exactly the step where the live product is known to sometimes fail. The app's
+  spoken readback (see README) is a separate, real safety net that catches a wrong
+  number before it's left uncorrected in the log — but that's a mitigation, not a
+  reason to call an STT+parser number an accuracy figure for the whole app. A real
+  end-to-end number, measured through the live Voice Agent WebSocket and scoring the
+  actual `log_reading` tool-call arguments, is reported separately below.
 
 ## Getting a valid run was itself a finding, disclosed rather than hidden
 
@@ -145,8 +159,13 @@ left as-is:
   above, plus a few cases where the accent voice's synthesis itself was the actual
   variable causing an audibly different number or unit to be heard.
 
-### What this does *not* measure
+### What this number is, and isn't
 
-The app's own safety net. Every flagged reading is read back to the cook for
-confirmation before being logged — so a raw STT miss caught at that step is not a safety
-failure in practice, only an STT accuracy statistic.
+**This 88.0% is an STT+parser number, not an end-to-end product number.** See "What this
+does *not* measure" in the Method section above for the full honest breakdown of the
+gap — no keyterms, no LLM tool-call step, and it skips exactly the self-correction
+extraction step the README documents as sometimes failing live. The app's spoken
+readback (every reading, not just flagged ones — see `README.md`) is a real safety net
+that catches a wrong number before it's left uncorrected, but it doesn't make this an
+end-to-end figure. See "End-to-end accuracy (live Voice Agent)" below for the number
+that actually exercises the full pipeline.
