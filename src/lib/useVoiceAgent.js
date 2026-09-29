@@ -197,13 +197,6 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
         message: evaluation.message,
         corrective_action: evaluation.correctiveAction,
         logged_temperature_f: temperatureF,
-        // True for a "safe" reading close enough to its category's limit
-        // that it's worth an explicit yes/no confirmation before moving on
-        // — see CONFIRM_MARGIN_F in ruleEngine.js. This is what closes the
-        // "silent false-safe" gap: a plain readback of a safe-sounding
-        // number is easy to not really listen to, so close calls get an
-        // explicit confirmation loop instead, same as amber/red already do.
-        confirm_recommended: !!evaluation.confirmRecommended,
       };
 
       pendingResultsRef.current.push({

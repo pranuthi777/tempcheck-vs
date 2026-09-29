@@ -212,7 +212,11 @@ export default function Home() {
   // MISSED_CHECK_MINUTES above) — the kind of one-glance rollup a manager
   // checking in mid-shift actually wants, not just a raw reading count.
   const managerSummary = useMemo(() => {
-    const flagged = readings.filter((r) => r.status === "amber" || r.status === "red");
+    // Only "red" is an actual FDA violation that needs a manager's
+    // corrective-action follow-up and a resolve click — "amber" is
+    // compliant (just close to the limit) and never gets a resolve
+    // button, so it must not count toward "still unresolved" here either.
+    const flagged = readings.filter((r) => r.status === "red");
     const unresolved = flagged.filter((r) => !r.resolvedAt);
     const lastReadingAt = readings[0]?.timestamp ?? null;
     const referencePoint = lastReadingAt ?? shiftStartDisplay;
@@ -485,7 +489,7 @@ export default function Home() {
             </div>
             <div>
               <p className="text-2xl font-bold">{managerSummary.flaggedCount}</p>
-              <p className="text-slate-500 text-xs">Flagged (amber/red)</p>
+              <p className="text-slate-500 text-xs">Violations (red)</p>
             </div>
             <div>
               <p className={`text-2xl font-bold ${managerSummary.unresolvedCount > 0 ? "text-amber-400" : ""}`}>
@@ -529,9 +533,9 @@ export default function Home() {
                   {r.categoryLabel}
                   {r.coolingStage === "start" && " — cooling in progress"}
                 </p>
-                {r.confirmRecommended && (
+                {r.status === "amber" && (
                   <p className="text-xs opacity-90 mt-1 font-semibold">
-                    🔎 Close to the limit — confirmed with the cook
+                    🔎 Compliant, but close to the limit — confirmed with the cook
                   </p>
                 )}
               </div>
@@ -567,7 +571,10 @@ export default function Home() {
             </thead>
             <tbody>
               {readings.map((r) => {
-                const isFlagged = r.status === "amber" || r.status === "red";
+                // Only "red" is an actual FDA violation needing a manager
+                // resolution — "amber" is compliant, just close to the
+                // limit, so it doesn't need the resolve workflow.
+                const isFlagged = r.status === "red";
                 return (
                   <tr key={`${r.id}-${r.timestamp}`} className="border-t border-slate-800">
                     <td className="px-3 py-2 text-slate-400 whitespace-nowrap">
@@ -592,8 +599,8 @@ export default function Home() {
                       >
                         {r.status}
                       </span>
-                      {r.confirmRecommended && (
-                        <span className="ml-1 text-xs text-slate-400" title="Safe, but close to the limit — confirmed with the cook before logging">
+                      {r.status === "amber" && (
+                        <span className="ml-1 text-xs text-slate-400" title="Compliant, but close to the limit — confirmed with the cook before logging">
                           🔎
                         </span>
                       )}

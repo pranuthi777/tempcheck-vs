@@ -26,15 +26,18 @@ function evalAgainstRuleEngine(item, value, unit) {
 
 // The headline number everyone will ask about first: of every clip where
 // the STT/parser got the number wrong, how would that wrong number
-// actually have played out on the real dashboard, given the new
-// close-call confirmation gate (ruleEngine.js's confirmRecommended)?
+// actually have played out on the real dashboard, given the amber/red
+// rule-engine verdict (ruleEngine.js)? Amber is now a compliant close-call
+// tier (not a violation) that still gets an explicit spoken confirmation
+// before moving on, same as before under the retired confirmRecommended
+// field — so it still counts as "caught," not silent.
 //   - "silent_false_safe": the wrong number logs as a plain "safe" reading
 //     with no confirmation prompt, while the TRUE reading was actually
 //     amber/red/unknown — the exact, critical failure mode this metric
 //     exists to catch and hold at zero.
-//   - "caught_by_confirmation": the wrong number is itself amber/red (so it
-//     already gets a spoken corrective-action question) or close enough to
-//     a limit to trigger the new confirm_recommended yes/no — the mistake
+//   - "caught_by_confirmation": the wrong number is itself amber (a
+//     compliant close call that still gets a yes/no confirmation) or red
+//     (which gets a spoken corrective-action question) — the mistake
 //     doesn't slip through silently, even though the logged number is wrong.
 //   - "rejected_as_unknown": the wrong number (or a parse failure) lands in
 //     the "unknown" category/implausible-range guard, which already forces
@@ -47,7 +50,7 @@ function classifyMiss(item, parsed) {
   const logged = evalAgainstRuleEngine(item, parsed?.value, parsed?.unit);
 
   if (logged.status === "unknown") return "rejected_as_unknown";
-  if (logged.status === "amber" || logged.status === "red" || logged.confirmRecommended) {
+  if (logged.status === "amber" || logged.status === "red") {
     return "caught_by_confirmation";
   }
   if (logged.status === "safe" && truth.status !== "safe") return "silent_false_safe";

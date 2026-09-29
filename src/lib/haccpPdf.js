@@ -65,16 +65,21 @@ export function exportHaccpPdf(readings, { shiftStart, shiftEnd, filterDescripti
   y += 18;
 
   // --- Section 1: corrective actions & violations, with spoken evidence ---
-  const flagged = readings.filter((r) => r.status === "red" || r.status === "amber");
+  // Only "red" is an actual FDA Food Code violation. "Amber" is a
+  // compliant reading close to the limit (see ruleEngine.js) — it gets a
+  // spoken confirmation in the app, but it never required a corrective
+  // action, so it doesn't belong in an inspector's violations section; it
+  // still appears, correctly labeled, in the full log below.
+  const flagged = readings.filter((r) => r.status === "red");
   doc.setFontSize(12);
   doc.setTextColor(20);
-  doc.text("Corrective Actions & Violations", MARGIN, y);
+  doc.text("Violations & Corrective Actions", MARGIN, y);
   y += 6;
 
   if (flagged.length === 0) {
     doc.setFontSize(9.5);
     doc.setTextColor(70);
-    doc.text("No amber or red readings this shift — nothing required a corrective action.", MARGIN, y + 14);
+    doc.text("No red (violation) readings this shift — nothing required a corrective action.", MARGIN, y + 14);
     y += 30;
   } else {
     autoTable(doc, {
