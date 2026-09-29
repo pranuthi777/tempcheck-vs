@@ -65,10 +65,23 @@ function parseTemperatureFromText(text) {
     }
   }
   if (!numberMatch) {
-    // Fall back to the first standalone number anywhere in the sentence.
-    const anyNumber = lower.match(new RegExp(`${NOT_A_MINUS_SIGN_HERE}-?\\d+(?:\\.\\d+)?`));
-    if (!anyNumber) return { value: null, unit: null };
-    return { value: Number(anyNumber[0]), unit: lower.includes("celsius") ? "C" : "F" };
+    // Fallback: no "degrees" word anywhere. A number spoken right after a
+    // unit/station label ("cooler 2", "station 3", "#3", "number 5") is
+    // that label, NOT the reading — taking it at face value silently
+    // misreads a real temperature (e.g. "cooler 2 reads 50" must not parse
+    // as 2°F). So: find every standalone number, drop any that's
+    // immediately preceded by a label word, and among what's left prefer
+    // the LAST one (same self-correction instinct as the "degrees" path
+    // above — "165, now it's 170" means 170). If nothing is left, return
+    // null so the voice agent asks the cook to repeat the reading instead
+    // of guessing.
+    const LABEL_BEFORE_NUMBER = /(?:\b(?:cooler|well|station|number)\b\s*#?\s*|#\s*)$/i;
+    const anyNumberPattern = new RegExp(`${NOT_A_MINUS_SIGN_HERE}-?\\d+(?:\\.\\d+)?`, "g");
+    const allNumbers = [...lower.matchAll(anyNumberPattern)];
+    const candidates = allNumbers.filter((m) => !LABEL_BEFORE_NUMBER.test(lower.slice(0, m.index)));
+    const chosen = candidates[candidates.length - 1];
+    if (!chosen) return { value: null, unit: null };
+    return { value: Number(chosen[0]), unit: lower.includes("celsius") ? "C" : "F" };
   }
 
   const value = Number(numberMatch[1]);
