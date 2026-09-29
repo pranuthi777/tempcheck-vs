@@ -6,6 +6,7 @@ import { exportHaccpPdf } from "@/lib/haccpPdf";
 import { loadShift, saveShift, clearShift } from "@/lib/shiftStorage";
 import { playLogBeep, playAlertTone } from "@/lib/audioCues";
 import { computeEntryHash, verifyHashChain, GENESIS_HASH } from "@/lib/hashChain";
+import { computeOverdueUnits, DEFAULT_INTERVAL_MS } from "@/lib/missedChecks";
 import BigDisplay from "@/components/BigDisplay";
 
 const STATUS_STYLES = {
@@ -22,12 +23,13 @@ const STATUS_DOT = {
   unknown: "bg-slate-400",
 };
 
-// No station-by-station check schedule is configured (that would need its
-// own setup UI), so the missed-check reminder uses one plain, honest
-// signal instead: how long it's been since ANY reading was logged during
-// a live shift. 45 minutes is a reasonable default gap for a kitchen that
-// should be checking something regularly, not a regulatory number.
-const MISSED_CHECK_MINUTES = 45;
+// How long a unit/location can go without its OWN reading before it's
+// flagged overdue (see missedChecks.js) — a single shift-wide "minutes
+// since ANY reading" signal let a frequently-checked cooler mask a fryer
+// nobody had actually checked in hours. 2 hours is a reasonable default
+// check cadence for a kitchen, not a regulatory number; there's no
+// per-station schedule UI (yet), so every unit shares this one interval.
+const MISSED_CHECK_INTERVAL_MS = DEFAULT_INTERVAL_MS;
 
 export default function Home() {
   const [readings, setReadings] = useState([]);
@@ -313,9 +315,9 @@ export default function Home() {
   }, [isLive]);
 
   // Manager daily summary: readings logged, flagged, still-unresolved
-  // corrective actions, and a plain missed-check signal (see
-  // MISSED_CHECK_MINUTES above) — the kind of one-glance rollup a manager
-  // checking in mid-shift actually wants, not just a raw reading count.
+  // corrective actions, and a per-unit/location missed-check list (see
+  // missedChecks.js) — the kind of one-glance rollup a manager checking in
+  // mid-shift actually wants, not just a raw reading count.
   const managerSummary = useMemo(() => {
     // Only "red" is an actual FDA violation that needs a manager's
     // corrective-action follow-up and a resolve click — "amber" is
@@ -325,17 +327,17 @@ export default function Home() {
     // live violation anymore, its correction is.
     const flagged = readings.filter((r) => r.status === "red" && !r.superseded);
     const unresolved = flagged.filter((r) => !r.resolvedAt);
-    const lastReadingAt = readings[0]?.timestamp ?? null;
-    const referencePoint = lastReadingAt ?? shiftStartDisplay;
-    const minutesSinceLastReading = isLive && referencePoint ? Math.floor((nowTick - referencePoint) / 60000) : null;
+    const overdueUnits = isLive
+      ? computeOverdueUnits({ readings, now: nowTick, intervalMs: MISSED_CHECK_INTERVAL_MS })
+      : [];
     return {
       total: readings.length,
       flaggedCount: flagged.length,
       unresolvedCount: unresolved.length,
-      minutesSinceLastReading,
-      missedCheck: minutesSinceLastReading !== null && minutesSinceLastReading >= MISSED_CHECK_MINUTES,
+      overdueUnits,
+      missedCheck: overdueUnits.length > 0,
     };
-  }, [readings, isLive, nowTick, shiftStartDisplay]);
+  }, [readings, isLive, nowTick]);
 
   // Distinct dates and stations/items present in the current log, for the
   // PDF export filters below. "Station" here means whatever the cook named
@@ -634,8 +636,16 @@ export default function Home() {
           </div>
           {managerSummary.missedCheck && (
             <div className="mt-3 rounded-lg border border-amber-700 bg-amber-950/40 text-amber-300 text-sm px-3 py-2">
-              No reading logged in over {managerSummary.minutesSinceLastReading} minutes — check that
-              stations are still being monitored.
+              <p className="font-semibold mb-1">
+                {managerSummary.overdueUnits.length === 1 ? "Station overdue for a check:" : "Stations overdue for a check:"}
+              </p>
+              <ul className="space-y-0.5">
+                {managerSummary.overdueUnits.map((u) => (
+                  <li key={u.unit}>
+                    <span className="font-medium">{u.unit}</span> — last checked {u.minutesSince} minutes ago
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </section>
