@@ -24,6 +24,42 @@ const STATUS_DOT = {
   unknown: "bg-slate-400",
 };
 
+// Top accent bar shown on each status-board card — a quick color read from
+// a few steps away, on top of the border/badge, since a kitchen "glance"
+// display benefits from redundant color coding.
+const STATUS_ACCENT = {
+  safe: "bg-emerald-400",
+  amber: "bg-amber-400",
+  red: "bg-red-400",
+  unknown: "bg-slate-500",
+};
+
+// Round-2 UI pass (task R2-UI): a small, consistent button/card vocabulary
+// instead of every button in the toolbar sharing one undifferentiated
+// slate-800 style. PRIMARY is the one action a cook needs most (start a
+// shift); DEMO is the secondary happy-path for a judge with no mic; DANGER
+// ends a live session; GHOST is for utility actions (verify, export,
+// settings) that should read as available but not competing for attention;
+// ICON is GHOST's square variant for a single glyph.
+const BTN = {
+  primary:
+    "px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 font-semibold text-white shadow-lg shadow-emerald-950/50 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none",
+  demo:
+    "px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 active:bg-violet-700 font-semibold text-white shadow-lg shadow-violet-950/50 transition",
+  danger:
+    "px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 active:bg-red-700 font-semibold text-white shadow-lg shadow-red-950/50 transition",
+  ghost:
+    "px-4 py-2.5 rounded-xl bg-slate-900/70 border border-slate-800 hover:bg-slate-800 hover:border-slate-700 font-medium text-slate-200 transition disabled:opacity-40 disabled:hover:bg-slate-900/70 disabled:hover:border-slate-800 disabled:cursor-not-allowed",
+  icon:
+    "w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900/70 border border-slate-800 hover:bg-slate-800 hover:border-slate-700 transition text-base",
+};
+
+// A shared "card" surface — rounded, subtly elevated, faintly bordered —
+// so every panel on the dashboard (manager summary, captions, settings,
+// log) reads as part of one coherent system instead of a stack of
+// differently-flavored boxes.
+const CARD = "rounded-2xl border border-slate-800/80 bg-slate-900/50 shadow-sm shadow-black/20";
+
 // How long a unit/location can go without its OWN reading before it's
 // flagged overdue (see missedChecks.js) — a single shift-wide "minutes
 // since ANY reading" signal let a frequently-checked cooler mask a fryer
@@ -425,13 +461,27 @@ export default function Home() {
 
   return (
     <main className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-4 py-6 gap-6">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">TempCheck</h1>
-          <p className="text-slate-400 text-sm">
-            Hands-free HACCP-style temperature logging, built on AssemblyAI&apos;s Voice Agent API.
-          </p>
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div
+            className="w-11 h-11 shrink-0 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 shadow-lg shadow-emerald-950/50 flex items-center justify-center text-xl"
+            aria-hidden="true"
+          >
+            🌡️
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight leading-tight">TempCheck</h1>
+            <p className="text-slate-400 text-sm">
+              Hands-free HACCP-style temperature logging, built on AssemblyAI&apos;s Voice Agent API.
+            </p>
+          </div>
         </div>
+      </header>
+
+      {/* Toolbar: primary shift controls on the left (the one thing a cook
+          actually needs to touch), utility actions grouped on the right,
+          visually de-emphasized so they don't compete with Start Shift. */}
+      <div className="flex flex-wrap items-center gap-3">
         <div className="flex flex-wrap items-center gap-2">
           {!isLive && (
             <input
@@ -440,94 +490,89 @@ export default function Home() {
               onChange={(e) => setCookName(e.target.value)}
               placeholder="Cook name / initials"
               title="Shown as 'Logged by' on the exported HACCP PDF — asked once per shift, like a real paper log."
-              className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-sm placeholder:text-slate-500 w-44"
+              className="px-3 py-2.5 rounded-xl bg-slate-900/70 border border-slate-800 text-sm placeholder:text-slate-500 w-44 focus:border-emerald-600"
             />
           )}
           {!isLive ? (
             <>
-              <button
-                onClick={startShift}
-                className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 font-semibold transition"
-              >
-                Start Shift
+              <button onClick={startShift} className={BTN.primary}>
+                ▶ Start Shift
               </button>
               <button
                 onClick={startDemo}
                 title="Plays a ~30s sample kitchen recording through the real app — no microphone needed"
-                className="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 font-semibold transition"
+                className={BTN.demo}
               >
                 🎬 Try Demo (no mic needed)
               </button>
             </>
           ) : isDemo ? (
-            <button
-              onClick={endDemo}
-              className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 font-semibold transition"
-            >
-              End Demo
+            <button onClick={endDemo} className={BTN.danger}>
+              ■ End Demo
             </button>
           ) : (
-            <button
-              onClick={endShift}
-              className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 font-semibold transition"
-            >
-              End Shift
+            <button onClick={endShift} className={BTN.danger}>
+              ■ End Shift
             </button>
           )}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
           <button
             onClick={verifyIntegrity}
             disabled={readings.length === 0}
             title="Recomputes the tamper-evident hash chain over every reading this shift and confirms nothing was edited, reordered, or deleted after logging."
-            className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:hover:bg-slate-800 font-semibold transition"
+            className={BTN.ghost}
           >
-            🔒 Verify Log Integrity
+            🔒 Verify Log
           </button>
           <button
             onClick={handleExportPdf}
             disabled={filteredReadings.length === 0}
-            className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:hover:bg-slate-800 font-semibold transition"
+            className={BTN.ghost}
           >
-            Export HACCP PDF{dateFilter !== "all" || stationFilter !== "all" ? " (filtered)" : ""}
+            📄 Export PDF{dateFilter !== "all" || stationFilter !== "all" ? " (filtered)" : ""}
           </button>
           <button
             onClick={() => setSettingsOpen((o) => !o)}
             title="Establishment name and thermometer ID/calibration date — shown on the exported HACCP PDF"
-            className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 font-semibold transition"
+            aria-label="Settings"
+            className={`${BTN.icon} ${settingsOpen ? "border-emerald-600 text-emerald-300" : ""}`}
           >
             ⚙️
           </button>
         </div>
-      </header>
+      </div>
 
       {settingsOpen && (
-        <div className="-mt-2 rounded-lg border border-slate-800 bg-slate-900/60 p-4 grid gap-3 sm:grid-cols-3 text-sm">
+        <div className={`${CARD} p-4 grid gap-3 sm:grid-cols-3 text-sm`}>
           <label className="flex flex-col gap-1">
-            <span className="text-slate-400 text-xs">Establishment name</span>
+            <span className="text-slate-400 text-xs font-medium">Establishment name</span>
             <input
               type="text"
               value={settings.establishmentName || ""}
               onChange={(e) => updateSettings({ establishmentName: e.target.value })}
               placeholder="e.g. Maple Street Diner"
-              className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 placeholder:text-slate-500"
+              className="px-3 py-2 rounded-lg bg-slate-950/60 border border-slate-800 placeholder:text-slate-500 focus:border-emerald-600"
             />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-slate-400 text-xs">Thermometer ID</span>
+            <span className="text-slate-400 text-xs font-medium">Thermometer ID</span>
             <input
               type="text"
               value={settings.thermometerId || ""}
               onChange={(e) => updateSettings({ thermometerId: e.target.value })}
               placeholder="e.g. Probe #2"
-              className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 placeholder:text-slate-500"
+              className="px-3 py-2 rounded-lg bg-slate-950/60 border border-slate-800 placeholder:text-slate-500 focus:border-emerald-600"
             />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-slate-400 text-xs">Last calibration date</span>
+            <span className="text-slate-400 text-xs font-medium">Last calibration date</span>
             <input
               type="date"
               value={settings.lastCalibrationDate || ""}
               onChange={(e) => updateSettings({ lastCalibrationDate: e.target.value })}
-              className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700"
+              className="px-3 py-2 rounded-lg bg-slate-950/60 border border-slate-800 focus:border-emerald-600"
             />
           </label>
         </div>
@@ -535,7 +580,7 @@ export default function Home() {
 
       {integrityResult && (
         <div
-          className={`-mt-2 rounded-lg border text-sm px-3 py-2 ${
+          className={`rounded-xl border text-sm px-4 py-2.5 ${
             integrityResult.verified
               ? "border-emerald-700 bg-emerald-950/40 text-emerald-300"
               : "border-red-700 bg-red-950/40 text-red-300"
@@ -548,14 +593,14 @@ export default function Home() {
       )}
 
       {readings.length > 0 && (
-        <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 -mt-2">
-          <span className="uppercase tracking-wide font-semibold text-slate-500">PDF filters:</span>
+        <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
+          <span className="uppercase tracking-wide font-semibold text-slate-500">PDF filters</span>
           <label className="flex items-center gap-1.5">
             Date
             <select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200"
+              className="bg-slate-900/70 border border-slate-800 rounded-lg px-2 py-1 text-slate-200"
             >
               <option value="all">All dates</option>
               {availableDates.map((d) => (
@@ -570,7 +615,7 @@ export default function Home() {
             <select
               value={stationFilter}
               onChange={(e) => setStationFilter(e.target.value)}
-              className="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200"
+              className="bg-slate-900/70 border border-slate-800 rounded-lg px-2 py-1 text-slate-200"
             >
               <option value="all">All stations</option>
               {availableStations.map((s) => (
@@ -580,7 +625,7 @@ export default function Home() {
               ))}
             </select>
           </label>
-          <span>
+          <span className="text-slate-500">
             {filteredReadings.length} of {readings.length} reading{readings.length === 1 ? "" : "s"} match
           </span>
         </div>
@@ -588,25 +633,37 @@ export default function Home() {
 
       {/* Hands-free controls: sound cues, big kitchen-display mode, and an
           optional push-to-talk mode for very loud kitchens where always-on
-          listening picks up too much background noise. */}
-      <div className="flex flex-wrap items-center gap-3 text-sm border-t border-b border-slate-800 py-2">
+          listening picks up too much background noise. Styled as a chip
+          toolbar rather than plain text links so it reads as a control
+          surface, not a footnote. */}
+      <div className="flex flex-wrap items-center gap-2 text-sm">
         <button
           onClick={() => setSoundEnabled((v) => !v)}
-          className="flex items-center gap-1.5 text-slate-300 hover:text-white transition"
           title="Beep on log, alert tone on amber/red"
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition ${
+            soundEnabled
+              ? "border-slate-700 bg-slate-900/70 text-slate-300 hover:text-white hover:border-slate-600"
+              : "border-slate-800 bg-slate-900/30 text-slate-500 hover:text-slate-300"
+          }`}
         >
           <span>{soundEnabled ? "🔊" : "🔇"}</span>
           <span>Sound {soundEnabled ? "on" : "off"}</span>
         </button>
         <button
           onClick={() => setBigDisplay(true)}
-          className="flex items-center gap-1.5 text-slate-300 hover:text-white transition"
           title="Full-screen, glanceable from across the kitchen"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-700 bg-slate-900/70 text-slate-300 hover:text-white hover:border-slate-600 transition"
         >
           <span>⛶</span>
           <span>Big display</span>
         </button>
-        <label className="flex items-center gap-1.5 text-slate-300 cursor-pointer ml-auto">
+        <label
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border cursor-pointer transition ml-auto ${
+            pushToTalk
+              ? "border-emerald-700 bg-emerald-950/40 text-emerald-300"
+              : "border-slate-700 bg-slate-900/70 text-slate-300 hover:text-white hover:border-slate-600"
+          }`}
+        >
           <input
             type="checkbox"
             checked={pushToTalk}
@@ -628,10 +685,10 @@ export default function Home() {
               e.preventDefault();
               stopTalking();
             }}
-            className={`px-4 py-1.5 rounded-lg font-semibold select-none transition ${
+            className={`px-4 py-1.5 rounded-full font-semibold select-none transition ${
               talking
-                ? "bg-emerald-500 text-white"
-                : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+                ? "bg-emerald-500 text-white shadow-lg shadow-emerald-950/50"
+                : "bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700"
             }`}
           >
             {talking ? "🎙️ Listening — release when done" : "Hold to talk"}
@@ -640,7 +697,7 @@ export default function Home() {
       </div>
 
       {restoredNotice && (
-        <div className="rounded-lg border border-sky-800 bg-sky-950/50 text-sky-300 text-sm px-3 py-2">
+        <div className="rounded-xl border border-sky-800 bg-sky-950/50 text-sky-300 text-sm px-4 py-2.5">
           Restored {readings.length} reading{readings.length === 1 ? "" : "s"} from before this
           page was reloaded — nothing was lost. Export the PDF whenever you&apos;re ready, or
           press Start Shift to begin a new one.
@@ -648,7 +705,7 @@ export default function Home() {
       )}
 
       {!isLive && !restoredNotice && readings.length === 0 && (
-        <div className="rounded-lg border border-violet-800 bg-violet-950/30 text-violet-300 text-sm px-3 py-2">
+        <div className="rounded-xl border border-violet-800 bg-violet-950/30 text-violet-300 text-sm px-4 py-2.5">
           New here? Click <strong>Try Demo</strong> above to hear a sample kitchen conversation
           flow through the real app in about 30 seconds — real speech recognition, real FDA rule
           checks, real spoken confirmation, no microphone required.
@@ -656,7 +713,7 @@ export default function Home() {
       )}
 
       {isDemo && isLive && (
-        <div className="rounded-lg border border-violet-700 bg-violet-950/50 text-violet-300 text-sm px-3 py-2">
+        <div className="rounded-xl border border-violet-700 bg-violet-950/50 text-violet-300 text-sm px-4 py-2.5">
           🎬 <strong>Demo mode</strong> — a sample kitchen recording is playing through the real
           pipeline (no microphone is being used).{" "}
           {demoFinished
@@ -665,70 +722,101 @@ export default function Home() {
         </div>
       )}
 
-      <div className="flex items-center gap-2 text-sm">
-        <span
-          className={`inline-block w-2.5 h-2.5 rounded-full ${
-            status === "listening"
-              ? "bg-emerald-400 animate-pulse"
-              : status === "connecting" || status === "reconnecting"
-              ? "bg-amber-400 animate-pulse"
-              : status === "error"
-              ? "bg-red-400"
-              : "bg-slate-600"
-          }`}
-        />
-        <span className="text-slate-400 capitalize">
-          {status === "reconnecting" ? "Reconnecting…" : status}
-        </span>
-        {error && <span className="text-red-400">— {error}</span>}
-      </div>
+      {/* Live status + captions, unified into one panel: a status pill up
+          top, then the running caption feed styled like chat bubbles (cook
+          on the left, TempCheck's spoken reply on the right) so it reads
+          at a glance instead of as two stacked paragraphs of plain text. */}
+      <div className={`${CARD} p-4`}>
+        <div className="flex items-center gap-2 text-sm mb-3">
+          <span
+            className={`inline-block w-2.5 h-2.5 rounded-full ${
+              status === "listening"
+                ? "bg-emerald-400 animate-pulse"
+                : status === "connecting" || status === "reconnecting"
+                ? "bg-amber-400 animate-pulse"
+                : status === "error"
+                ? "bg-red-400"
+                : "bg-slate-600"
+            }`}
+          />
+          <span className="text-slate-400 capitalize font-medium">
+            {status === "reconnecting" ? "Reconnecting…" : status}
+          </span>
+          {error && <span className="text-red-400">— {error}</span>}
+        </div>
 
-      {/* Live captions */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 min-h-[72px] text-sm space-y-1">
-        {userCaption && <p className="text-slate-300">🎙️ {userCaption}</p>}
-        {agentCaption && <p className="text-sky-300">🔊 {agentCaption}</p>}
-        {!userCaption && !agentCaption && (
-          <p className="text-slate-500">
-            {!isLive
-              ? "Press Start Shift and call out a reading."
-              : pushToTalk
-              ? "Hold the talk button and call out a reading."
-              : "Listening for a reading…"}
-          </p>
-        )}
+        <div className="min-h-[56px] text-sm space-y-2">
+          {userCaption && (
+            <p className="flex items-start gap-2 text-slate-200">
+              <span className="shrink-0">🎙️</span>
+              <span className="rounded-xl rounded-tl-none bg-slate-800/80 px-3 py-1.5">{userCaption}</span>
+            </p>
+          )}
+          {agentCaption && (
+            <p className="flex items-start gap-2 text-sky-200">
+              <span className="shrink-0">🔊</span>
+              <span className="rounded-xl rounded-tl-none bg-sky-900/40 px-3 py-1.5">{agentCaption}</span>
+            </p>
+          )}
+          {!userCaption && !agentCaption && (
+            <p className="text-slate-500">
+              {!isLive
+                ? "Press Start Shift and call out a reading."
+                : pushToTalk
+                ? "Hold the talk button and call out a reading."
+                : "Listening for a reading…"}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Manager summary */}
       {readings.length > 0 && (
-        <section className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+        <section className={`${CARD} p-4`}>
           <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-3">
             Manager Summary
           </h2>
-          <div className="flex flex-wrap gap-6 text-sm">
-            <div>
-              <p className="text-2xl font-bold">{managerSummary.total}</p>
-              <p className="text-slate-500 text-xs">Readings logged</p>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="rounded-xl border border-slate-800 bg-slate-950/40 px-4 py-3">
+              <p className="text-2xl font-bold tabular-nums">{managerSummary.total}</p>
+              <p className="text-slate-500 text-xs mt-0.5">Readings logged</p>
             </div>
-            <div>
-              <p className="text-2xl font-bold">{managerSummary.flaggedCount}</p>
-              <p className="text-slate-500 text-xs">Violations (red)</p>
+            <div
+              className={`rounded-xl border px-4 py-3 ${
+                managerSummary.flaggedCount > 0
+                  ? "border-red-900 bg-red-950/30"
+                  : "border-slate-800 bg-slate-950/40"
+              }`}
+            >
+              <p className={`text-2xl font-bold tabular-nums ${managerSummary.flaggedCount > 0 ? "text-red-400" : ""}`}>
+                {managerSummary.flaggedCount}
+              </p>
+              <p className="text-slate-500 text-xs mt-0.5">Violations (red)</p>
             </div>
-            <div>
-              <p className={`text-2xl font-bold ${managerSummary.unresolvedCount > 0 ? "text-amber-400" : ""}`}>
+            <div
+              className={`rounded-xl border px-4 py-3 ${
+                managerSummary.unresolvedCount > 0
+                  ? "border-amber-900 bg-amber-950/30"
+                  : "border-slate-800 bg-slate-950/40"
+              }`}
+            >
+              <p className={`text-2xl font-bold tabular-nums ${managerSummary.unresolvedCount > 0 ? "text-amber-400" : ""}`}>
                 {managerSummary.unresolvedCount}
               </p>
-              <p className="text-slate-500 text-xs">Corrective actions unresolved</p>
+              <p className="text-slate-500 text-xs mt-0.5">Corrective actions unresolved</p>
             </div>
           </div>
           {managerSummary.missedCheck && (
-            <div className="mt-3 rounded-lg border border-amber-700 bg-amber-950/40 text-amber-300 text-sm px-3 py-2">
-              <p className="font-semibold mb-1">
+            <div className="mt-3 rounded-xl border border-amber-700 bg-amber-950/40 text-amber-300 text-sm px-4 py-3">
+              <p className="font-semibold mb-1.5 flex items-center gap-1.5">
+                <span>⏰</span>
                 {managerSummary.overdueUnits.length === 1 ? "Station overdue for a check:" : "Stations overdue for a check:"}
               </p>
-              <ul className="space-y-0.5">
+              <ul className="space-y-1">
                 {managerSummary.overdueUnits.map((u) => (
-                  <li key={u.unit}>
-                    <span className="font-medium">{u.unit}</span> — last checked {u.minutesSince} minutes ago
+                  <li key={u.unit} className="flex items-center justify-between gap-2 border-t border-amber-900/50 pt-1 first:border-t-0 first:pt-0">
+                    <span className="font-medium">{u.unit}</span>
+                    <span className="text-amber-400/80 whitespace-nowrap">{u.minutesSince} min ago</span>
                   </li>
                 ))}
               </ul>
@@ -749,14 +837,17 @@ export default function Home() {
             {latestByKey.map((r) => (
               <div
                 key={r.id}
-                className={`rounded-xl border-2 p-4 ${STATUS_STYLES[r.status] || STATUS_STYLES.unknown}`}
+                className={`relative overflow-hidden rounded-xl border-2 p-4 pt-5 shadow-sm shadow-black/20 hover:-translate-y-0.5 transition-transform ${
+                  STATUS_STYLES[r.status] || STATUS_STYLES.unknown
+                }`}
               >
+                <span className={`absolute top-0 left-0 right-0 h-1.5 ${STATUS_ACCENT[r.status] || STATUS_ACCENT.unknown}`} />
                 <div className="flex items-center gap-2 mb-1">
                   <span className={`w-2 h-2 rounded-full ${STATUS_DOT[r.status]}`} />
                   <span className="font-semibold capitalize">{r.status}</span>
                 </div>
                 <p className="text-sm opacity-90">{r.location || r.foodItem}</p>
-                <p className="text-2xl font-bold">
+                <p className="text-2xl font-bold tabular-nums">
                   {Number.isFinite(r.temperatureF) ? `${r.temperatureF}°F` : "—"}
                 </p>
                 <p className="text-xs opacity-70">
@@ -772,11 +863,19 @@ export default function Home() {
             ))}
           </div>
         )}
-        <div className="flex gap-4 mt-3 text-xs text-slate-400">
-          <span>Safe: {summary.safe}</span>
-          <span>Amber: {summary.amber}</span>
-          <span>Red: {summary.red}</span>
-          <span>Unknown: {summary.unknown}</span>
+        <div className="flex flex-wrap gap-2 mt-3 text-xs">
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-800 bg-slate-900/50 text-slate-300">
+            <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT.safe}`} /> Safe {summary.safe}
+          </span>
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-800 bg-slate-900/50 text-slate-300">
+            <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT.amber}`} /> Amber {summary.amber}
+          </span>
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-800 bg-slate-900/50 text-slate-300">
+            <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT.red}`} /> Red {summary.red}
+          </span>
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-slate-800 bg-slate-900/50 text-slate-300">
+            <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT.unknown}`} /> Unknown {summary.unknown}
+          </span>
         </div>
       </section>
 
@@ -785,9 +884,9 @@ export default function Home() {
         <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide mb-2">
           Full Log ({readings.length})
         </h2>
-        <div className="overflow-x-auto rounded-xl border border-slate-800">
+        <div className="overflow-x-auto rounded-2xl border border-slate-800/80 shadow-sm shadow-black/20 max-h-[32rem] overflow-y-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-900 text-slate-400">
+            <thead className="bg-slate-900 text-slate-400 sticky top-0 z-10 shadow-sm shadow-black/40">
               <tr>
                 <th className="text-left px-3 py-2 font-medium">Time</th>
                 <th className="text-left px-3 py-2 font-medium">Location / Item</th>
@@ -800,7 +899,7 @@ export default function Home() {
               </tr>
             </thead>
             <tbody>
-              {readings.map((r) => {
+              {readings.map((r, i) => {
                 // Only "red" is an actual FDA violation needing a manager
                 // resolution — "amber" is compliant, just close to the
                 // limit, so it doesn't need the resolve workflow. A
@@ -810,7 +909,9 @@ export default function Home() {
                 return (
                   <tr
                     key={`${r.id}-${r.timestamp}`}
-                    className={`border-t border-slate-800 ${r.superseded ? "opacity-50" : ""}`}
+                    className={`border-t border-slate-800/80 hover:bg-slate-800/30 transition-colors ${
+                      i % 2 === 1 ? "bg-slate-900/30" : ""
+                    } ${r.superseded ? "opacity-50" : ""}`}
                   >
                     <td className="px-3 py-2 text-slate-400 whitespace-nowrap">
                       {new Date(r.timestamp).toLocaleTimeString()}
@@ -890,9 +991,11 @@ export default function Home() {
         </div>
       </section>
 
-      <details className="text-xs text-slate-500">
-        <summary className="cursor-pointer">Recent transcript</summary>
-        <ul className="mt-2 space-y-1">
+      <details className={`${CARD} text-xs text-slate-500 p-3 open:pb-4`}>
+        <summary className="cursor-pointer select-none font-medium text-slate-400 hover:text-slate-200 transition">
+          Recent transcript
+        </summary>
+        <ul className="mt-2 space-y-1 pl-1">
           {transcript.map((t, i) => (
             <li key={i}>
               <span className="font-semibold">{t.role === "user" ? "Cook" : "TempCheck"}:</span>{" "}

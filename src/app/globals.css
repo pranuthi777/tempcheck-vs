@@ -1,1 +1,56 @@
 @import "tailwindcss";
+
+/*
+ * Round-2 UI pass (task R2-UI): the app worked but looked like unstyled
+ * default Tailwind — every surface the same flat slate-900 box, every
+ * button the same weight, no sense of hierarchy between "the one button
+ * you press to start a shift" and "a utility action you reach for once a
+ * shift." This file adds the handful of global touches a component-level
+ * className pass can't: a body backdrop with real depth, a consistent
+ * focus ring (important for a kitchen tablet used with wet/gloved fingers
+ * relying on the browser's own tab order), and tuned scrollbars for the
+ * log table so it doesn't look like a bare HTML `<table>` when it scrolls.
+ */
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  /* A very subtle radial glow anchored top-center, not a loud gradient —
+     kitchen tablets are often viewed in bright ambient light, so contrast
+     matters more than mood lighting. This just keeps the page from
+     reading as one dead-flat slab of color. */
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(16, 185, 129, 0.07), transparent 60%),
+    radial-gradient(800px 500px at 100% 0%, rgba(56, 189, 248, 0.05), transparent 55%),
+    #020617;
+  background-attachment: fixed;
+}
+
+/* A visible, high-contrast focus ring everywhere — this app is meant to be
+   usable with a glance and a tap from across a kitchen, including via
+   keyboard/switch-access on a mounted tablet, not just a mouse. */
+:focus-visible {
+  outline: 2px solid #34d399;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Thin, unobtrusive scrollbars for the log table and transcript panel
+   instead of the browser's bulky default, on the engines that support
+   styling them. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
+}
+
+*::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #334155;
+  border-radius: 9999px;
+}
