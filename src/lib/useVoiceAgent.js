@@ -4,24 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { evaluateReading } from "./ruleEngine";
 import { evaluateCoolingCheck, COOLING_CITATION } from "./coolingEngine";
 import { createCorrectionTracker } from "./correctionTracker";
+import { makeBatchId, findMatches } from "./coolingBatches";
 import { buildSessionUpdate } from "./agentConfig";
 import { PCMPlayer } from "./audioPlayer";
 import { startMicCapture, startDemoCapture } from "./micCapture";
-
-// Verified live: a real cooling_check tool call came back with BOTH
-// food_item and location set (the model filled in location from earlier
-// context even though the cook never mentioned it for that reading), while
-// the matching cooling_start call had only food_item. A single "prefer one
-// field" key would have failed to pair them whichever field it preferred,
-// so a cooling_start is indexed under BOTH of its non-empty fields, and a
-// cooling_check matches on either one — food_item first since that's the
-// more specific/stable identifier for what's actually cooling.
-function coolingKeys(args) {
-  const keys = [];
-  if (args.food_item) keys.push("item:" + args.food_item.toLowerCase().trim());
-  if (args.location) keys.push("loc:" + args.location.toLowerCase().trim());
-  return keys;
-}
 
 function celsiusToFahrenheit(c) {
   return Math.round(((c * 9) / 5 + 32) * 10) / 10;
@@ -35,7 +21,12 @@ function celsiusToFahrenheit(c) {
  * shift). `onReading` is called once per logged reading with the full
  * evaluated record for the dashboard/log/PDF to consume.
  */
-export function useVoiceAgent({ onReading, onTranscriptLine }) {
+export function useVoiceAgent({
+  onReading,
+  onTranscriptLine,
+  initialCoolingPending,
+  onCoolingPendingChange,
+}) {
   const [status, setStatus] = useState("idle"); // idle | connecting | listening | reconnecting | error | ended
   const [error, setError] = useState(null);
   const [userCaption, setUserCaption] = useState("");
@@ -56,11 +47,32 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
   const deliberateCloseRef = useRef(false);
   const resumeAttemptedRef = useRef(false);
   const openSocketRef = useRef(null);
-  // Pending cooling-curve starts, keyed by normalized location/food_item —
-  // see coolingEngine.js. Lives only for the session (not persisted across
-  // a reload, a known, disclosed limitation); a start not yet matched by a
-  // check just means that item's cooling progress isn't being tracked.
-  const coolingPendingRef = useRef(new Map());
+  // Pending cooling-curve starts, as an explicit LIST of batches (not a
+  // key->single-record map — a second pot of the same item starting to
+  // cool must never silently overwrite the first one's pending record).
+  // See coolingBatches.js. Restored from `initialCoolingPending` (page.js
+  // persists this to shiftStorage) so a reload doesn't lose in-progress
+  // cooling checks.
+  const coolingPendingRef = useRef(initialCoolingPending || []);
+  const notifyCoolingPendingChange = useCallback(() => {
+    onCoolingPendingChange?.([...coolingPendingRef.current]);
+  }, [onCoolingPendingChange]);
+  // page.js's shift-restore effect runs AFTER mount (it's deferred a tick
+  // to avoid a server/client render mismatch — see page.js), so the
+  // `initialCoolingPending` prop above is only ever [] on first render.
+  // This lets page.js push the real restored batches in once loadShift()
+  // resolves. resetCoolingPending clears it for a brand-new shift/demo.
+  const restoreCoolingPending = useCallback(
+    (batches) => {
+      coolingPendingRef.current = Array.isArray(batches) ? batches : [];
+      notifyCoolingPendingChange();
+    },
+    [notifyCoolingPendingChange]
+  );
+  const resetCoolingPending = useCallback(() => {
+    coolingPendingRef.current = [];
+    notifyCoolingPendingChange();
+  }, [notifyCoolingPendingChange]);
   // Tracks the most recent ordinary (non-cooling) reading per location/
   // food_item so a cook correcting themselves in a follow-up turn ("wait,
   // that's wrong, it's 48") gets linked to what it corrects instead of
@@ -116,10 +128,20 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
 
       if (args.reading_type === "cooling_start") {
         coolingStage = "start";
-        const keys = coolingKeys(args);
-        if (keys.length > 0 && Number.isFinite(temperatureF)) {
-          const pendingRecord = { startTemperatureF: temperatureF, startTimestamp: Date.now() };
-          for (const k of keys) coolingPendingRef.current.set(k, pendingRecord);
+        if (Number.isFinite(temperatureF) && (args.food_item || args.location)) {
+          const startTimestamp = Date.now();
+          const batch = {
+            batchId: makeBatchId({ foodItem: args.food_item, location: args.location, startTimestamp }),
+            foodItem: args.food_item || null,
+            location: args.location || null,
+            startTemperatureF: temperatureF,
+            startTimestamp,
+          };
+          // A LIST, never a key->record map: a second pot of the same
+          // item/location starting to cool must not silently overwrite an
+          // earlier still-pending batch (see coolingBatches.js).
+          coolingPendingRef.current = [...coolingPendingRef.current, batch];
+          notifyCoolingPendingChange();
         }
         evaluation = {
           category: "cooling",
@@ -134,13 +156,8 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
         };
       } else if (args.reading_type === "cooling_check") {
         coolingStage = "check";
-        const keys = coolingKeys(args);
-        let pending = null;
-        for (const k of keys) {
-          pending = coolingPendingRef.current.get(k);
-          if (pending) break;
-        }
-        if (!pending || !Number.isFinite(temperatureF)) {
+        const matches = findMatches(coolingPendingRef.current, { foodItem: args.food_item, location: args.location });
+        if (matches.length === 0 || !Number.isFinite(temperatureF)) {
           evaluation = {
             category: "cooling",
             categoryLabel: "Cooling (in progress)",
@@ -150,7 +167,24 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
             message: "No matching cooling-start reading was found for this item.",
             citation: COOLING_CITATION,
           };
+        } else if (matches.length > 1) {
+          // Genuine ambiguity — e.g. two pots of chili both cooling at
+          // once — never silently pick one and risk pairing this check
+          // against the wrong batch's clock.
+          const times = matches
+            .map((b) => new Date(b.startTimestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }))
+            .join(", ");
+          evaluation = {
+            category: "cooling",
+            categoryLabel: "Cooling (in progress)",
+            status: "unknown",
+            limitF: null,
+            correctiveAction: `Ask the cook which batch this check is for — pending starts at ${times} — then log the check again with a more specific item/location.`,
+            message: `${matches.length} pending cooling batches matched this item/location (started at ${times}) — can't tell which one this check is for.`,
+            citation: COOLING_CITATION,
+          };
         } else {
+          const pending = matches[0];
           const result = evaluateCoolingCheck({
             startTemperatureF: pending.startTemperatureF,
             startTimestamp: pending.startTimestamp,
@@ -167,15 +201,11 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
             citation: result.citation,
           };
           // A violation or a compliant final reading both resolve this
-          // cooling pair; an "amber" (still in progress, on track) leaves
+          // cooling batch; an "amber" (still in progress, on track) leaves
           // it pending so a later check can pair against the same start.
-          // Clear every key that was pointing at this record (it may have
-          // been indexed under both food_item and location), not just the
-          // one this particular check happened to match on.
           if (result.status !== "amber") {
-            for (const [k, v] of coolingPendingRef.current.entries()) {
-              if (v === pending) coolingPendingRef.current.delete(k);
-            }
+            coolingPendingRef.current = coolingPendingRef.current.filter((b) => b.batchId !== pending.batchId);
+            notifyCoolingPendingChange();
           }
         }
       } else {
@@ -240,7 +270,7 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
         result: JSON.stringify(resultPayload),
       });
     },
-    [onReading]
+    [onReading, notifyCoolingPendingChange]
   );
 
   const flushPendingResults = useCallback(() => {
@@ -432,5 +462,7 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
     talking,
     startTalking,
     stopTalking,
+    restoreCoolingPending,
+    resetCoolingPending,
   };
 }

@@ -50,6 +50,10 @@ export default function Home() {
   // own hash below, or GENESIS_HASH for a fresh shift.
   const lastHashRef = useRef(GENESIS_HASH);
   const [integrityResult, setIntegrityResult] = useState(null); // {verified, brokenAt, reason} | null
+  // Pending cooling-curve starts (see coolingBatches.js / useVoiceAgent.js).
+  // Mirrored here purely so it can be persisted to shiftStorage — the hook
+  // owns the actual matching logic, this is just "what to save."
+  const [coolingPending, setCoolingPending] = useState([]);
   useEffect(() => {
     soundEnabledRef.current = soundEnabled;
   }, [soundEnabled]);
@@ -57,6 +61,13 @@ export default function Home() {
   // Restore an in-progress (or just-ended, not-yet-exported) shift from
   // localStorage on load — so a crashed tab or accidental reload doesn't
   // silently lose a shift's compliance record. See src/lib/shiftStorage.js.
+  // Pending cooling-curve batches (coolingBatches.js) are restored via
+  // restoreCoolingPending below, once — that function comes from
+  // useVoiceAgent(), which is declared further down this component, so the
+  // restored batches are staged here in a ref and picked up by a second
+  // effect (after the useVoiceAgent() call) rather than called directly.
+  const pendingCoolingRestoreRef = useRef(null);
+  const [coolingRestoreTick, setCoolingRestoreTick] = useState(0);
   useEffect(() => {
     let cancelled = false;
     // Deferred a tick so this never fires synchronously during the mount
@@ -65,7 +76,7 @@ export default function Home() {
     Promise.resolve().then(() => {
       if (cancelled) return;
       const saved = loadShift();
-      if (saved && saved.readings.length > 0) {
+      if (saved && (saved.readings.length > 0 || saved.coolingPending?.length > 0)) {
         setReadings(saved.readings);
         shiftStartRef.current = saved.shiftStart ?? null;
         shiftEndRef.current = saved.shiftEnd ?? null;
@@ -75,6 +86,8 @@ export default function Home() {
         // hash chain so far — resume from there, not from genesis, or
         // every reading after a reload would look like a broken chain.
         if (saved.readings[0]?.hash) lastHashRef.current = saved.readings[0].hash;
+        pendingCoolingRestoreRef.current = saved.coolingPending || [];
+        setCoolingRestoreTick((t) => t + 1);
       }
     });
     return () => {
@@ -160,6 +173,10 @@ export default function Home() {
     setTranscript((prev) => [...prev.slice(-30), line]);
   }, []);
 
+  const onCoolingPendingChange = useCallback((batches) => {
+    setCoolingPending(batches);
+  }, []);
+
   const {
     status,
     error,
@@ -174,23 +191,38 @@ export default function Home() {
     talking,
     startTalking,
     stopTalking,
+    restoreCoolingPending,
+    resetCoolingPending,
   } = useVoiceAgent({
     onReading,
     onTranscriptLine,
+    onCoolingPendingChange,
   });
+
+  // Picks up a shift restored from localStorage (see the effect above,
+  // which stages the batches in pendingCoolingRestoreRef because
+  // restoreCoolingPending isn't available until the useVoiceAgent() call
+  // above has run) and pushes it into the hook exactly once per restore.
+  useEffect(() => {
+    if (coolingRestoreTick === 0) return;
+    if (pendingCoolingRestoreRef.current === null) return;
+    restoreCoolingPending(pendingCoolingRestoreRef.current);
+    pendingCoolingRestoreRef.current = null;
+  }, [coolingRestoreTick, restoreCoolingPending]);
 
   // Persist on every change so a mid-shift crash never loses more than the
   // last render's worth of readings. Demo readings never touch the real
   // saved shift.
   useEffect(() => {
     if (isDemo) return;
-    if (readings.length === 0 && !shiftStartRef.current) return;
+    if (readings.length === 0 && !shiftStartRef.current && coolingPending.length === 0) return;
     saveShift({
       shiftStart: shiftStartRef.current,
       shiftEnd: shiftEndRef.current,
       readings,
+      coolingPending,
     });
-  }, [readings, isDemo]);
+  }, [readings, isDemo, coolingPending]);
 
   const startShift = useCallback(() => {
     // A brand-new shift replaces whatever was persisted, including a
@@ -201,8 +233,9 @@ export default function Home() {
     shiftStartRef.current = Date.now();
     shiftEndRef.current = null;
     setShiftStartDisplay(shiftStartRef.current);
+    resetCoolingPending();
     connect();
-  }, [connect]);
+  }, [connect, resetCoolingPending]);
 
   const endShift = useCallback(() => {
     shiftEndRef.current = Date.now();
@@ -210,9 +243,10 @@ export default function Home() {
       shiftStart: shiftStartRef.current,
       shiftEnd: shiftEndRef.current,
       readings,
+      coolingPending,
     });
     disconnect();
-  }, [disconnect, readings]);
+  }, [disconnect, readings, coolingPending]);
 
   // "Try Demo" (backlog #7 — first-60-seconds judge experience): plays a
   // pre-recorded sample kitchen clip through the exact same real pipeline
@@ -229,8 +263,9 @@ export default function Home() {
     shiftStartRef.current = Date.now();
     shiftEndRef.current = null;
     setShiftStartDisplay(shiftStartRef.current);
+    resetCoolingPending();
     connect({ demo: true });
-  }, [connect]);
+  }, [connect, resetCoolingPending]);
 
   const endDemo = useCallback(() => {
     disconnect();
@@ -238,7 +273,8 @@ export default function Home() {
     shiftStartRef.current = null;
     shiftEndRef.current = null;
     setShiftStartDisplay(null);
-  }, [disconnect]);
+    resetCoolingPending();
+  }, [disconnect, resetCoolingPending]);
 
   // Superseded (corrected-away) readings stay in `readings` for the audit
   // trail but must never count toward live totals — a reading the cook
