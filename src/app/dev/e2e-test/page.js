@@ -142,18 +142,33 @@ async function runClipEndToEnd(item) {
         greetingDone = true;
         // Stream the real clip audio at real-time pacing, now that the
         // agent has finished its own greeting.
-        for (let i = 0; i < int16.length; i += CHUNK_SAMPLES) {
-          const chunk = int16.subarray(i, i + CHUNK_SAMPLES);
-          ws.send(JSON.stringify({ type: "input.audio", audio: int16BufferToBase64(chunk.buffer.slice(chunk.byteOffset, chunk.byteOffset + chunk.byteLength)) }));
-          await sleep(CHUNK_MS);
-        }
-        // Trailing silence so the server's turn-detection has a real gap
-        // to key off, same as a cook pausing after speaking.
-        const silenceChunk = new Int16Array(CHUNK_SAMPLES);
-        const silenceB64 = int16BufferToBase64(silenceChunk.buffer);
-        for (let t = 0; t < TRAILING_SILENCE_MS; t += CHUNK_MS) {
-          ws.send(JSON.stringify({ type: "input.audio", audio: silenceB64 }));
-          await sleep(CHUNK_MS);
+        //
+        // Bug found by running this harness against production: if the
+        // WebSocket closes mid-stream (server hangup, network blip), a bare
+        // ws.send() throws synchronously. That throw happens inside this
+        // async onmessage handler, so it becomes an unhandled promise
+        // rejection — it never reaches the outer runClipEndToEnd Promise,
+        // finish() never runs, and that clip's await hangs forever, freezing
+        // the whole sequential harness loop. Wrapping each streaming loop in
+        // try/catch and routing a failure through finish() guarantees the
+        // clip's promise always settles.
+        try {
+          for (let i = 0; i < int16.length; i += CHUNK_SAMPLES) {
+            const chunk = int16.subarray(i, i + CHUNK_SAMPLES);
+            ws.send(JSON.stringify({ type: "input.audio", audio: int16BufferToBase64(chunk.buffer.slice(chunk.byteOffset, chunk.byteOffset + chunk.byteLength)) }));
+            await sleep(CHUNK_MS);
+          }
+          // Trailing silence so the server's turn-detection has a real gap
+          // to key off, same as a cook pausing after speaking.
+          const silenceChunk = new Int16Array(CHUNK_SAMPLES);
+          const silenceB64 = int16BufferToBase64(silenceChunk.buffer);
+          for (let t = 0; t < TRAILING_SILENCE_MS; t += CHUNK_MS) {
+            ws.send(JSON.stringify({ type: "input.audio", audio: silenceB64 }));
+            await sleep(CHUNK_MS);
+          }
+        } catch (err) {
+          finish({ error: "WebSocket closed mid-stream: " + String(err?.message || err) });
+          return;
         }
 
         toolCallTimer = setTimeout(() => {
