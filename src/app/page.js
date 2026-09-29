@@ -7,6 +7,7 @@ import { loadShift, saveShift, clearShift } from "@/lib/shiftStorage";
 import { playLogBeep, playAlertTone } from "@/lib/audioCues";
 import { computeEntryHash, verifyHashChain, GENESIS_HASH } from "@/lib/hashChain";
 import { computeOverdueUnits, DEFAULT_INTERVAL_MS } from "@/lib/missedChecks";
+import { loadSettings, saveSettings } from "@/lib/settingsStorage";
 import BigDisplay from "@/components/BigDisplay";
 
 const STATUS_STYLES = {
@@ -56,6 +57,32 @@ export default function Home() {
   // Mirrored here purely so it can be persisted to shiftStorage — the hook
   // owns the actual matching logic, this is just "what to save."
   const [coolingPending, setCoolingPending] = useState([]);
+  // Round-2 critique #P1-8 (HACCP PDF chain-of-custody fields): establishment
+  // name and thermometer ID/calibration date are "set once in settings" —
+  // they don't change shift to shift, so they're persisted separately from
+  // the shift itself (settingsStorage.js), not re-asked every time.
+  // Lazy initializer (not an effect + setState) so this never triggers a
+  // cascading render; loadSettings() returns {} during SSR (no window) and
+  // the settings panel is hidden by default, so there's nothing for a
+  // server/client mismatch to show up in on first paint.
+  const [settings, setSettingsState] = useState(() => ({
+    establishmentName: "",
+    thermometerId: "",
+    lastCalibrationDate: "",
+    ...loadSettings(),
+  }));
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const updateSettings = useCallback((patch) => {
+    setSettingsState((prev) => {
+      const next = { ...prev, ...patch };
+      saveSettings(next);
+      return next;
+    });
+  }, []);
+  // The cook's name/initials, asked once per shift (not persistent like the
+  // settings above) so every reading in the exported log has an owner, like
+  // a real HACCP log — "This is Maria."
+  const [cookName, setCookName] = useState("");
   useEffect(() => {
     soundEnabledRef.current = soundEnabled;
   }, [soundEnabled]);
@@ -90,6 +117,7 @@ export default function Home() {
         if (saved.readings[0]?.hash) lastHashRef.current = saved.readings[0].hash;
         pendingCoolingRestoreRef.current = saved.coolingPending || [];
         setCoolingRestoreTick((t) => t + 1);
+        if (saved.cookName) setCookName(saved.cookName);
       }
     });
     return () => {
@@ -223,8 +251,9 @@ export default function Home() {
       shiftEnd: shiftEndRef.current,
       readings,
       coolingPending,
+      cookName,
     });
-  }, [readings, isDemo, coolingPending]);
+  }, [readings, isDemo, coolingPending, cookName]);
 
   const startShift = useCallback(() => {
     // A brand-new shift replaces whatever was persisted, including a
@@ -246,9 +275,11 @@ export default function Home() {
       shiftEnd: shiftEndRef.current,
       readings,
       coolingPending,
+      cookName,
     });
     disconnect();
-  }, [disconnect, readings, coolingPending]);
+    setCookName("");
+  }, [disconnect, readings, coolingPending, cookName]);
 
   // "Try Demo" (backlog #7 — first-60-seconds judge experience): plays a
   // pre-recorded sample kitchen clip through the exact same real pipeline
@@ -374,8 +405,12 @@ export default function Home() {
       shiftEnd: shiftEndRef.current,
       filterDescription: parts.length > 0 ? parts.join(" — ") : null,
       integrity,
+      establishmentName: settings.establishmentName,
+      thermometerId: settings.thermometerId,
+      lastCalibrationDate: settings.lastCalibrationDate,
+      cookName,
     });
-  }, [filteredReadings, dateFilter, stationFilter, verifyIntegrity]);
+  }, [filteredReadings, dateFilter, stationFilter, verifyIntegrity, settings, cookName]);
 
   if (bigDisplay) {
     return (
@@ -397,7 +432,17 @@ export default function Home() {
             Hands-free HACCP-style temperature logging, built on AssemblyAI&apos;s Voice Agent API.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {!isLive && (
+            <input
+              type="text"
+              value={cookName}
+              onChange={(e) => setCookName(e.target.value)}
+              placeholder="Cook name / initials"
+              title="Shown as 'Logged by' on the exported HACCP PDF — asked once per shift, like a real paper log."
+              className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-sm placeholder:text-slate-500 w-44"
+            />
+          )}
           {!isLive ? (
             <>
               <button
@@ -444,8 +489,49 @@ export default function Home() {
           >
             Export HACCP PDF{dateFilter !== "all" || stationFilter !== "all" ? " (filtered)" : ""}
           </button>
+          <button
+            onClick={() => setSettingsOpen((o) => !o)}
+            title="Establishment name and thermometer ID/calibration date — shown on the exported HACCP PDF"
+            className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 font-semibold transition"
+          >
+            ⚙️
+          </button>
         </div>
       </header>
+
+      {settingsOpen && (
+        <div className="-mt-2 rounded-lg border border-slate-800 bg-slate-900/60 p-4 grid gap-3 sm:grid-cols-3 text-sm">
+          <label className="flex flex-col gap-1">
+            <span className="text-slate-400 text-xs">Establishment name</span>
+            <input
+              type="text"
+              value={settings.establishmentName || ""}
+              onChange={(e) => updateSettings({ establishmentName: e.target.value })}
+              placeholder="e.g. Maple Street Diner"
+              className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 placeholder:text-slate-500"
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-slate-400 text-xs">Thermometer ID</span>
+            <input
+              type="text"
+              value={settings.thermometerId || ""}
+              onChange={(e) => updateSettings({ thermometerId: e.target.value })}
+              placeholder="e.g. Probe #2"
+              className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 placeholder:text-slate-500"
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-slate-400 text-xs">Last calibration date</span>
+            <input
+              type="date"
+              value={settings.lastCalibrationDate || ""}
+              onChange={(e) => updateSettings({ lastCalibrationDate: e.target.value })}
+              className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700"
+            />
+          </label>
+        </div>
+      )}
 
       {integrityResult && (
         <div

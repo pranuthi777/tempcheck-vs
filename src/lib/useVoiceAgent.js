@@ -153,6 +153,7 @@ export function useVoiceAgent({
             ? `Cooling started at ${temperatureF}°F. Must reach 70°F within 2h, then 41°F within 6h total.`
             : "Cooling start logged, but no valid starting temperature was captured.",
           citation: COOLING_CITATION,
+          measurementType: "product",
         };
       } else if (args.reading_type === "cooling_check") {
         coolingStage = "check";
@@ -166,6 +167,7 @@ export function useVoiceAgent({
             correctiveAction: "Log the cooling starting temperature first, then check again.",
             message: "No matching cooling-start reading was found for this item.",
             citation: COOLING_CITATION,
+            measurementType: "product",
           };
         } else if (matches.length > 1) {
           // Genuine ambiguity — e.g. two pots of chili both cooling at
@@ -182,6 +184,7 @@ export function useVoiceAgent({
             correctiveAction: `Ask the cook which batch this check is for — pending starts at ${times} — then log the check again with a more specific item/location.`,
             message: `${matches.length} pending cooling batches matched this item/location (started at ${times}) — can't tell which one this check is for.`,
             citation: COOLING_CITATION,
+            measurementType: "product",
           };
         } else {
           const pending = matches[0];
@@ -199,6 +202,7 @@ export function useVoiceAgent({
             correctiveAction: result.correctiveAction,
             message: result.message,
             citation: result.citation,
+            measurementType: "product",
           };
           // A violation or a compliant final reading both resolve this
           // cooling batch; an "amber" (still in progress, on track) leaves

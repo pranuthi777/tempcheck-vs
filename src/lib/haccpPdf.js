@@ -12,7 +12,12 @@ function drawFooter(doc) {
     doc.setFontSize(8);
     doc.setTextColor(140);
     doc.text(`Page ${i} of ${pages}`, PAGE_WIDTH - MARGIN, 792 - 20, { align: "right" });
-    doc.text("TempCheck — generated directly from spoken readings, not typed after the fact", MARGIN, 792 - 20);
+    // Softened per Round-2 critique #P1-8: this used to assert "not typed
+    // after the fact" on every page with nothing backing it up right here.
+    // The actual backing (the hash chain + honest caveat about what it
+    // does and doesn't prove) is in the body of the report — this footer
+    // now just points there instead of repeating the claim unsupported.
+    doc.text("TempCheck — generated from spoken readings. See \"Log integrity\" below for what's verified.", MARGIN, 792 - 20);
   }
 }
 
@@ -25,7 +30,19 @@ function drawFooter(doc) {
  * whatever it's given and prints `filterDescription` in the header so it's
  * clear the export isn't necessarily the whole shift.
  */
-export function exportHaccpPdf(readings, { shiftStart, shiftEnd, filterDescription, integrity } = {}) {
+export function exportHaccpPdf(
+  readings,
+  {
+    shiftStart,
+    shiftEnd,
+    filterDescription,
+    integrity,
+    establishmentName,
+    thermometerId,
+    lastCalibrationDate,
+    cookName,
+  } = {}
+) {
   const doc = new jsPDF({ unit: "pt", format: "letter" });
   const generatedAt = new Date();
 
@@ -38,7 +55,16 @@ export function exportHaccpPdf(readings, { shiftStart, shiftEnd, filterDescripti
   doc.text("HACCP-Style Temperature Log", MARGIN, 52);
   doc.setFontSize(10);
   doc.setTextColor(90);
-  doc.text("TempCheck — voice-logged food-safety compliance record", MARGIN, 67);
+  // Round-2 critique #P1-8: an inspector asks who took a reading, with
+  // which thermometer, on which unit, and for which establishment. The
+  // establishment name (when set in Settings) replaces the generic
+  // subtitle so the report is identifiable at a glance, same as a real
+  // paper HACCP log's letterhead.
+  doc.text(
+    establishmentName ? establishmentName : "TempCheck — voice-logged food-safety compliance record",
+    MARGIN,
+    67
+  );
 
   let y = 88;
   doc.setFontSize(9);
@@ -51,6 +77,17 @@ export function exportHaccpPdf(readings, { shiftStart, shiftEnd, filterDescripti
       MARGIN,
       y
     );
+    y += 13;
+  }
+  if (cookName) {
+    doc.text(`Logged by: ${cookName}`, MARGIN, y);
+    y += 13;
+  }
+  if (thermometerId || lastCalibrationDate) {
+    const parts = [];
+    if (thermometerId) parts.push(`Thermometer: ${thermometerId}`);
+    if (lastCalibrationDate) parts.push(`last calibrated ${new Date(lastCalibrationDate).toLocaleDateString()}`);
+    doc.text(parts.join(", "), MARGIN, y);
     y += 13;
   }
   if (filterDescription) {
@@ -140,7 +177,13 @@ export function exportHaccpPdf(readings, { shiftStart, shiftEnd, filterDescripti
     // Code always wins the category the reading was actually evaluated
     // against (see foodCategories.js) — this just marks, for a manager's
     // review, the cases where the voice agent's own guess disagreed.
-    (r.categoryLabel || "—") + (r.categoryConflict ? " (⚠ category conflict)" : ""),
+    // measurementType (ruleEngine.js) labels whether this was a storage
+    // unit's air temperature or a specific food item's internal/product
+    // temperature — a real inspector distinction, derived deterministically
+    // from the category rather than asked as a new voice question.
+    (r.categoryLabel || "—") +
+      (r.measurementType ? ` (${r.measurementType === "air" ? "Air" : "Product"})` : "") +
+      (r.categoryConflict ? " (⚠ category conflict)" : ""),
     Number.isFinite(r.temperatureF) ? `${r.temperatureF}°F` : "—",
     (r.status || "unknown").toUpperCase() + (r.superseded ? " (superseded)" : ""),
     r.correctiveAction || "—",

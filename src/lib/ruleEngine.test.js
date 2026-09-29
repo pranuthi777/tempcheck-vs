@@ -187,3 +187,37 @@ test("every recognized category cites its specific FDA Food Code section", () =>
     assert.ok(r.citation && r.citation.includes(citation), `expected citation containing ${citation}, got ${r.citation}`);
   }
 });
+
+// Round-2 critique #P1-8 (HACCP PDF): an inspector wants to know whether a
+// reading was checking a STORAGE UNIT's air temperature (a walk-in cooler,
+// a steam table) or a specific FOOD ITEM's internal/product temperature
+// (chicken breast, a steak) — those are different checks with different
+// FDA sections. The category a reading resolves to already tells us this
+// deterministically, so no new voice interaction is needed: cold_holding/
+// hot_holding/freezer are unit checks (nothing was inserted into food),
+// every food-item category (poultry/ground_meat/whole_muscle/fish_seafood/
+// reheating) and cooling are product checks (a probe went into the food).
+test("measurementType is 'air' for a storage-unit check (location, no specific food item)", () => {
+  const cold = evaluateReading({ location: "walk-in cooler", temperatureF: 38 });
+  assert.equal(cold.measurementType, "air");
+  const hot = evaluateReading({ location: "steam table", temperatureF: 140 });
+  assert.equal(hot.measurementType, "air");
+  const frz = evaluateReading({ location: "walk-in freezer", temperatureF: -5 });
+  assert.equal(frz.measurementType, "air");
+});
+
+test("measurementType is 'product' for a specific food item's internal temperature", () => {
+  const poultry = evaluateReading({ foodItem: "chicken breast", temperatureF: 180 });
+  assert.equal(poultry.measurementType, "product");
+  const ground = evaluateReading({ foodItem: "ground beef", temperatureF: 161 });
+  assert.equal(ground.measurementType, "product");
+  const fish = evaluateReading({ foodItem: "salmon", temperatureF: 151 });
+  assert.equal(fish.measurementType, "product");
+});
+
+test("measurementType is null when the category is unknown or the temperature is invalid", () => {
+  const unknown = evaluateReading({ foodItem: "spaceship fuel", temperatureF: 100 });
+  assert.equal(unknown.measurementType, null);
+  const invalid = evaluateReading({ location: "walk-in cooler", temperatureF: NaN });
+  assert.equal(invalid.measurementType, null);
+});

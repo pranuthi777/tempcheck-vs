@@ -91,6 +91,18 @@ function round1(n) {
   return Math.round(n * 10) / 10;
 }
 
+// Round-2 critique #P1-8: an inspector wants to know whether a reading
+// checked a STORAGE UNIT's air temperature or a specific FOOD ITEM's
+// internal/product temperature — the category already tells us this
+// deterministically, so it needs no new voice interaction. cold_holding/
+// hot_holding/freezer are unit/air checks; every food-item category and
+// the cooling curve are product checks (a probe went into the food).
+const AIR_CATEGORIES = new Set(["cold_holding", "hot_holding", "freezer"]);
+function measurementTypeFor(category) {
+  if (!category || category === "unknown") return null;
+  return AIR_CATEGORIES.has(category) ? "air" : "product";
+}
+
 /**
  * @param {{location?:string, foodItem?:string, readingType?:string, temperatureF:number}} input
  * @returns {{
@@ -120,6 +132,7 @@ function evaluateReading(input) {
       message: "No valid temperature was captured.",
       citation: null,
       categoryConflict: conflict,
+      measurementType: null,
     };
   }
 
@@ -138,6 +151,7 @@ function evaluateReading(input) {
       message: `${round1(temperatureF)}°F is implausible and was not saved.`,
       citation: null,
       categoryConflict: conflict,
+      measurementType: null,
     };
   }
 
@@ -151,6 +165,7 @@ function evaluateReading(input) {
       message: `${round1(temperatureF)}°F logged, but the item/location wasn't recognized. A manager should classify it.`,
       citation: null,
       categoryConflict: conflict,
+      measurementType: null,
     };
   }
 
@@ -190,7 +205,8 @@ function evaluateReading(input) {
     message,
     citation: limit.citation,
     categoryConflict: conflict,
+    measurementType: measurementTypeFor(category),
   };
 }
 
-module.exports = { evaluateReading, LIMITS, CORRECTIVE_ACTIONS };
+module.exports = { evaluateReading, LIMITS, CORRECTIVE_ACTIONS, measurementTypeFor };
