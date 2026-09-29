@@ -2,6 +2,57 @@
 
 import { useCallback, useRef, useState } from "react";
 import { parseTemperatureFromText } from "@/lib/parseTemperatureFromText";
+import { evaluateReading } from "@/lib/ruleEngine";
+
+function celsiusToFahrenheit(c) {
+  return Math.round(((c * 9) / 5 + 32) * 10) / 10;
+}
+
+// Runs the same deterministic rule engine the live app uses against a
+// {location, food_item, reading_type, value, unit} reading, so the harness
+// can ask "what would TempCheck's dashboard actually have shown for this
+// number?" for both the ground-truth reading and whatever was parsed from
+// the real STT transcript.
+function evalAgainstRuleEngine(item, value, unit) {
+  if (!Number.isFinite(value)) return evaluateReading({ temperatureF: NaN });
+  const temperatureF = unit === "C" ? celsiusToFahrenheit(value) : value;
+  return evaluateReading({
+    location: item.expected.location,
+    foodItem: item.expected.food_item,
+    readingType: item.expected.reading_type,
+    temperatureF,
+  });
+}
+
+// The headline number everyone will ask about first: of every clip where
+// the STT/parser got the number wrong, how would that wrong number
+// actually have played out on the real dashboard, given the new
+// close-call confirmation gate (ruleEngine.js's confirmRecommended)?
+//   - "silent_false_safe": the wrong number logs as a plain "safe" reading
+//     with no confirmation prompt, while the TRUE reading was actually
+//     amber/red/unknown — the exact, critical failure mode this metric
+//     exists to catch and hold at zero.
+//   - "caught_by_confirmation": the wrong number is itself amber/red (so it
+//     already gets a spoken corrective-action question) or close enough to
+//     a limit to trigger the new confirm_recommended yes/no — the mistake
+//     doesn't slip through silently, even though the logged number is wrong.
+//   - "rejected_as_unknown": the wrong number (or a parse failure) lands in
+//     the "unknown" category/implausible-range guard, which already forces
+//     a clarifying question before anything is logged.
+//   - "wrong_but_harmless": the number is wrong, but not in a way that
+//     changes the safety verdict at all (e.g. off by a degree, still safe
+//     either way) — an accuracy miss, not a safety miss.
+function classifyMiss(item, parsed) {
+  const truth = evalAgainstRuleEngine(item, item.expected.temperature_value, item.expected.temperature_unit);
+  const logged = evalAgainstRuleEngine(item, parsed?.value, parsed?.unit);
+
+  if (logged.status === "unknown") return "rejected_as_unknown";
+  if (logged.status === "amber" || logged.status === "red" || logged.confirmRecommended) {
+    return "caught_by_confirmation";
+  }
+  if (logged.status === "safe" && truth.status !== "safe") return "silent_false_safe";
+  return "wrong_but_harmless";
+}
 
 // Lowered from 5 (then 3) after live runs showed the AssemblyAI async-v2
 // queue backing up under sustained concurrent load, and a long unattended
@@ -98,16 +149,23 @@ export default function AccuracyTestPage() {
           const expected = item.expected;
           const valueCorrect = parsed.value === expected.temperature_value;
           const unitCorrect = parsed.unit === expected.temperature_unit;
+          const correct = valueCorrect && unitCorrect;
           localResults.push({
             ...item,
             transcript: text,
             parsed,
             valueCorrect,
             unitCorrect,
-            correct: valueCorrect && unitCorrect,
+            correct,
+            missClass: correct ? null : classifyMiss(item, parsed),
           });
         } catch (err) {
-          localResults.push({ ...item, error: String(err.message || err), correct: false });
+          localResults.push({
+            ...item,
+            error: String(err.message || err),
+            correct: false,
+            missClass: classifyMiss(item, null),
+          });
         }
         setDone((d) => d + 1);
         setResults([...localResults]);
@@ -160,6 +218,7 @@ export default function AccuracyTestPage() {
                 <th className="p-1 text-left">Expected</th>
                 <th className="p-1 text-left">Transcript</th>
                 <th className="p-1 text-left">Parsed</th>
+                <th className="p-1 text-left">Miss class</th>
                 <th className="p-1 text-left">OK</th>
               </tr>
             </thead>
@@ -177,6 +236,9 @@ export default function AccuracyTestPage() {
                     <td className="p-1">{r.transcript || r.error}</td>
                     <td className="p-1">
                       {r.parsed ? `${r.parsed.value}${r.parsed.unit || ""}` : "—"}
+                    </td>
+                    <td className={`p-1 ${r.missClass === "silent_false_safe" ? "text-red-400 font-semibold" : ""}`}>
+                      {r.missClass}
                     </td>
                     <td className="p-1">❌</td>
                   </tr>
@@ -199,17 +261,38 @@ function summarize(results) {
     byNoise[key].total += 1;
     if (r.correct) byNoise[key].correct += 1;
   }
-  return { total, correct, byNoise };
+  const missClasses = { silent_false_safe: 0, caught_by_confirmation: 0, rejected_as_unknown: 0, wrong_but_harmless: 0 };
+  const silentFalseSafeItems = [];
+  for (const r of results) {
+    if (!r.missClass) continue;
+    missClasses[r.missClass] = (missClasses[r.missClass] || 0) + 1;
+    if (r.missClass === "silent_false_safe") silentFalseSafeItems.push(r);
+  }
+  const misses = total - correct;
+  return { total, correct, byNoise, missClasses, misses, silentFalseSafeItems };
 }
 
 function MarkdownSummary({ summary }) {
   if (summary.total === 0) return null;
   const pct = ((summary.correct / summary.total) * 100).toFixed(1);
+  const sfs = summary.missClasses.silent_false_safe;
+  const sfsRate = ((sfs / summary.total) * 100).toFixed(2);
   return (
     <div className="bg-slate-900 border border-slate-800 rounded p-4">
       <p className="font-semibold">
         {summary.correct}/{summary.total} correct ({pct}%)
       </p>
+      <p className={`mt-2 font-semibold ${sfs > 0 ? "text-red-400" : "text-emerald-400"}`}>
+        Silent false-safe rate: {sfs}/{summary.total} ({sfsRate}%)
+      </p>
+      {summary.misses > 0 && (
+        <p className="mt-1 text-slate-400 text-xs">
+          Of {summary.misses} misses: {summary.missClasses.caught_by_confirmation} caught by
+          amber/red or the close-call confirmation, {summary.missClasses.rejected_as_unknown}{" "}
+          rejected as unknown, {summary.missClasses.wrong_but_harmless} wrong but harmless
+          (didn&apos;t change the verdict), {sfs} silent false-safe.
+        </p>
+      )}
       <ul className="mt-2 space-y-1">
         {Object.entries(summary.byNoise).map(([noise, s]) => (
           <li key={noise}>

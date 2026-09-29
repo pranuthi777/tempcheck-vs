@@ -84,6 +84,31 @@ test("very cold cooler reading is 'safe' by the cold-holding rule (colder is nev
   assert.equal(evaluateReading({ location: "steam table", temperatureF: -10 }).status, "red");
 });
 
+test("silent false-safe guard: a safe reading close to its limit is flagged confirmRecommended", () => {
+  // 38F is safe for cold holding (limit 41) but only 3F away — exactly the
+  // kind of close call a misheard digit (e.g. true 48F) could hide behind.
+  const close = evaluateReading({ location: "walk-in cooler", temperatureF: 38 });
+  assert.equal(close.status, "safe");
+  assert.equal(close.confirmRecommended, true);
+
+  // Comfortably safe, far from the limit — no confirmation needed.
+  const comfortable = evaluateReading({ location: "walk-in cooler", temperatureF: 20 });
+  assert.equal(comfortable.status, "safe");
+  assert.equal(comfortable.confirmRecommended, false);
+
+  // Same idea on an "at_or_above" category: 140F is safe for hot holding
+  // (limit 135) but close enough to confirm.
+  const closeHot = evaluateReading({ location: "steam table", temperatureF: 140 });
+  assert.equal(closeHot.status, "safe");
+  assert.equal(closeHot.confirmRecommended, true);
+
+  // Amber/red never need this flag — they already get a corrective-action
+  // question, which is a stronger confirmation loop than a yes/no.
+  const amber = evaluateReading({ location: "walk-in cooler", temperatureF: 43 });
+  assert.equal(amber.status, "amber");
+  assert.equal(amber.confirmRecommended, false);
+});
+
 test("every recognized category cites its specific FDA Food Code section", () => {
   const cases = [
     { location: "walk-in cooler", temperatureF: 38, citation: "3-501.16(A)(2)" },

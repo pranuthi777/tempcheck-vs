@@ -529,6 +529,11 @@ export default function Home() {
                   {r.categoryLabel}
                   {r.coolingStage === "start" && " — cooling in progress"}
                 </p>
+                {r.confirmRecommended && (
+                  <p className="text-xs opacity-90 mt-1 font-semibold">
+                    🔎 Close to the limit — confirmed with the cook
+                  </p>
+                )}
               </div>
             ))}
           </div>
@@ -587,6 +592,11 @@ export default function Home() {
                       >
                         {r.status}
                       </span>
+                      {r.confirmRecommended && (
+                        <span className="ml-1 text-xs text-slate-400" title="Safe, but close to the limit — confirmed with the cook before logging">
+                          🔎
+                        </span>
+                      )}
                     </td>
                     <td className="px-3 py-2 text-slate-300">{r.correctiveAction || "—"}</td>
                     <td className="px-3 py-2 text-slate-500 whitespace-nowrap">{r.citation || "—"}</td>

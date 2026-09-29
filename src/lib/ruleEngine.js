@@ -48,6 +48,19 @@ const LIMITS = {
   reheating: { direction: "at_or_above", safeAt: 165, amberBandF: 5, citation: "FDA Food Code 3-403.11(A)" },
 };
 
+// How close (in °F) a *safe* reading has to be to its category's limit
+// before we treat it as a close call worth an explicit confirmation, not
+// just a one-way readback. This exists because of a real gap: a reading
+// that's misheard within the safe zone (e.g. a true 48°F logged as a
+// "safe" 38°F for cold holding) produces a normal, unremarkable-sounding
+// "safe" readback that's easy to not really listen to. We can't detect
+// that specific failure from the logged number alone — but a lot of the
+// readings a cook actually calls out *are* close to the line on purpose
+// (checking a cooler that's running warm, watching a steam table drift
+// down), and those are exactly the readings worth double-checking before
+// moving on. Not an FDA number — see the file header note on amberBandF.
+const CONFIRM_MARGIN_F = 5;
+
 const CORRECTIVE_ACTIONS = {
   cold_holding:
     "Move product to a colder unit or add ice immediately. If it's been above 41°F for more than 4 hours, discard it.",
@@ -92,6 +105,7 @@ function evaluateReading(input) {
       correctiveAction: "Could not parse a numeric temperature — ask the cook to repeat the reading.",
       message: "No valid temperature was captured.",
       citation: null,
+      confirmRecommended: false,
     };
   }
 
@@ -109,6 +123,7 @@ function evaluateReading(input) {
         "That reading is outside any plausible kitchen temperature range — ask the cook to repeat it before logging.",
       message: `${round1(temperatureF)}°F is implausible and was not saved.`,
       citation: null,
+      confirmRecommended: false,
     };
   }
 
@@ -121,6 +136,7 @@ function evaluateReading(input) {
       correctiveAction: CORRECTIVE_ACTIONS.unknown,
       message: `${round1(temperatureF)}°F logged, but the item/location wasn't recognized. A manager should classify it.`,
       citation: null,
+      confirmRecommended: false,
     };
   }
 
@@ -144,6 +160,12 @@ function evaluateReading(input) {
       ? `${t}°F is within the safe range for ${categoryLabel.toLowerCase()} (must be ${verb} ${limit.safeAt}°F).`
       : `${t}°F is ${status === "red" ? "a violation" : "borderline"} for ${categoryLabel.toLowerCase()} (must be ${verb} ${limit.safeAt}°F).`;
 
+  // A "safe" verdict close enough to the limit that it's worth an explicit
+  // confirmation before moving on, not just a readback — see CONFIRM_MARGIN_F
+  // above. Amber/red readings already get a corrective-action question, so
+  // this only fires for status === "safe".
+  const confirmRecommended = status === "safe" && Math.abs(t - limit.safeAt) <= CONFIRM_MARGIN_F;
+
   return {
     category,
     categoryLabel,
@@ -152,7 +174,8 @@ function evaluateReading(input) {
     correctiveAction: status === "safe" ? null : CORRECTIVE_ACTIONS[category],
     message,
     citation: limit.citation,
+    confirmRecommended,
   };
 }
 
-module.exports = { evaluateReading, LIMITS, CORRECTIVE_ACTIONS };
+module.exports = { evaluateReading, LIMITS, CORRECTIVE_ACTIONS, CONFIRM_MARGIN_F };
