@@ -13,7 +13,7 @@
     position:relative;
     overflow:hidden;
     page-break-after: always;
-    padding: 64px 76px;
+    padding: 60px 76px;
     display:flex; flex-direction:column;
   }
   .slide:last-child { page-break-after: avoid; }
@@ -24,23 +24,23 @@
       linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
     background-size: 48px 48px;
   }
-  .kicker { color:#6ee7b7; font-size:20px; font-weight:700; letter-spacing:1px; text-transform:uppercase; z-index:2; }
-  h1 { font-size:52px; font-weight:800; color:#f8fafc; letter-spacing:-1px; margin-top:10px; z-index:2; }
+  .kicker { color:#6ee7b7; font-size:19px; font-weight:700; letter-spacing:1px; text-transform:uppercase; z-index:2; }
+  h1 { font-size:46px; font-weight:800; color:#f8fafc; letter-spacing:-1px; margin-top:10px; z-index:2; }
   h1 span { color:#34d399; }
-  .sub { font-size:24px; color:#94a3b8; margin-top:14px; max-width:1000px; line-height:1.4; z-index:2; }
-  .body { margin-top:36px; z-index:2; flex:1; }
+  .sub { font-size:22px; color:#94a3b8; margin-top:14px; max-width:1050px; line-height:1.4; z-index:2; }
+  .body { margin-top:30px; z-index:2; flex:1; }
   ul.big { list-style:none; }
-  ul.big li { font-size:26px; color:#cbd5e1; margin-bottom:20px; padding-left:34px; position:relative; line-height:1.4; }
-  ul.big li::before { content:"→"; position:absolute; left:0; color:#34d399; font-weight:800; }
-  .stat-row { display:flex; gap:24px; margin-top:10px; }
-  .stat { flex:1; border-radius:18px; padding:28px; border:2px solid; }
-  .stat b { display:block; font-size:56px; font-weight:800; }
-  .stat span { font-size:20px; opacity:0.85; }
+  ul.big li { font-size:23px; color:#cbd5e1; margin-bottom:16px; padding-left:34px; position:relative; line-height:1.4; }
+  ul.big li::before { content:"\2192"; position:absolute; left:0; color:#34d399; font-weight:800; }
+  .stat-row { display:flex; gap:20px; margin-top:10px; flex-wrap:wrap; }
+  .stat { flex:1; min-width:200px; border-radius:16px; padding:22px; border:2px solid; }
+  .stat b { display:block; font-size:44px; font-weight:800; }
+  .stat span { font-size:17px; opacity:0.85; }
   .safe { border-color:#10b981; background:rgba(16,185,129,0.10); color:#6ee7b7; }
   .amber { border-color:#f59e0b; background:rgba(245,158,11,0.10); color:#fcd34d; }
   .red { border-color:#ef4444; background:rgba(239,68,68,0.10); color:#fca5a5; }
   .neutral { border-color:#334155; background:rgba(148,163,184,0.08); color:#e2e8f0; }
-  .footer { margin-top:auto; display:flex; justify-content:space-between; font-size:18px; color:#64748b; z-index:2; }
+  .footer { margin-top:auto; display:flex; justify-content:space-between; font-size:17px; color:#64748b; z-index:2; }
   .footer b { color:#94a3b8; }
   .pill { display:inline-flex; align-items:center; gap:10px; color:#6ee7b7; font-size:18px; font-weight:600;
     border:1px solid rgba(110,231,183,0.35); border-radius:999px; padding:8px 18px; width:fit-content;
@@ -48,12 +48,15 @@
   .dot { width:9px; height:9px; border-radius:50%; background:#34d399; box-shadow:0 0 10px #34d399; }
   code { font-family: "SF Mono", Menlo, monospace; background:rgba(255,255,255,0.06); padding:3px 8px; border-radius:6px; font-size:0.85em; }
   .flow { display:flex; align-items:center; gap:8px; flex-wrap:nowrap; margin-top:20px; z-index:2; }
-  .flowbox { border:2px solid #334155; background:rgba(148,163,184,0.06); border-radius:12px; padding:14px 14px; font-size:16px; color:#e2e8f0; text-align:center; flex:1; min-width:0; }
+  .flowbox { border:2px solid #334155; background:rgba(148,163,184,0.06); border-radius:12px; padding:14px 14px; font-size:15px; color:#e2e8f0; text-align:center; flex:1; min-width:0; }
   .arrow { color:#34d399; font-size:20px; font-weight:800; flex:0 0 auto; }
   .flowbox.hl { border-color:#34d399; background:rgba(16,185,129,0.10); color:#6ee7b7; font-weight:700; }
-  table.cmp { width:100%; border-collapse:collapse; margin-top:16px; z-index:2; font-size:20px; }
-  table.cmp th, table.cmp td { text-align:left; padding:12px 16px; border-bottom:1px solid #1e293b; }
-  table.cmp th { color:#6ee7b7; font-size:16px; text-transform:uppercase; letter-spacing:0.5px; }
+  table.cmp { width:100%; border-collapse:collapse; margin-top:14px; z-index:2; font-size:18px; }
+  table.cmp th, table.cmp td { text-align:left; padding:10px 14px; border-bottom:1px solid #1e293b; }
+  table.cmp th { color:#6ee7b7; font-size:15px; text-transform:uppercase; letter-spacing:0.5px; }
+  .cols { display:flex; gap:36px; margin-top:26px; z-index:2; flex:1; }
+  .col { flex:1; }
+  .col h3 { font-size:19px; color:#6ee7b7; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px; }
 </style>
 </head>
 <body>
@@ -63,7 +66,7 @@
   <div class="grid"></div>
   <div class="pill"><span class="dot"></span> AssemblyAI Voice Agent Hackathon</div>
   <h1>Temp<span>Check</span></h1>
-  <div class="sub">Voice-logged food safety — read back and proven. Every flagged temperature is spoken back and confirmed before it's saved, and every accuracy number in this deck was measured against AssemblyAI's real API, not estimated.</div>
+  <div class="sub">Voice-logged food safety — read back and proven. Every flagged temperature is spoken back and confirmed before it's saved, and every number in this deck was measured against AssemblyAI's real API or verified live against the real deployed app — nothing estimated.</div>
   <div class="footer"><b>github.com/pranuthi777/tempcheck-vs</b><span>tempcheck-vsh.vercel.app</span></div>
 </div>
 
@@ -79,7 +82,7 @@
       <li>The fix has to be hands-free (cooks are working) and has to catch the misheard digit <i>in the same breath</i>, not at the next audit.</li>
     </ul>
   </div>
-  <div class="footer"><b>TempCheck</b><span>2 / 12</span></div>
+  <div class="footer"><b>TempCheck</b><span>2 / 14</span></div>
 </div>
 
 <!-- 3: The idea -->
@@ -91,10 +94,11 @@
     <ul class="big">
       <li>A cook calls out a reading mid-task — "walk-in cooler, thirty-eight," "chicken breast, one fifty-two."</li>
       <li>TempCheck logs it, checks it against real FDA limits, and speaks the exact number back before saving anything flagged.</li>
+      <li>A cook can self-correct mid-sentence ("steam table, one twenty — no wait, one forty") and TempCheck keeps the corrected number, not the first one.</li>
       <li>Out-of-range readings get a spoken corrective action, not a silent red dot nobody sees until the shift ends.</li>
     </ul>
   </div>
-  <div class="footer"><b>TempCheck</b><span>3 / 12</span></div>
+  <div class="footer"><b>TempCheck</b><span>3 / 14</span></div>
 </div>
 
 <!-- 4: How it works -->
@@ -114,7 +118,7 @@
     <div class="flowbox">spoken readback<br/>+ dashboard/PDF</div>
   </div>
   <div class="sub" style="margin-top:40px;">The Voice Agent handles STT, turn-taking, and tool-calling. It never decides whether a reading is safe — that's a separate, unit-tested, deterministic step.</div>
-  <div class="footer"><b>TempCheck</b><span>4 / 12</span></div>
+  <div class="footer"><b>TempCheck</b><span>4 / 14</span></div>
 </div>
 
 <!-- 5: Why rule engine is separate -->
@@ -125,11 +129,12 @@
   <div class="body">
     <ul class="big">
       <li>The model's only job is extraction: location/item, number, unit. A plain, unit-tested comparison against FDA Food Code limits decides safe / amber / red.</li>
-      <li>Cold holding &le;41&deg;F &middot; hot holding &ge;135&deg;F &middot; poultry &ge;165&deg;F &middot; ground meat &ge;155&deg;F &middot; whole muscle / fish / eggs &ge;145&deg;F.</li>
-      <li>25 automated tests cover every category, every boundary, unit conversion, and implausible readings — zero hallucination risk in the verdict itself.</li>
+      <li>Cold holding &le;41&deg;F &middot; hot holding &ge;135&deg;F &middot; poultry &ge;165&deg;F &middot; ground/injected meat &ge;155&deg;F &middot; whole muscle &ge;145&deg;F &middot; fish/seafood/eggs &ge;145&deg;F &middot; reheating &ge;165&deg;F.</li>
+      <li>Plus a two-stage cooling curve (135&rarr;70&deg;F within 2h, then &rarr;41&deg;F within 6h, FDA 3-501.14(A)), pairing a spoken "cooling start" with a later "cooling check."</li>
+      <li>39 automated tests cover every category, every boundary, unit conversion, and implausible readings — zero hallucination risk in the verdict itself.</li>
     </ul>
   </div>
-  <div class="footer"><b>TempCheck</b><span>5 / 12</span></div>
+  <div class="footer"><b>TempCheck</b><span>5 / 14</span></div>
 </div>
 
 <!-- 6: Deep AssemblyAI usage -->
@@ -140,92 +145,162 @@
   <table class="cmp">
     <tr><th>Use</th><th>API</th><th>What it does</th></tr>
     <tr><td>Live cook-facing app</td><td>Voice Agent API</td><td>Real-time STT + turn detection + tool-calling + TTS, over a live WebSocket session</td></tr>
-    <tr><td>Accuracy proof harness</td><td>Async transcription API (v2)</td><td>270 real clips, real upload &rarr; transcript &rarr; poll, scored against ground truth</td></tr>
+    <tr><td>Accuracy proof harness</td><td>Async transcription API (v2)</td><td>648 real clips, real upload &rarr; transcript &rarr; poll, scored against ground truth</td></tr>
   </table>
-  <div class="sub" style="margin-top:30px;">We didn't just call the API and hope — we built a real, reproducible test harness against it and published the actual result.</div>
-  <div class="footer"><b>TempCheck</b><span>6 / 12</span></div>
+  <div class="sub" style="margin-top:26px;">We didn't just call the API and hope — we built a real, reproducible test harness against it, published the actual result, and even shipped a no-mic demo mode that replays a sample clip through the exact same live Voice Agent session.</div>
+  <div class="footer"><b>TempCheck</b><span>6 / 14</span></div>
 </div>
 
 <!-- 7: Measured accuracy -->
 <div class="slide">
   <div class="grid"></div>
   <div class="kicker">Measured accuracy &mdash; no invented numbers</div>
-  <h1>254 / 270 correct &mdash; 94.1%</h1>
+  <h1>570 / 648 correct &mdash; 88.0%</h1>
   <div class="stat-row">
-    <div class="stat safe"><b>96.7%</b><span>Clean audio (87/90)</span></div>
-    <div class="stat amber"><b>98.9%</b><span>Moderate noise, ~12dB SNR (89/90)</span></div>
-    <div class="stat red"><b>86.7%</b><span>Heavy kitchen noise, ~4dB SNR (78/90)</span></div>
+    <div class="stat safe"><b>92.3%</b><span>Baseline noise (299/324)</span></div>
+    <div class="stat safe"><b>90.3%</b><span>4 accents (130/144)</span></div>
+    <div class="stat safe"><b>94.4%</b><span>Fast speech, ~1.6x (34/36)</span></div>
+    <div class="stat red"><b>52.8% / 47.2%</b><span>Fryer / shouting coworker</span></div>
   </div>
-  <div class="sub" style="margin-top:30px;">Method disclosed <i>before</i> the result in <code>docs/accuracy.md</code>. The first real run scored 92.2% and caught three real bugs in our own number parser — fixed, re-tested against the live API again, and republished honestly.</div>
-  <div class="footer"><b>TempCheck</b><span>7 / 12</span></div>
+  <div class="sub" style="margin-top:26px;">Method disclosed <i>before</i> the result in <code>docs/accuracy.md</code>, including 3 harness failures fixed and disclosed, not hidden. Headline finding: steady noise (dishwasher 100%, hood fan 97%) degrades gracefully, but transient speech-like noise (fryer, a shouting coworker) hits accuracy far harder — a real, actionable finding for kitchen layout, not just a score.</div>
+  <div class="footer"><b>TempCheck</b><span>7 / 14</span></div>
 </div>
 
-<!-- 8: Live demo -->
+<!-- 8: Real-kitchen hands-free stack -->
 <div class="slide">
   <div class="grid"></div>
-  <div class="kicker">Live demo</div>
+  <div class="kicker">Built for a real kitchen shift</div>
+  <h1>Hands-free by default, not just voice-in</h1>
+  <div class="cols">
+    <div class="col">
+      <h3>Works in a loud kitchen</h3>
+      <ul class="big">
+        <li>Push-to-talk mode for very loud stations</li>
+        <li>Full-screen, one-glance Big Display mode</li>
+        <li>Audio cues: a beep on every log, a sharper alert tone on amber/red</li>
+      </ul>
+    </div>
+    <div class="col">
+      <h3>Covers more of the real menu</h3>
+      <ul class="big">
+        <li>Poultry, ground/injected meat, whole muscle, fish/seafood/eggs, reheating</li>
+        <li>Two-stage cooling-curve tracking, not just point-in-time checks</li>
+        <li>Every verdict cites its exact FDA Food Code section</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer"><b>TempCheck</b><span>8 / 14</span></div>
+</div>
+
+<!-- 9: Inspector-ready + manager view -->
+<div class="slide">
+  <div class="grid"></div>
+  <div class="kicker">Inspector-ready output &amp; manager view</div>
+  <h1>Built for the people who actually read the log</h1>
+  <div class="cols">
+    <div class="col">
+      <h3>The PDF an inspector expects</h3>
+      <ul class="big">
+        <li>Dedicated violations section: corrective action + the cook's exact spoken words as evidence</li>
+        <li>Filterable by date and by station/item</li>
+        <li>Page numbers, footer, manager sign-off line</li>
+      </ul>
+    </div>
+    <div class="col">
+      <h3>A manager checking in mid-shift</h3>
+      <ul class="big">
+        <li>Live summary: readings logged, flagged, unresolved corrective actions</li>
+        <li>Missed-check reminder if nothing's been logged in 45+ minutes</li>
+        <li>One-click "Mark resolved" once a corrective action is actually taken</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer"><b>TempCheck</b><span>9 / 14</span></div>
+</div>
+
+<!-- 10: Live demo -->
+<div class="slide">
+  <div class="grid"></div>
+  <div class="kicker">Live demo &mdash; verified against the real deployed app</div>
   <h1>Dashboard, mid-shift</h1>
   <div class="stat-row">
     <div class="stat safe"><b>38&deg;F</b><span>Walk-in cooler &mdash; safe</span></div>
-    <div class="stat amber"><b>130&deg;F</b><span>Steam table &mdash; amber</span></div>
-    <div class="stat red"><b>149&deg;F</b><span>Ground beef &mdash; red, corrective action prompted</span></div>
+    <div class="stat amber"><b>43&deg;F</b><span>Prep cooler &mdash; amber</span></div>
+    <div class="stat red"><b>152&deg;F</b><span>Chicken breast &mdash; red, corrective action prompted</span></div>
   </div>
-  <div class="sub" style="margin-top:30px;">Every entry keeps the cook's exact spoken words next to the verdict, and the whole shift exports as an inspector-ready HACCP PDF with one click.</div>
-  <div class="footer"><b>TempCheck</b><span>8 / 12</span></div>
+  <div class="sub" style="margin-top:26px;">Every entry keeps the cook's exact spoken words next to the verdict, a manager can mark a corrective action resolved with one click, and the whole shift exports as an inspector-ready HACCP PDF with one click.</div>
+  <div class="footer"><b>TempCheck</b><span>10 / 14</span></div>
 </div>
 
-<!-- 9: Business value -->
+<!-- 11: Try it in 30 seconds -->
 <div class="slide">
   <div class="grid"></div>
-  <div class="kicker">Business value</div>
-  <h1>Every kitchen already has to do this</h1>
+  <div class="kicker">First 60 seconds for a judge</div>
+  <h1>No mic? No problem &mdash; press &ldquo;Try Demo&rdquo;</h1>
   <div class="body">
     <ul class="big">
-      <li>Temperature logging isn't optional — it's a health-code requirement at every US food establishment.</li>
-      <li>TempCheck turns a paper chore into a real-time, hands-free, provably-checked habit, with the exported PDF already in the format an inspector expects.</li>
-      <li>No new hardware: it runs in a browser tab a kitchen already has open.</li>
+      <li>One click plays a ~30-second sample kitchen recording straight through the exact same real pipeline a live microphone uses.</li>
+      <li>Nothing about the response is scripted: real AssemblyAI transcription, real rule-engine verdicts, real spoken confirmation, real UI updates from real tool calls.</li>
+      <li>Demonstrates a safe reading, a flagged reading with a corrective action, a mid-sentence self-correction, and an amber boundary case — all in well under a minute.</li>
     </ul>
   </div>
-  <div class="footer"><b>TempCheck</b><span>9 / 12</span></div>
+  <div class="footer"><b>TempCheck</b><span>11 / 14</span></div>
 </div>
 
-<!-- 10: Originality -->
+<!-- 12: Business value & originality -->
 <div class="slide">
   <div class="grid"></div>
-  <div class="kicker">Originality</div>
-  <h1>A narrow angle in a gallery of general-purpose agents.</h1>
-  <div class="sub">Most submissions in this hackathon build general-purpose copilots, dispatch/fraud agents, or interview coaches. TempCheck is deliberately narrow: one real workflow, done with enough rigor — deterministic rules, mandatory readback, measured accuracy, real end-to-end verification — that it could plausibly go into a real kitchen tomorrow.</div>
-  <div class="footer"><b>TempCheck</b><span>10 / 12</span></div>
+  <div class="kicker">Business value &amp; originality</div>
+  <h1>Every kitchen already has to do this &mdash; almost nobody else is building it</h1>
+  <div class="cols">
+    <div class="col">
+      <h3>Business value</h3>
+      <ul class="big">
+        <li>Temperature logging is a health-code requirement, not optional, at every US food establishment.</li>
+        <li>Turns a paper chore into a real-time, hands-free, provably-checked habit — the exported PDF is already in the format an inspector expects.</li>
+        <li>No new hardware: runs in a browser tab a kitchen already has open.</li>
+      </ul>
+    </div>
+    <div class="col">
+      <h3>Originality</h3>
+      <ul class="big">
+        <li>Most of the gallery is general-purpose copilots, dispatch/fraud agents, or interview coaches.</li>
+        <li>TempCheck is deliberately narrow: one real workflow, done with enough rigor — deterministic rules, mandatory readback, measured accuracy, real end-to-end verification, a judge-friendly demo mode — that it could plausibly go into a real kitchen tomorrow.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer"><b>TempCheck</b><span>12 / 14</span></div>
 </div>
 
-<!-- 11: What's next -->
+<!-- 13: Known limitations -->
 <div class="slide">
   <div class="grid"></div>
-  <div class="kicker">What's next</div>
-  <h1>Known limitations, stated plainly</h1>
+  <div class="kicker">Known limitations, stated plainly</div>
+  <h1>What isn't solved yet</h1>
   <div class="body">
     <ul class="big">
-      <li>Cooling-curve time tracking (135&deg;F&rarr;70&deg;F within 2h, then &rarr;41&deg;F within 4h) — only point-in-time readings are checked today.</li>
-      <li>No persistent multi-shift storage yet — a shift's log lives in the browser tab and exports to PDF before ending.</li>
-      <li>Phone/SIP deployment for kitchens that don't want a browser tab open.</li>
+      <li>The accuracy test set is synthesized speech and noise, not real kitchen recordings — a disclosed, reproducible proxy, not a certified real-world number.</li>
+      <li>Transient, speech-like noise (a fryer, a shouting coworker) is measurably harder for the STT than steady noise — 52.8%/47.2% vs. 88–100%.</li>
+      <li>Cooling-curve tracking pairs a start and one later check and assumes temperature only decreased in between — it doesn't independently confirm an intermediate point, and the pending state doesn't survive a reload.</li>
+      <li>Shift storage is local to one browser (localStorage) — no multi-device or multi-user backend yet.</li>
     </ul>
   </div>
-  <div class="footer"><b>TempCheck</b><span>11 / 12</span></div>
+  <div class="footer"><b>TempCheck</b><span>13 / 14</span></div>
 </div>
 
-<!-- 12: Links -->
+<!-- 14: Links -->
 <div class="slide">
   <div class="grid"></div>
   <div class="kicker">Links</div>
   <h1>Try it yourself</h1>
   <div class="body" style="margin-top:20px;">
     <ul class="big">
-      <li>Live demo: tempcheck-vsh.vercel.app</li>
+      <li>Live demo: tempcheck-vsh.vercel.app (click "Try Demo" — no mic needed)</li>
       <li>Code: github.com/pranuthi777/tempcheck-vs</li>
       <li>Measured accuracy &amp; method: docs/accuracy.md</li>
     </ul>
   </div>
-  <div class="footer"><b>Thank you</b><span>12 / 12</span></div>
+  <div class="footer"><b>Thank you</b><span>14 / 14</span></div>
 </div>
 
 </body>

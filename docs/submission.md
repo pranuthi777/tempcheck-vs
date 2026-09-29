@@ -34,19 +34,32 @@ TempCheck:
 3. **Reads the exact number back out loud** and asks for the corrective
    action on anything out of range, so a misheard digit gets caught in the
    same breath, not at the next inspection.
-4. Shows a live green/amber/red dashboard and exports an inspector-ready
-   HACCP PDF log — timestamped, with the cook's exact words next to every
-   reading.
+4. Shows a live green/amber/red dashboard, a manager-facing summary
+   (readings logged, flagged, unresolved corrective actions, a missed-check
+   reminder), and exports an inspector-ready HACCP PDF log — timestamped,
+   with the cook's exact words as evidence next to every flagged reading.
+5. Works hands-free end to end: push-to-talk for loud stations, a
+   full-screen big-display mode, audio cues on every log/alert, and a
+   two-stage cooling-curve check (FDA 3-501.14(A)), not just point-in-time
+   readings.
+6. No mic on hand? The live demo has a one-click **Try Demo** mode that
+   plays a sample kitchen clip through the exact same real pipeline —
+   real transcription, real rule-engine verdicts, real spoken confirmation
+   — so a judge can see it work in under a minute without granting
+   microphone access.
 
 **Why this is a good fit for AssemblyAI specifically.** The whole safety
 case rests on how well the Voice Agent API's turn detection, tool-calling,
 and STT accuracy hold up in a noisy, hands-busy environment — which is
 exactly what Universal-Streaming's low-latency, semantic+acoustic
 endpointing and keyterm biasing are built for. We didn't just call the API;
-we built a 270-clip noisy-kitchen test harness that runs real audio through
-AssemblyAI's real transcription API and measures actual number-capture
-accuracy (see `docs/accuracy.md` — method disclosed before the result, no
-invented numbers).
+we built a 648-clip noisy-kitchen test harness (spanning noise levels,
+4 accents, fast speech, and 4 real-kitchen noise types like a fryer and a
+shouting coworker) that runs real audio through AssemblyAI's real
+transcription API and measures actual number-capture accuracy — 570/648,
+88.0% (see `docs/accuracy.md` — method disclosed before the result, no
+invented numbers, including 3 harness failures disclosed and fixed rather
+than hidden).
 
 **Business value.** Every restaurant with a health inspection is required to
 keep temperature logs; most do it on paper, after the fact, from memory.

@@ -45,6 +45,7 @@ vs. amber vs. red every time.
 - **`src/lib/coolingEngine.js`** — the two-stage cooling curve (135°F→70°F within 2h, then →41°F within 6h total, FDA 3-501.14(A)), pairing a spoken "cooling start" reading with a later "cooling check" for the same item.
 - **`src/lib/haccpPdf.js`** — generates the inspector-ready HACCP-style log PDF: a letterhead-style header, a dedicated "Corrective Actions & Violations" section listing every amber/red reading with its FDA citation and the cook's exact spoken words as evidence, the full log, page numbers, and a manager sign-off line. Exportable filtered by date and by station/item from the dashboard.
 - **`src/lib/audioCues.js`** + **`src/components/BigDisplay.js`** — hands-free extras: a beep on every log (a distinct alert tone for amber/red), and a full-screen, glanceable big-display mode. Push-to-talk (for loud kitchens) lives in `useVoiceAgent.js`.
+- **`src/lib/micCapture.js`**'s `startDemoCapture` + **`public/demo/`** — the no-mic "Try Demo" mode: feeds a pre-recorded sample clip through the exact same AudioWorklet/WebSocket pipeline a real microphone uses, so nothing about the agent's response is scripted.
 
 ## Running it locally
 
