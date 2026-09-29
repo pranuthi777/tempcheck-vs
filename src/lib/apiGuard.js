@@ -6,28 +6,57 @@
  */
 
 /**
- * Best-effort same-origin check. A browser sending a fetch() request
- * generally attaches an Origin header, including for a same-origin
- * request in modern browsers — if one is present and doesn't match this
- * deployment's own origin, the request didn't come from this app's own
- * page. Honest limitation: a request with NO Origin header at all can't
- * be distinguished this way and is treated as same-origin — this is a
- * real deterrent against another site's page quietly calling this
- * endpoint from a browser, not an airtight authentication boundary.
+ * Best-effort same-origin check. A browser sending a fetch() request from
+ * this app's own page attaches an Origin header (and/or a Referer), so a
+ * request whose Origin doesn't match this deployment's own origin didn't
+ * come from this app's own page.
  *
- * @param {{origin: string|null, requestUrl: string}} input
+ * Round-3 P1 fix: an earlier version treated a request with NO Origin
+ * header at all as same-origin ("can't tell, so allow"). That was a real
+ * bypass — a plain server-to-server call (curl, a script, another
+ * backend) never sends an Origin header either, so it sailed straight
+ * through untouched, which defeats the entire point of this check for
+ * the most likely abuse path (a script hitting the token endpoint
+ * directly to burn AssemblyAI credits), not just the browser-based one.
+ * Now: Origin is checked first when present; Referer is used as a
+ * fallback when Origin is absent (a real page navigation or fetch from
+ * this app almost always sends at least one of the two); a request with
+ * NEITHER header is treated as cross-origin and rejected, since that
+ * combination is the fingerprint of a direct script call, not a
+ * legitimate browser request from this app's own page. Still an honest
+ * deterrent, not an airtight authentication boundary — a determined
+ * caller can forge either header — but it no longer waves through the
+ * single most common shape of automated abuse.
+ *
+ * @param {{origin: string|null, referer?: string|null, requestUrl: string}} input
  */
-function isCrossOrigin({ origin, requestUrl }) {
-  if (!origin) return false;
+function isCrossOrigin({ origin, referer, requestUrl }) {
+  let requestOrigin;
   try {
-    const requestOrigin = new URL(requestUrl).origin;
-    return origin !== requestOrigin;
+    requestOrigin = new URL(requestUrl).origin;
   } catch {
     // A request URL we can't parse can't be compared against — fail open
-    // on the origin check specifically (rate limiting still applies), the
-    // same honest best-effort stance as the missing-Origin-header case.
+    // on the origin check itself (rate limiting still applies).
     return false;
   }
+
+  if (origin) {
+    return origin !== requestOrigin;
+  }
+
+  if (referer) {
+    try {
+      return new URL(referer).origin !== requestOrigin;
+    } catch {
+      // A Referer we can't parse isn't usable evidence of same-origin —
+      // treat it like having no evidence at all.
+      return true;
+    }
+  }
+
+  // Neither Origin nor Referer present: can't establish same-origin, so
+  // don't assume it. This is what closes the no-Origin bypass.
+  return true;
 }
 
 /**

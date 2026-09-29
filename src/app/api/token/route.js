@@ -30,7 +30,13 @@ const limiter = createRateLimiter({ windowMs: RATE_LIMIT_WINDOW_MS, maxPerKey: R
 const GENERIC_ERROR = { error: "Could not start a voice session right now. Please try again." };
 
 export async function GET(request) {
-  if (isCrossOrigin({ origin: request.headers.get("origin"), requestUrl: request.url })) {
+  if (
+    isCrossOrigin({
+      origin: request.headers.get("origin"),
+      referer: request.headers.get("referer"),
+      requestUrl: request.url,
+    })
+  ) {
     return Response.json(GENERIC_ERROR, { status: 403 });
   }
 
