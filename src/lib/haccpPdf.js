@@ -25,7 +25,7 @@ function drawFooter(doc) {
  * whatever it's given and prints `filterDescription` in the header so it's
  * clear the export isn't necessarily the whole shift.
  */
-export function exportHaccpPdf(readings, { shiftStart, shiftEnd, filterDescription } = {}) {
+export function exportHaccpPdf(readings, { shiftStart, shiftEnd, filterDescription, integrity } = {}) {
   const doc = new jsPDF({ unit: "pt", format: "letter" });
   const generatedAt = new Date();
 
@@ -197,8 +197,31 @@ export function exportHaccpPdf(readings, { shiftStart, shiftEnd, filterDescripti
     "Cooling-curve checks (135°F to 70°F within 2h, then to 41°F within 6h total, FDA Food Code 3-501.14(A)) pair a \"cooling start\" reading with a later \"cooling check\" reading for the same item and assume the temperature only decreased in between — they don't independently confirm an intermediate point.",
     CONTENT_WIDTH
   );
+
+  // Log integrity (Bug #5 / #26): honest about what the hash chain proves
+  // and doesn't. See hashChain.js for the full reasoning — this is a "what
+  // was said, in this order, at this time" guarantee, not proof a probe
+  // touched food at this temperature.
+  const integrityHeadline = integrity
+    ? integrity.verified
+      ? "Log integrity: VERIFIED — every entry's hash chains correctly from the start of this shift; nothing was edited, reordered, or deleted after logging."
+      : `Log integrity: BROKEN at entry ${integrity.brokenAt} — ${integrity.reason}`
+    : "Log integrity: not checked for this export.";
+  const integrityCaveat =
+    "This hash chain and the server-issued timestamps on each entry prove WHEN something was said and that the record hasn't been edited since — they do not prove a thermometer probe actually touched the food at the stated temperature.";
+  const integrityLines = doc.splitTextToSize(integrityHeadline, CONTENT_WIDTH);
+  const integrityCaveatLines = doc.splitTextToSize(integrityCaveat, CONTENT_WIDTH);
+
   const blockHeight =
-    22 + summaryLines.length * LINE_HEIGHT + 12 + caveatLines.length * LINE_HEIGHT + 44;
+    22 +
+    summaryLines.length * LINE_HEIGHT +
+    12 +
+    caveatLines.length * LINE_HEIGHT +
+    14 +
+    integrityLines.length * LINE_HEIGHT +
+    10 +
+    integrityCaveatLines.length * LINE_HEIGHT +
+    44;
 
   // Start a fresh page rather than letting this block run off the bottom
   // of a full last page.
@@ -215,8 +238,20 @@ export function exportHaccpPdf(readings, { shiftStart, shiftEnd, filterDescripti
   doc.text(caveatLines, MARGIN, afterSummaryY + 12);
   const afterCaveatY = afterSummaryY + 12 + caveatLines.length * LINE_HEIGHT;
 
+  doc.setFontSize(9.5);
+  if (integrity && !integrity.verified) doc.setTextColor(185, 28, 28);
+  else if (integrity && integrity.verified) doc.setTextColor(21, 128, 61);
+  else doc.setTextColor(120);
+  doc.text(integrityLines, MARGIN, afterCaveatY + 14);
+  const afterIntegrityY = afterCaveatY + 14 + integrityLines.length * LINE_HEIGHT;
+
+  doc.setFontSize(9);
+  doc.setTextColor(120);
+  doc.text(integrityCaveatLines, MARGIN, afterIntegrityY + 10);
+  const afterIntegrityCaveatY = afterIntegrityY + 10 + integrityCaveatLines.length * LINE_HEIGHT;
+
   // --- Manager sign-off line ---
-  const signY = afterCaveatY + 30;
+  const signY = afterIntegrityCaveatY + 30;
   doc.setDrawColor(120);
   doc.setLineWidth(0.75);
   doc.line(MARGIN, signY, MARGIN + 220, signY);

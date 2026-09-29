@@ -5,6 +5,7 @@ import { useVoiceAgent } from "@/lib/useVoiceAgent";
 import { exportHaccpPdf } from "@/lib/haccpPdf";
 import { loadShift, saveShift, clearShift } from "@/lib/shiftStorage";
 import { playLogBeep, playAlertTone } from "@/lib/audioCues";
+import { computeEntryHash, verifyHashChain, GENESIS_HASH } from "@/lib/hashChain";
 import BigDisplay from "@/components/BigDisplay";
 
 const STATUS_STYLES = {
@@ -43,6 +44,12 @@ export default function Home() {
   const shiftStartRef = useRef(null);
   const shiftEndRef = useRef(null);
   const soundEnabledRef = useRef(true);
+  // Tamper-evident hash chain (Bug #5 / #26): each entry's hash depends on
+  // the previous entry's hash, so lastHashRef always holds "what the next
+  // entry must chain from." Restored from the newest restored reading's
+  // own hash below, or GENESIS_HASH for a fresh shift.
+  const lastHashRef = useRef(GENESIS_HASH);
+  const [integrityResult, setIntegrityResult] = useState(null); // {verified, brokenAt, reason} | null
   useEffect(() => {
     soundEnabledRef.current = soundEnabled;
   }, [soundEnabled]);
@@ -64,6 +71,10 @@ export default function Home() {
         shiftEndRef.current = saved.shiftEnd ?? null;
         setShiftStartDisplay(shiftStartRef.current);
         setRestoredNotice(true);
+        // readings are stored newest-first, so [0] is the last link in the
+        // hash chain so far — resume from there, not from genesis, or
+        // every reading after a reload would look like a broken chain.
+        if (saved.readings[0]?.hash) lastHashRef.current = saved.readings[0].hash;
       }
     });
     return () => {
@@ -96,7 +107,42 @@ export default function Home() {
         playLogBeep();
       }
     }
+
+    // Tamper-evidence (Bug #5 / #26): fetch a server-issued timestamp and
+    // extend the hash chain, then merge those fields onto this entry once
+    // ready. Done AFTER the synchronous UI update above so network/crypto
+    // latency never delays the cook's spoken readback — the reading is
+    // already visible and already sent back to the voice agent; this just
+    // fills in its tamper-evidence fields a beat later.
+    (async () => {
+      let serverTimestamp = null;
+      try {
+        const resp = await fetch("/api/log-timestamp");
+        const data = await resp.json();
+        serverTimestamp = data.timestamp || null;
+      } catch {
+        // Best-effort: if the server timestamp can't be fetched (offline,
+        // deploy hiccup), the hash chain still runs off the client
+        // timestamp alone rather than failing to log the reading at all.
+      }
+      const prevHash = lastHashRef.current;
+      const entryForHash = { ...record, serverTimestamp };
+      const hash = await computeEntryHash(entryForHash, prevHash);
+      lastHashRef.current = hash;
+      setReadings((prev) => prev.map((r) => (r.id === record.id ? { ...r, serverTimestamp, prevHash, hash } : r)));
+    })();
   }, []);
+
+  // Recomputes the hash chain over every reading in this shift (oldest
+  // first — `readings` itself is stored newest-first) and reports whether
+  // it's still intact. See hashChain.js for exactly what this does and
+  // doesn't prove.
+  const verifyIntegrity = useCallback(async () => {
+    const chronological = [...readings].reverse();
+    const result = await verifyHashChain(chronological);
+    setIntegrityResult(result);
+    return result;
+  }, [readings]);
 
   // A manager (or the cook themselves) marks a flagged reading resolved
   // once the corrective action has actually been taken — e.g. the product
@@ -277,16 +323,21 @@ export default function Home() {
     });
   }, [readings, dateFilter, stationFilter]);
 
-  const handleExportPdf = useCallback(() => {
+  const handleExportPdf = useCallback(async () => {
     const parts = [];
     if (dateFilter !== "all") parts.push(dateFilter);
     if (stationFilter !== "all") parts.push(stationFilter);
+    // Integrity is verified over the FULL shift log, not just the filtered
+    // rows being exported — filtering which rows print in the PDF doesn't
+    // change whether the underlying log itself is intact.
+    const integrity = await verifyIntegrity();
     exportHaccpPdf(filteredReadings, {
       shiftStart: shiftStartRef.current,
       shiftEnd: shiftEndRef.current,
       filterDescription: parts.length > 0 ? parts.join(" — ") : null,
+      integrity,
     });
-  }, [filteredReadings, dateFilter, stationFilter]);
+  }, [filteredReadings, dateFilter, stationFilter, verifyIntegrity]);
 
   if (bigDisplay) {
     return (
@@ -341,6 +392,14 @@ export default function Home() {
             </button>
           )}
           <button
+            onClick={verifyIntegrity}
+            disabled={readings.length === 0}
+            title="Recomputes the tamper-evident hash chain over every reading this shift and confirms nothing was edited, reordered, or deleted after logging."
+            className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:hover:bg-slate-800 font-semibold transition"
+          >
+            🔒 Verify Log Integrity
+          </button>
+          <button
             onClick={handleExportPdf}
             disabled={filteredReadings.length === 0}
             className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:hover:bg-slate-800 font-semibold transition"
@@ -349,6 +408,20 @@ export default function Home() {
           </button>
         </div>
       </header>
+
+      {integrityResult && (
+        <div
+          className={`-mt-2 rounded-lg border text-sm px-3 py-2 ${
+            integrityResult.verified
+              ? "border-emerald-700 bg-emerald-950/40 text-emerald-300"
+              : "border-red-700 bg-red-950/40 text-red-300"
+          }`}
+        >
+          {integrityResult.verified
+            ? "🔒 Log integrity: verified — every entry's hash chains correctly from the start of this shift, nothing edited, reordered, or deleted."
+            : `⚠️ Log integrity: BROKEN at entry ${integrityResult.brokenAt} — ${integrityResult.reason}`}
+        </div>
+      )}
 
       {readings.length > 0 && (
         <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 -mt-2">

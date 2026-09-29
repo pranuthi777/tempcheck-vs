@@ -46,6 +46,9 @@ vs. amber vs. red every time.
 - **`src/lib/haccpPdf.js`** — generates the inspector-ready HACCP-style log PDF: a letterhead-style header, a dedicated "Corrective Actions & Violations" section listing every amber/red reading with its FDA citation and the cook's exact spoken words as evidence, the full log, page numbers, and a manager sign-off line. Exportable filtered by date and by station/item from the dashboard.
 - **`src/lib/audioCues.js`** + **`src/components/BigDisplay.js`** — hands-free extras: a beep on every log (a distinct alert tone for amber/red), and a full-screen, glanceable big-display mode. Push-to-talk (for loud kitchens) lives in `useVoiceAgent.js`.
 - **`src/lib/micCapture.js`**'s `startDemoCapture` + **`public/demo/`** — the no-mic "Try Demo" mode: feeds a pre-recorded sample clip through the exact same AudioWorklet/WebSocket pipeline a real microphone uses, so nothing about the agent's response is scripted.
+- **`src/lib/correctionTracker.js`** — links a reading to an immediately-prior one for the same location/food_item within a 45s window, so a cross-turn correction ("wait, that's wrong, it's 48") never leaves a stale entry sitting next to its own fix. Fully unit tested.
+- **`src/lib/hashChain.js`** + **`src/app/api/log-timestamp/route.js`** — the tamper-evident log: a SHA-256 hash chain across every entry (each depends on the one before it) plus a server-issued timestamp per entry. Fully unit tested. See "Tamper-evident log" below for exactly what this proves and what it doesn't.
+- **`src/lib/foodCategories.js`**'s `categoryConflict` — the deterministic code mapping from food_item/location always wins over the agent's own guessed `reading_type`; a disagreement is flagged (dashboard + PDF) for a manager's review, never silently overridden by the LLM.
 
 ## Running it locally
 
@@ -65,7 +68,7 @@ No mic handy, or just want to see it work first? Click **🎬 Try Demo (no mic n
 npm test
 ```
 
-29 tests: every FDA category, boundary values, unit conversion, unrecognized items, implausible readings, non-numeric input, and the STT-transcript number parser used by the accuracy harness below (including regression tests for real parsing bugs the accuracy runs themselves caught — see `docs/accuracy.md`).
+62 tests: every FDA category and its binary amber/red boundaries (amber sits entirely on the compliant side of each limit — see the note in `ruleEngine.js`), the freezer category, code-wins-over-LLM category resolution and conflict flagging, cross-turn correction linking, the tamper-evident hash chain, unit conversion, unrecognized items, implausible readings, non-numeric input, and the STT-transcript number parser used by the accuracy harness below (including regression tests for real parsing bugs the accuracy runs themselves caught — see `docs/accuracy.md`).
 
 ## First-60-seconds demo mode
 
@@ -78,6 +81,16 @@ See [`docs/accuracy.md`](docs/accuracy.md) for the real, measured number-capture
 ## Real end-to-end verification
 
 Beyond unit tests, the live deployment was driven with real synthesized speech through the actual production AssemblyAI Voice Agent WebSocket (no text-injection shortcuts, no mocks): a normal safe reading, a flagged out-of-range poultry reading (with the corrective-action dialogue), a mid-sentence self-correction, an unrecognized item (clarifying-question path), and barge-in (talking over the agent mid-sentence) all produced correct tool calls, correct FDA rule-engine verdicts, correct spoken readbacks, and correct interruption handling (`reply.done: interrupted`, playback flushed) against the real backend.
+
+## Tamper-evident log
+
+Every logged reading is linked into a SHA-256 hash chain (`src/lib/hashChain.js`): each entry's hash is computed from its own content plus the previous entry's hash, so editing, reordering, or deleting an entry after the fact breaks the chain from that point forward. Each entry also carries a server-issued timestamp (`src/app/api/log-timestamp/route.js`, a tiny Vercel serverless function — harder for a client to fake than trusting the browser's own `Date.now()` alone) and the cook's verbatim spoken transcript. A **🔒 Verify Log Integrity** button on the dashboard, and a "Log integrity: VERIFIED / BROKEN" line on every exported PDF, recompute the chain and report whether it's intact.
+
+**What this does and doesn't prove, stated plainly:** this is a "this is what was said, in this order, at this time" guarantee — it is *not* proof that a thermometer probe actually touched food at the stated temperature (a voice log fundamentally can't prove that; a cook could still misread or lie to a working probe). It's also not a cryptographic timestamp authority or a persistent server-side audit store — this app has no backend database, so the log still lives in the browser (`localStorage`) until exported, and someone with full control of their own browser (devtools, editing `localStorage` directly) could in principle fabricate an entirely new, internally-consistent chain from scratch before ever exporting. What it *does* catch, and the realistic threat it's aimed at, is the far more common case: editing or deleting an entry from an *existing* log after the fact (e.g. changing a 152°F chicken-breast violation to a compliant number after the shift, hoping nobody notices) — any such edit is detectable, because it breaks the chain from that entry forward.
+
+Two related, real limitations of the underlying AssemblyAI Voice Agent API, confirmed directly against its own published docs: neither `transcript.user` nor `transcript.user.delta` includes a confidence score, and there is no word-level timing data on the final transcript. So per-word timing information — which would have made this stronger evidence of *when* each word was spoken, not just each full utterance — isn't available to build on top of this API as documented today; the verbatim transcript and its utterance-level server timestamp are what's actually achievable and honestly claimed here.
+
+Corrections are handled the same honest way: a cook correcting an earlier reading in a later turn (`src/lib/correctionTracker.js`) never rewrites or deletes the original hash-chained entry — it adds a new entry with an audit note ("Corrected from 38°F (amber) by cook at 08:47") and marks the original "superseded" for display, while both remain in the chain exactly as logged.
 
 ## Known limitations (stated plainly, not hidden)
 
