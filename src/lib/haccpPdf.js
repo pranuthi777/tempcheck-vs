@@ -166,30 +166,44 @@ export function exportHaccpPdf(readings, { shiftStart, shiftEnd, filterDescripti
 
   const flaggedCount = flagged.length;
   let finalY = doc.lastAutoTable.finalY || y;
-  // The summary/caveat/signature block needs ~110pt; start a fresh page
-  // rather than letting it run off the bottom of a full last page.
-  if (finalY > 792 - 110 - 30) {
+
+  // Both blocks below can wrap to more than one line (the caveat sentence
+  // especially, and the summary sentence too once there are 2+ flagged
+  // readings) — laying them out at fixed y-offsets assumed a single line
+  // each and let a wrapped summary visually collide with the caveat text
+  // right under it. Measure the real wrapped line counts first so every
+  // block that follows is positioned from where the previous one actually
+  // ended, not from a guess.
+  const LINE_HEIGHT = 11.5;
+  doc.setFontSize(9);
+  const summaryLines = doc.splitTextToSize(
+    `${readings.length} readings logged, ${flaggedCount} flagged for corrective action. All numbers above are exactly what the cook said and what was measured — none are estimated.`,
+    CONTENT_WIDTH
+  );
+  const caveatLines = doc.splitTextToSize(
+    "Cooling-curve checks (135°F to 70°F within 2h, then to 41°F within 6h total, FDA Food Code 3-501.14(A)) pair a \"cooling start\" reading with a later \"cooling check\" reading for the same item and assume the temperature only decreased in between — they don't independently confirm an intermediate point.",
+    CONTENT_WIDTH
+  );
+  const blockHeight =
+    22 + summaryLines.length * LINE_HEIGHT + 12 + caveatLines.length * LINE_HEIGHT + 44;
+
+  // Start a fresh page rather than letting this block run off the bottom
+  // of a full last page.
+  if (finalY + blockHeight > 792 - 30) {
     doc.addPage();
     finalY = 40;
   }
-  doc.setFontSize(9);
+
   doc.setTextColor(60);
-  doc.text(
-    `${readings.length} readings logged, ${flaggedCount} flagged for corrective action. All numbers above are exactly what the cook said and what was measured — none are estimated.`,
-    MARGIN,
-    finalY + 22,
-    { maxWidth: CONTENT_WIDTH }
-  );
+  doc.text(summaryLines, MARGIN, finalY + 22);
+  const afterSummaryY = finalY + 22 + summaryLines.length * LINE_HEIGHT;
+
   doc.setTextColor(120);
-  doc.text(
-    "Cooling-curve checks (135°F to 70°F within 2h, then to 41°F within 6h total, FDA Food Code 3-501.14(A)) pair a \"cooling start\" reading with a later \"cooling check\" reading for the same item and assume the temperature only decreased in between — they don't independently confirm an intermediate point.",
-    MARGIN,
-    finalY + 38,
-    { maxWidth: CONTENT_WIDTH }
-  );
+  doc.text(caveatLines, MARGIN, afterSummaryY + 12);
+  const afterCaveatY = afterSummaryY + 12 + caveatLines.length * LINE_HEIGHT;
 
   // --- Manager sign-off line ---
-  const signY = finalY + 70;
+  const signY = afterCaveatY + 30;
   doc.setDrawColor(120);
   doc.setLineWidth(0.75);
   doc.line(MARGIN, signY, MARGIN + 220, signY);
