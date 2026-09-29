@@ -1,0 +1,27 @@
+{
+  "description": "Synthesized (espeak-ng) sample kitchen dialogue used by the in-app 'Try Demo' mode. This is a scripted audio track played through the app's real microphone-capture pipeline via a mocked getUserMedia — it is not a canned/fake UI animation. The real AssemblyAI Voice Agent transcribes it, the real rule engine evaluates it, and the real UI updates from real tool calls, exactly as it would for an actual cook speaking into a real microphone.",
+  "generatedWith": "espeak-ng (en-us voice), concatenated with ffmpeg, silence gaps between utterances to let the agent respond",
+  "totalDurationSeconds": 31.5,
+  "script": [
+    {
+      "atSeconds": 1.5,
+      "text": "Walk in cooler, thirty eight degrees.",
+      "expected": { "category": "cold_holding", "status": "safe" }
+    },
+    {
+      "atSeconds": 8.3,
+      "text": "Chicken breast, one fifty two degrees.",
+      "expected": { "category": "poultry", "status": "red", "note": "below the 165F poultry minimum" }
+    },
+    {
+      "atSeconds": 15.9,
+      "text": "Steam table, one twenty. No wait, one forty degrees.",
+      "expected": { "category": "hot_holding", "status": "safe", "note": "demonstrates mid-sentence self-correction handling; final spoken number (140) is used" }
+    },
+    {
+      "atSeconds": 25.6,
+      "text": "Prep cooler, forty three degrees.",
+      "expected": { "category": "cold_holding", "status": "amber", "note": "within the amber band above the 41F limit" }
+    }
+  ]
+}

@@ -56,6 +56,8 @@ npm run dev
 
 Open `http://localhost:3000`, click **Start Shift**, allow microphone access, and call out a reading.
 
+No mic handy, or just want to see it work first? Click **🎬 Try Demo (no mic needed)** instead — it plays a ~30-second sample kitchen recording through the exact same real pipeline (real AssemblyAI transcription, real rule-engine verdicts, real spoken confirmations) with no microphone access needed. See "First-60-seconds demo mode" below.
+
 ## Tests
 
 ```bash
@@ -63,6 +65,10 @@ npm test
 ```
 
 29 tests: every FDA category, boundary values, unit conversion, unrecognized items, implausible readings, non-numeric input, and the STT-transcript number parser used by the accuracy harness below (including regression tests for real parsing bugs the accuracy runs themselves caught — see `docs/accuracy.md`).
+
+## First-60-seconds demo mode
+
+Judges reviewing dozens of submissions shouldn't need a working microphone or a quiet room to see this work. The **🎬 Try Demo** button on the live site plays a pre-recorded, synthesized (`espeak-ng`) sample kitchen conversation — a safe cold-holding reading, a flagged poultry reading with a corrective action, a mid-sentence self-correction, and a borderline amber reading (`public/demo/manifest.json` documents the exact script and expected outcome for each) — straight through the app's real microphone-capture pipeline (`src/lib/micCapture.js`'s `startDemoCapture`) via the same AudioWorklet used for a real mic. Nothing about the response is scripted or faked: the real AssemblyAI Voice Agent transcribes it, the real deterministic rule engine (`src/lib/ruleEngine.js`) evaluates it, and the real UI — status board, spoken confirmation, Manager Summary, log — updates from real tool calls, exactly as it would for an actual cook. Demo readings are clearly badged "Demo mode" and are never persisted to (or allowed to overwrite) a real saved shift.
 
 ## Measured accuracy
 

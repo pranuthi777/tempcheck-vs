@@ -5,7 +5,7 @@ import { evaluateReading } from "./ruleEngine";
 import { evaluateCoolingCheck, COOLING_CITATION } from "./coolingEngine";
 import { buildSessionUpdate } from "./agentConfig";
 import { PCMPlayer } from "./audioPlayer";
-import { startMicCapture } from "./micCapture";
+import { startMicCapture, startDemoCapture } from "./micCapture";
 
 // Verified live: a real cooling_check tool call came back with BOTH
 // food_item and location set (the model filled in location from earlier
@@ -39,6 +39,12 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
   const [error, setError] = useState(null);
   const [userCaption, setUserCaption] = useState("");
   const [agentCaption, setAgentCaption] = useState("");
+  // Demo mode: "try it without a mic" plays a sample clip through the real
+  // pipeline instead of a real microphone. isDemo lets the UI badge the
+  // session so nobody mistakes it for a live shift; demoFinished flips once
+  // the sample clip has finished playing.
+  const [isDemo, setIsDemo] = useState(false);
+  const [demoFinished, setDemoFinished] = useState(false);
 
   const wsRef = useRef(null);
   const playerRef = useRef(null);
@@ -326,30 +332,40 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
     openSocketRef.current = openSocket;
   }, [openSocket]);
 
-  const connect = useCallback(async () => {
-    setError(null);
-    setStatus("connecting");
-    deliberateCloseRef.current = false;
-    resumeAttemptedRef.current = false;
-    sessionInfoRef.current = null;
-    try {
-      playerRef.current = new PCMPlayer();
-      await openSocket(null);
-      // Reset the mic gate for this session: open (continuous) unless
-      // push-to-talk was already selected before Start Shift was pressed.
-      micOpenRef.current = !pushToTalk;
-      stopMicRef.current = await startMicCapture((base64Chunk) => {
-        if (!micOpenRef.current) return;
-        const ws = wsRef.current;
-        if (ws && ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({ type: "input.audio", audio: base64Chunk }));
-        }
-      });
-    } catch (err) {
-      setError(String(err.message || err));
-      setStatus("error");
-    }
-  }, [openSocket, pushToTalk]);
+  const connect = useCallback(
+    async ({ demo = false } = {}) => {
+      setError(null);
+      setStatus("connecting");
+      deliberateCloseRef.current = false;
+      resumeAttemptedRef.current = false;
+      sessionInfoRef.current = null;
+      setIsDemo(demo);
+      setDemoFinished(false);
+      try {
+        playerRef.current = new PCMPlayer();
+        await openSocket(null);
+        // Reset the mic gate for this session: open (continuous) unless
+        // push-to-talk was already selected before Start Shift was pressed.
+        // Demo mode always forces continuous listening — there's no one
+        // there to hold a push-to-talk button while the sample clip plays.
+        micOpenRef.current = demo ? true : !pushToTalk;
+        const onChunk = (base64Chunk) => {
+          if (!micOpenRef.current) return;
+          const ws = wsRef.current;
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: "input.audio", audio: base64Chunk }));
+          }
+        };
+        stopMicRef.current = demo
+          ? await startDemoCapture(onChunk, () => setDemoFinished(true))
+          : await startMicCapture(onChunk);
+      } catch (err) {
+        setError(String(err.message || err));
+        setStatus("error");
+      }
+    },
+    [openSocket, pushToTalk]
+  );
 
   const disconnect = useCallback(() => {
     deliberateCloseRef.current = true;
@@ -362,6 +378,8 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
     stopMicRef.current?.();
     playerRef.current?.close();
     setStatus("ended");
+    setIsDemo(false);
+    setDemoFinished(false);
   }, []);
 
   return {
@@ -371,6 +389,8 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
     agentCaption,
     connect,
     disconnect,
+    isDemo,
+    demoFinished,
     pushToTalk,
     setPushToTalk,
     talking,

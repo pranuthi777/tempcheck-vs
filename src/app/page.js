@@ -71,17 +71,6 @@ export default function Home() {
     };
   }, []);
 
-  // Persist on every change so a mid-shift crash never loses more than the
-  // last render's worth of readings.
-  useEffect(() => {
-    if (readings.length === 0 && !shiftStartRef.current) return;
-    saveShift({
-      shiftStart: shiftStartRef.current,
-      shiftEnd: shiftEndRef.current,
-      readings,
-    });
-  }, [readings]);
-
   const onReading = useCallback((record) => {
     setRestoredNotice(false);
     setReadings((prev) => [record, ...prev]);
@@ -117,6 +106,8 @@ export default function Home() {
     agentCaption,
     connect,
     disconnect,
+    isDemo,
+    demoFinished,
     pushToTalk,
     setPushToTalk,
     talking,
@@ -126,6 +117,19 @@ export default function Home() {
     onReading,
     onTranscriptLine,
   });
+
+  // Persist on every change so a mid-shift crash never loses more than the
+  // last render's worth of readings. Demo readings never touch the real
+  // saved shift.
+  useEffect(() => {
+    if (isDemo) return;
+    if (readings.length === 0 && !shiftStartRef.current) return;
+    saveShift({
+      shiftStart: shiftStartRef.current,
+      shiftEnd: shiftEndRef.current,
+      readings,
+    });
+  }, [readings, isDemo]);
 
   const startShift = useCallback(() => {
     // A brand-new shift replaces whatever was persisted, including a
@@ -148,6 +152,32 @@ export default function Home() {
     });
     disconnect();
   }, [disconnect, readings]);
+
+  // "Try Demo" (backlog #7 — first-60-seconds judge experience): plays a
+  // pre-recorded sample kitchen clip through the exact same real pipeline
+  // (mic-capture -> WebSocket -> AssemblyAI -> tool call -> rule engine ->
+  // UI) instead of a real microphone, so a judge with no mic, or who just
+  // doesn't want to grant mic access, can still see the whole thing work
+  // for real in under a minute. Demo readings never touch the real
+  // persisted shift in localStorage (guarded below) and are cleared the
+  // moment the demo ends, so they can never be mistaken for, or overwrite,
+  // a real cook's log.
+  const startDemo = useCallback(() => {
+    setReadings([]);
+    setRestoredNotice(false);
+    shiftStartRef.current = Date.now();
+    shiftEndRef.current = null;
+    setShiftStartDisplay(shiftStartRef.current);
+    connect({ demo: true });
+  }, [connect]);
+
+  const endDemo = useCallback(() => {
+    disconnect();
+    setReadings([]);
+    shiftStartRef.current = null;
+    shiftEndRef.current = null;
+    setShiftStartDisplay(null);
+  }, [disconnect]);
 
   const summary = useMemo(() => {
     const counts = { safe: 0, amber: 0, red: 0, unknown: 0 };
@@ -251,11 +281,27 @@ export default function Home() {
         </div>
         <div className="flex gap-2">
           {!isLive ? (
+            <>
+              <button
+                onClick={startShift}
+                className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 font-semibold transition"
+              >
+                Start Shift
+              </button>
+              <button
+                onClick={startDemo}
+                title="Plays a ~30s sample kitchen recording through the real app — no microphone needed"
+                className="px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 font-semibold transition"
+              >
+                🎬 Try Demo (no mic needed)
+              </button>
+            </>
+          ) : isDemo ? (
             <button
-              onClick={startShift}
-              className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 font-semibold transition"
+              onClick={endDemo}
+              className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 font-semibold transition"
             >
-              Start Shift
+              End Demo
             </button>
           ) : (
             <button
@@ -372,6 +418,24 @@ export default function Home() {
           Restored {readings.length} reading{readings.length === 1 ? "" : "s"} from before this
           page was reloaded — nothing was lost. Export the PDF whenever you&apos;re ready, or
           press Start Shift to begin a new one.
+        </div>
+      )}
+
+      {!isLive && !restoredNotice && readings.length === 0 && (
+        <div className="rounded-lg border border-violet-800 bg-violet-950/30 text-violet-300 text-sm px-3 py-2">
+          New here? Click <strong>Try Demo</strong> above to hear a sample kitchen conversation
+          flow through the real app in about 30 seconds — real speech recognition, real FDA rule
+          checks, real spoken confirmation, no microphone required.
+        </div>
+      )}
+
+      {isDemo && isLive && (
+        <div className="rounded-lg border border-violet-700 bg-violet-950/50 text-violet-300 text-sm px-3 py-2">
+          🎬 <strong>Demo mode</strong> — a sample kitchen recording is playing through the real
+          pipeline (no microphone is being used).{" "}
+          {demoFinished
+            ? "Demo clip finished — press End Demo above, or explore the log and PDF export below."
+            : "Sit back for about 30 seconds while it plays four sample readings."}
         </div>
       )}
 
