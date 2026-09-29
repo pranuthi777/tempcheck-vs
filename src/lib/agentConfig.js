@@ -81,16 +81,48 @@ export function buildSessionUpdate() {
       greeting: GREETING,
       input: {
         format: { encoding: "audio/pcm", sample_rate: 24000 },
+        // Round-2 critique #P1-9: expanded from 13 to ~30+ terms, covering
+        // every location category plus at least one representative food
+        // item from each FDA temperature category in foodCategories.js
+        // (poultry, ground/injected meat, whole muscle, fish/seafood/eggs,
+        // reheating), not just the two or three items the original test
+        // set happened to use. Re-measured before/after in docs/accuracy.md.
         keyterms: [
+          // locations
           "walk-in cooler",
           "reach-in cooler",
+          "prep cooler",
+          "line cooler",
           "walk-in freezer",
           "freezer",
           "steam table",
           "hot well",
+          "hot box",
+          "salad bar",
+          // poultry
           "chicken",
+          "chicken breast",
+          "turkey",
           "poultry",
+          // ground/injected meat
           "ground beef",
+          "sausage",
+          "meatballs",
+          // whole muscle
+          "steak",
+          "pork loin",
+          "roast",
+          "brisket",
+          // fish/seafood/eggs
+          "salmon",
+          "shrimp",
+          "eggs",
+          // reheating / other common kitchen items and vocabulary
+          "soup",
+          "chili",
+          "rice",
+          "sous vide",
+          "sanitizer",
           "Fahrenheit",
           "Celsius",
           "cooling",
