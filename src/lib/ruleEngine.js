@@ -44,7 +44,7 @@
  * the cited limits above.
  */
 
-const { resolveCategory, CATEGORY_LABELS } = require("./foodCategories");
+const { resolveCategory, categoryConflict, CATEGORY_LABELS } = require("./foodCategories");
 
 // [amberLow, safeThreshold] pairs per category. Direction differs:
 // cold_holding is "safe at or BELOW threshold"; everything else is
@@ -103,6 +103,12 @@ function evaluateReading(input) {
   const temperatureF = Number(input.temperatureF);
   const category = resolveCategory(input);
   const categoryLabel = CATEGORY_LABELS[category];
+  // "Code wins" (see foodCategories.js): `category` above is already the
+  // code-resolved one whenever code could resolve one at all. This flag
+  // just surfaces, for manager review, the cases where the agent's LLM
+  // guessed a different reading_type — it never changes which category
+  // was actually evaluated.
+  const conflict = categoryConflict(input);
 
   if (!Number.isFinite(temperatureF)) {
     return {
@@ -113,6 +119,7 @@ function evaluateReading(input) {
       correctiveAction: "Could not parse a numeric temperature — ask the cook to repeat the reading.",
       message: "No valid temperature was captured.",
       citation: null,
+      categoryConflict: conflict,
     };
   }
 
@@ -130,6 +137,7 @@ function evaluateReading(input) {
         "That reading is outside any plausible kitchen temperature range — ask the cook to repeat it before logging.",
       message: `${round1(temperatureF)}°F is implausible and was not saved.`,
       citation: null,
+      categoryConflict: conflict,
     };
   }
 
@@ -142,6 +150,7 @@ function evaluateReading(input) {
       correctiveAction: CORRECTIVE_ACTIONS.unknown,
       message: `${round1(temperatureF)}°F logged, but the item/location wasn't recognized. A manager should classify it.`,
       citation: null,
+      categoryConflict: conflict,
     };
   }
 
@@ -180,6 +189,7 @@ function evaluateReading(input) {
     correctiveAction: status === "red" ? CORRECTIVE_ACTIONS[category] : null,
     message,
     citation: limit.citation,
+    categoryConflict: conflict,
   };
 }
 

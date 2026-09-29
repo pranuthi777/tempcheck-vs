@@ -44,7 +44,8 @@ export const LOG_READING_TOOL = {
       },
       reading_type: {
         type: "string",
-        description: "Explicit category if the cook states it directly.",
+        description:
+          "Explicit category if the cook states it directly. This is only a hint: the tool's own deterministic lookup from location/food_item always takes priority when it can classify the item, so send your best guess and trust whatever category comes back in the result — even if it differs from what you sent.",
         enum: [
           "cold_holding",
           "freezer",

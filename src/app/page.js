@@ -587,6 +587,14 @@ export default function Home() {
                           ({r.coolingStage === "start" ? "cooling start" : "cooling check"})
                         </span>
                       )}
+                      {r.categoryConflict && (
+                        <span
+                          className="ml-1.5 text-xs text-amber-400"
+                          title={`Category conflict: evaluated as ${r.categoryLabel} (code-resolved from the item/location) — the voice agent's own guess disagreed. Worth a manager's review.`}
+                        >
+                          ⚠️ category conflict
+                        </span>
+                      )}
                     </td>
                     <td className="px-3 py-2 font-mono">
                       {Number.isFinite(r.temperatureF) ? `${r.temperatureF}°F` : "—"}

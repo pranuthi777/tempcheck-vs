@@ -150,6 +150,28 @@ test("the old confirmRecommended field is gone — amber itself is now the close
   assert.equal(r.confirmRecommended, undefined);
 });
 
+test("code wins over the LLM's reading_type: chicken breast mislabeled hot_holding is still evaluated as poultry and comes back red at 140F", () => {
+  const r = evaluateReading({ foodItem: "chicken breast", readingType: "hot_holding", temperatureF: 140 });
+  assert.equal(r.category, "poultry");
+  assert.equal(r.status, "red");
+  assert.equal(r.categoryConflict, true);
+  assert.match(r.correctiveAction, /165/);
+});
+
+test("no conflict flag when the LLM's reading_type matches (or there's nothing to check it against)", () => {
+  const agree = evaluateReading({ foodItem: "chicken breast", readingType: "poultry", temperatureF: 180 });
+  assert.equal(agree.categoryConflict, false);
+
+  const noGuess = evaluateReading({ foodItem: "chicken breast", temperatureF: 180 });
+  assert.equal(noGuess.categoryConflict, false);
+
+  // Code can't resolve this one at all, so the LLM's own reading_type is
+  // trusted and there's nothing to flag as a conflict.
+  const trusted = evaluateReading({ foodItem: "soup", readingType: "reheating", temperatureF: 175 });
+  assert.equal(trusted.category, "reheating");
+  assert.equal(trusted.categoryConflict, false);
+});
+
 test("every recognized category cites its specific FDA Food Code section", () => {
   const cases = [
     { location: "walk-in cooler", temperatureF: 30, citation: "3-501.16(A)(2)" },

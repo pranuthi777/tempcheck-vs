@@ -132,7 +132,10 @@ export function exportHaccpPdf(readings, { shiftStart, shiftEnd, filterDescripti
     new Date(r.timestamp).toLocaleTimeString(),
     (r.location || r.foodItem || "—") +
       (r.coolingStage ? ` (${r.coolingStage === "start" ? "cooling start" : "cooling check"})` : ""),
-    r.categoryLabel || "—",
+    // Code always wins the category the reading was actually evaluated
+    // against (see foodCategories.js) — this just marks, for a manager's
+    // review, the cases where the voice agent's own guess disagreed.
+    (r.categoryLabel || "—") + (r.categoryConflict ? " (⚠ category conflict)" : ""),
     Number.isFinite(r.temperatureF) ? `${r.temperatureF}°F` : "—",
     (r.status || "unknown").toUpperCase(),
     r.correctiveAction || "—",

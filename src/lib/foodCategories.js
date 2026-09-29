@@ -129,19 +129,12 @@ const CATEGORY_LABELS = {
 };
 
 /**
- * Resolve a free-text location/food-item string to a category.
- * Falls back to "unknown" rather than guessing — an unrecognized item
- * must be flagged for a human to categorize, never silently assumed safe.
+ * Look up a category from the food_item/location text alone, via the
+ * deterministic ITEM_CATEGORY_MAP — no LLM input involved. Returns null if
+ * nothing in the map matches.
  */
-function resolveCategory({ location, foodItem, readingType }) {
+function codeResolvedCategory({ location, foodItem }) {
   const normalize = (s) => (s || "").toLowerCase().trim();
-
-  // Explicit reading_type from the agent wins if it's a valid category.
-  const explicit = normalize(readingType).replace(/\s+/g, "_");
-  if (explicit && CATEGORY_LABELS[explicit] && explicit !== "unknown") {
-    return explicit;
-  }
-
   const loc = normalize(location);
   const item = normalize(foodItem);
 
@@ -151,8 +144,56 @@ function resolveCategory({ location, foodItem, readingType }) {
   for (const [key, category] of Object.entries(ITEM_CATEGORY_MAP)) {
     if (item && item.includes(key)) return category;
   }
+  return null;
+}
+
+/**
+ * Resolve a free-text location/food-item string to a category.
+ *
+ * "Code wins": the deterministic ITEM_CATEGORY_MAP lookup from
+ * food_item/location is authoritative whenever it resolves to something.
+ * The agent's own LLM-supplied reading_type is used ONLY as a fallback,
+ * when the code lookup can't classify the item at all — it never
+ * overrides a code-resolvable category, even if the LLM disagrees. This
+ * matters because the LLM's reading_type is a free-form guess from the
+ * same model that also (rarely) mishears a number; "chicken breast" must
+ * always be evaluated as poultry (165F), never accidentally downgraded to
+ * hot_holding (135F) because the model guessed wrong.
+ *
+ * Falls back to "unknown" rather than guessing — an unrecognized item
+ * must be flagged for a human to categorize, never silently assumed safe.
+ */
+function resolveCategory({ location, foodItem, readingType }) {
+  const codeCategory = codeResolvedCategory({ location, foodItem });
+  if (codeCategory) return codeCategory;
+
+  // Nothing in the map matched — fall back to the LLM's own guess, if it
+  // gave a valid one.
+  const normalize = (s) => (s || "").toLowerCase().trim();
+  const explicit = normalize(readingType).replace(/\s+/g, "_");
+  if (explicit && CATEGORY_LABELS[explicit] && explicit !== "unknown") {
+    return explicit;
+  }
 
   return "unknown";
 }
 
-module.exports = { ITEM_CATEGORY_MAP, CATEGORY_LABELS, resolveCategory };
+/**
+ * True when the LLM's reading_type disagrees with the code-resolved
+ * category — worth flagging for a human to review, even though the code
+ * category (not the LLM's guess) is what actually gets evaluated. No
+ * conflict is reported when there's nothing to compare (no reading_type
+ * given, or the code lookup couldn't resolve anything on its own).
+ */
+function categoryConflict({ location, foodItem, readingType }) {
+  const codeCategory = codeResolvedCategory({ location, foodItem });
+  if (!codeCategory) return false;
+
+  const normalize = (s) => (s || "").toLowerCase().trim();
+  const explicit = normalize(readingType).replace(/\s+/g, "_");
+  if (!explicit || !CATEGORY_LABELS[explicit] || explicit === "unknown") return false;
+
+  return explicit !== codeCategory;
+}
+
+module.exports = { ITEM_CATEGORY_MAP, CATEGORY_LABELS, resolveCategory, categoryConflict };
