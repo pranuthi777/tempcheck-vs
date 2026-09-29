@@ -21,13 +21,33 @@
  * a new one corrects — it doesn't remove or mutate anything itself. The
  * caller (useVoiceAgent.js) decides how to record the audit trail.
  *
- * Heuristic, stated plainly: "the same exchange" is approximated as
- * "the same normalized location/food_item, within a short time window."
- * A real correction almost always happens within seconds of the original
- * readback. A deliberately short window (default 45s) is used specifically
- * so two legitimate, separate checks of the same station later in a shift
- * are NOT mistaken for a correction of each other — a real but accepted
- * false-negative trade-off, not a claim that every correction is caught.
+ * Round-3 critique #P0-1 — a real, dangerous bug found by manual review:
+ * this used to match on LOCATION alone (or food_item alone) purely by
+ * proximity in time. That meant two DIFFERENT food items checked
+ * back-to-back at the same station — "walk-in cooler, chicken, forty
+ * eight" then, twenty seconds later, "walk-in cooler, milk, thirty
+ * eight" — got linked as if the second corrected the first, because both
+ * mention "walk-in cooler." The genuine 48°F chicken violation would have
+ * been silently marked "superseded" by an unrelated milk reading and
+ * dropped out of the violations list. Fixed two ways, both required:
+ *
+ *  1. Matching is now on food_item ONLY, never location. A correction is
+ *     about the same physical item being re-stated, not the same shelf.
+ *     A reading with no food_item at all (a pure storage-unit/air check,
+ *     e.g. "walk-in cooler, thirty eight") is never treated as
+ *     correctable by this tracker — two consecutive location-only
+ *     readings are two independent checks. A genuinely spoken correction
+ *     of a location-only reading going undetected just leaves two
+ *     separate entries in the log, which is the safe direction to err in
+ *     (nothing is ever hidden); the old behavior's failure mode was the
+ *     dangerous direction (a real violation silently vanishing).
+ *  2. Proximity in time is no longer sufficient by itself either: the new
+ *     reading's own spoken words must contain an explicit correction cue
+ *     ("no", "wait", "sorry", "I mean", "actually", "that's wrong", …).
+ *     Two honest, independent re-checks of the same food item within the
+ *     window (a manager saying "check that chicken again") must not be
+ *     silently merged just because they're close together in time and
+ *     share a food item.
  */
 
 const DEFAULT_WINDOW_MS = 45000;
@@ -36,14 +56,31 @@ function normalize(s) {
   return (s || "").toLowerCase().trim();
 }
 
-// Mirrors useVoiceAgent.js's coolingKeys(): index under BOTH non-empty
-// fields (food_item and location) since a correction may repeat only one
-// of them ("walk-in cooler 38" ... "no, the cooler's 48").
-function keysFor({ location, foodItem }) {
-  const keys = [];
-  if (foodItem) keys.push("item:" + normalize(foodItem));
-  if (location) keys.push("loc:" + normalize(location));
-  return keys;
+// Food-item-only identity key — see the file header for why location is
+// deliberately never used to match a correction.
+function identityKeyFor({ foodItem }) {
+  const item = normalize(foodItem);
+  return item ? "item:" + item : null;
+}
+
+const CORRECTION_CUE_PATTERNS = [
+  /\bno\b/i,
+  /\bnope\b/i,
+  /\bwait\b/i,
+  /\bsorry\b/i,
+  /\bi mean\b/i,
+  /\bactually\b/i,
+  /\bthat'?s wrong\b/i,
+  /\bmy mistake\b/i,
+  /\bmisspoke\b/i,
+  /\bcorrection\b/i,
+  /\bmeant to say\b/i,
+  /\bnot\s+\d/i, // "not thirty eight" / "not 38"
+];
+
+function hasCorrectionCue(text) {
+  const t = text || "";
+  return CORRECTION_CUE_PATTERNS.some((re) => re.test(t));
 }
 
 /**
@@ -54,35 +91,36 @@ function createCorrectionTracker({ windowMs = DEFAULT_WINDOW_MS } = {}) {
 
   /**
    * Records a new reading and, if it looks like a correction of a very
-   * recent prior reading for the same location/food_item, returns that
-   * prior reading's info. Always updates the tracker's own "latest" state
-   * for this reading's keys, whether or not a correction was detected.
+   * recent prior reading for the SAME food_item AND the new reading's own
+   * spoken words contain a correction cue, returns that prior reading's
+   * info. Always updates the tracker's own "latest" state for this
+   * reading's key (when it has a food_item), whether or not a correction
+   * was detected — so a LATER reading with a cue phrase can still find
+   * and correct an earlier one that had none.
    *
-   * @param {{id:string, location?:string, foodItem?:string, temperatureF:number, status:string, timestamp?:number}} reading
+   * @param {{id:string, foodItem?:string, temperatureF:number, status:string, timestamp?:number, cookText?:string}} reading
    * @returns {{id:string, temperatureF:number, status:string, timestamp:number}|null}
    */
-  function checkAndRecord({ id, location, foodItem, temperatureF, status, timestamp = Date.now() }) {
-    const keys = keysFor({ location, foodItem });
+  function checkAndRecord({ id, foodItem, temperatureF, status, timestamp = Date.now(), cookText }) {
+    const key = identityKeyFor({ foodItem });
     let corrects = null;
 
-    if (keys.length > 0 && Number.isFinite(temperatureF)) {
-      for (const k of keys) {
-        const prior = latestByKey.get(k);
-        if (
-          prior &&
-          prior.id !== id &&
-          Number.isFinite(prior.temperatureF) &&
-          timestamp - prior.timestamp >= 0 &&
-          timestamp - prior.timestamp <= windowMs
-        ) {
-          corrects = prior;
-          break;
-        }
+    if (key && Number.isFinite(temperatureF) && hasCorrectionCue(cookText)) {
+      const prior = latestByKey.get(key);
+      if (
+        prior &&
+        prior.id !== id &&
+        Number.isFinite(prior.temperatureF) &&
+        timestamp - prior.timestamp >= 0 &&
+        timestamp - prior.timestamp <= windowMs
+      ) {
+        corrects = prior;
       }
     }
 
-    const record = { id, temperatureF, status, timestamp };
-    for (const k of keys) latestByKey.set(k, record);
+    if (key && Number.isFinite(temperatureF)) {
+      latestByKey.set(key, { id, temperatureF, status, timestamp });
+    }
 
     return corrects;
   }
@@ -90,4 +128,4 @@ function createCorrectionTracker({ windowMs = DEFAULT_WINDOW_MS } = {}) {
   return { checkAndRecord, windowMs };
 }
 
-module.exports = { createCorrectionTracker, keysFor, DEFAULT_WINDOW_MS };
+module.exports = { createCorrectionTracker, identityKeyFor, hasCorrectionCue, DEFAULT_WINDOW_MS };

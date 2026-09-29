@@ -5,7 +5,7 @@ import { useVoiceAgent } from "@/lib/useVoiceAgent";
 import { exportHaccpPdf } from "@/lib/haccpPdf";
 import { loadShift, saveShift, clearShift } from "@/lib/shiftStorage";
 import { playLogBeep, playAlertTone } from "@/lib/audioCues";
-import { computeEntryHash, verifyHashChain, GENESIS_HASH } from "@/lib/hashChain";
+import { computeEntryHash, verifyLog, GENESIS_HASH } from "@/lib/hashChain";
 import { computeOverdueUnits, DEFAULT_INTERVAL_MS } from "@/lib/missedChecks";
 import { loadSettings, saveSettings } from "@/lib/settingsStorage";
 import BigDisplay from "@/components/BigDisplay";
@@ -88,6 +88,41 @@ export default function Home() {
   // entry must chain from." Restored from the newest restored reading's
   // own hash below, or GENESIS_HASH for a fresh shift.
   const lastHashRef = useRef(GENESIS_HASH);
+  // Round-3 #P0-2: every append to the hash chain (a reading's own hash,
+  // or a correction/resolution event's hash) reads lastHashRef.current,
+  // awaits some async work (a server-timestamp fetch, a crypto.subtle
+  // digest), then writes lastHashRef.current — a real race if two appends
+  // ever overlap (e.g. a reading logged right as a manager clicks Mark
+  // Resolved on another one): both could read the same stale prevHash
+  // before either writes back, corrupting the chain. chainQueueRef
+  // serializes every append through one promise queue so each one's
+  // entire async body (read prevHash -> await -> write prevHash) runs to
+  // completion before the next one's body even starts.
+  const chainQueueRef = useRef(Promise.resolve());
+  const enqueueChainAppend = useCallback((task) => {
+    const run = chainQueueRef.current.then(() => task());
+    chainQueueRef.current = run.catch(() => {}); // never let one failure wedge the queue
+    return run;
+  }, []);
+  // Monotonic append-order counter shared by readings AND correction/
+  // resolution events, so verifyLog can reconstruct the true order things
+  // were actually logged in (readings and events are stored in separate,
+  // each newest-first, arrays — `seq` is what lets them be merged back
+  // into one true chronological chain regardless of which array they're
+  // in). Continues from the highest seq found in a restored shift rather
+  // than resetting to 0, so restored + new entries never collide.
+  const seqRef = useRef(0);
+  const nextSeq = useCallback(() => {
+    seqRef.current += 1;
+    return seqRef.current;
+  }, []);
+  // Correction/resolution events — see hashChain.js's file header
+  // (Round-3 #P0-3). Superseded/resolvedAt are still cached directly on
+  // the reading for fast, simple rendering (unchanged from before), but
+  // that cache is no longer the source of truth: verifyIntegrity below
+  // cross-checks it against this hashed, appended event log and reports a
+  // mismatch as broken.
+  const [events, setEvents] = useState([]);
   const [integrityResult, setIntegrityResult] = useState(null); // {verified, brokenAt, reason} | null
   // Pending cooling-curve starts (see coolingBatches.js / useVoiceAgent.js).
   // Mirrored here purely so it can be persisted to shiftStorage — the hook
@@ -143,14 +178,23 @@ export default function Home() {
       const saved = loadShift();
       if (saved && (saved.readings.length > 0 || saved.coolingPending?.length > 0)) {
         setReadings(saved.readings);
+        const savedEvents = saved.events || [];
+        setEvents(savedEvents);
         shiftStartRef.current = saved.shiftStart ?? null;
         shiftEndRef.current = saved.shiftEnd ?? null;
         setShiftStartDisplay(shiftStartRef.current);
         setRestoredNotice(true);
-        // readings are stored newest-first, so [0] is the last link in the
-        // hash chain so far — resume from there, not from genesis, or
-        // every reading after a reload would look like a broken chain.
-        if (saved.readings[0]?.hash) lastHashRef.current = saved.readings[0].hash;
+        // Resume the hash chain from whichever restored entry (reading or
+        // event) has the HIGHEST seq — that's the true last link, since
+        // readings and events are separate arrays and either could hold
+        // the most recent append. Falls back to genesis for a brand-new
+        // shift with nothing restored.
+        const allRestored = [...saved.readings, ...savedEvents];
+        if (allRestored.length > 0) {
+          const last = allRestored.reduce((a, b) => ((b.seq ?? -1) > (a.seq ?? -1) ? b : a));
+          if (last?.hash) lastHashRef.current = last.hash;
+          seqRef.current = Math.max(0, ...allRestored.map((e) => e.seq ?? 0));
+        }
         pendingCoolingRestoreRef.current = saved.coolingPending || [];
         setCoolingRestoreTick((t) => t + 1);
         if (saved.cookName) setCookName(saved.cookName);
@@ -161,79 +205,148 @@ export default function Home() {
     };
   }, []);
 
-  const onReading = useCallback((record) => {
-    setRestoredNotice(false);
-    setReadings((prev) => {
-      // A reading that corrects an earlier one (see correctionTracker.js /
-      // useVoiceAgent.js) marks that earlier entry "superseded" instead of
-      // leaving two unlinked entries side by side — the old one stays in
-      // the log for the audit trail (never deleted), but is excluded from
-      // live counts/summaries so a corrected-away "safe" or "red" reading
-      // never lingers as if it were still current.
-      const next = record.correctsReadingId
-        ? prev.map((r) =>
-            r.id === record.correctsReadingId
-              ? { ...r, superseded: true, supersededAt: record.timestamp, supersededNote: record.correctionNote }
-              : r
-          )
-        : prev;
-      return [record, ...next];
-    });
-    if (soundEnabledRef.current) {
-      if (record.status === "amber" || record.status === "red") {
-        playAlertTone(record.status);
-      } else {
-        playLogBeep();
+  const onReading = useCallback(
+    (record) => {
+      const seq = nextSeq();
+      const recordWithSeq = { ...record, seq };
+      setRestoredNotice(false);
+      setReadings((prev) => {
+        // A reading that corrects an earlier one (see correctionTracker.js
+        // / useVoiceAgent.js) marks that earlier entry "superseded"
+        // instead of leaving two unlinked entries side by side — the old
+        // one stays in the log for the audit trail (never deleted). This
+        // cached flag is set immediately for instant UI feedback; the
+        // matching hashed correction EVENT (Round-3 #P0-3, see
+        // hashChain.js) is appended just below, right after this
+        // reading's own hash — verifyIntegrity cross-checks the two.
+        //
+        // Round-3 #P0-1: a superseded RED reading must never disappear
+        // from violations — it's a real, historical FDA violation that
+        // happened, whatever it was later corrected to. The note says
+        // what it was corrected TO (this new reading's own value), and
+        // flags it for a manager to confirm rather than silently trusting
+        // the cook's own correction.
+        const next = record.correctsReadingId
+          ? prev.map((r) =>
+              r.id === record.correctsReadingId
+                ? {
+                    ...r,
+                    superseded: true,
+                    supersededAt: record.timestamp,
+                    supersededNote:
+                      `Corrected by cook to ${record.temperatureF}°F (${record.status}) at ${new Date(
+                        record.timestamp
+                      ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` +
+                      (r.status === "red" ? " — manager to confirm" : ""),
+                  }
+                : r
+            )
+          : prev;
+        return [recordWithSeq, ...next];
+      });
+      if (soundEnabledRef.current) {
+        if (record.status === "amber" || record.status === "red") {
+          playAlertTone(record.status);
+        } else {
+          playLogBeep();
+        }
       }
-    }
 
-    // Tamper-evidence (Bug #5 / #26): fetch a server-issued timestamp and
-    // extend the hash chain, then merge those fields onto this entry once
-    // ready. Done AFTER the synchronous UI update above so network/crypto
-    // latency never delays the cook's spoken readback — the reading is
-    // already visible and already sent back to the voice agent; this just
-    // fills in its tamper-evidence fields a beat later.
-    (async () => {
-      let serverTimestamp = null;
-      try {
-        const resp = await fetch("/api/log-timestamp");
-        const data = await resp.json();
-        serverTimestamp = data.timestamp || null;
-      } catch {
-        // Best-effort: if the server timestamp can't be fetched (offline,
-        // deploy hiccup), the hash chain still runs off the client
-        // timestamp alone rather than failing to log the reading at all.
-      }
-      const prevHash = lastHashRef.current;
-      const entryForHash = { ...record, serverTimestamp };
-      const hash = await computeEntryHash(entryForHash, prevHash);
-      lastHashRef.current = hash;
-      setReadings((prev) => prev.map((r) => (r.id === record.id ? { ...r, serverTimestamp, prevHash, hash } : r)));
-    })();
-  }, []);
+      // Tamper-evidence (Bug #5 / #26, extended Round-3 #P0-2/#P0-3):
+      // fetch a server-issued timestamp and extend the hash chain, then
+      // merge those fields onto this entry once ready. Done AFTER the
+      // synchronous UI update above so network/crypto latency never
+      // delays the cook's spoken readback. The whole body is enqueued
+      // through chainQueueRef so overlapping readings can never race on
+      // lastHashRef — see chainQueueRef's own comment above.
+      enqueueChainAppend(async () => {
+        let serverTimestamp = null;
+        try {
+          const resp = await fetch("/api/log-timestamp");
+          const data = await resp.json();
+          serverTimestamp = data.timestamp || null;
+        } catch {
+          // Best-effort: if the server timestamp can't be fetched (offline,
+          // deploy hiccup), the hash chain still runs off the client
+          // timestamp alone rather than failing to log the reading at all.
+        }
+        const prevHash = lastHashRef.current;
+        const entryForHash = { ...recordWithSeq, serverTimestamp };
+        const hash = await computeEntryHash(entryForHash, prevHash);
+        lastHashRef.current = hash;
+        setReadings((prev) => prev.map((r) => (r.id === record.id ? { ...r, serverTimestamp, prevHash, hash } : r)));
 
-  // Recomputes the hash chain over every reading in this shift (oldest
-  // first — `readings` itself is stored newest-first) and reports whether
-  // it's still intact. See hashChain.js for exactly what this does and
-  // doesn't prove.
+        // If this reading corrects an earlier one, append the matching
+        // hashed correction EVENT right after the reading's own hash, in
+        // the same serialized turn — "this reading exists" and "it
+        // corrects entry X" become two ordered, chained, tamper-evident
+        // facts instead of one hashed fact plus one unhashed flag.
+        if (record.correctsReadingId) {
+          const eventSeq = nextSeq();
+          const correctionEvent = {
+            id: `corr-${record.id}`,
+            kind: "correction",
+            targetId: record.correctsReadingId,
+            correctedTemperatureF: record.temperatureF,
+            correctedStatus: record.status,
+            timestamp: record.timestamp,
+            seq: eventSeq,
+          };
+          const evPrevHash = lastHashRef.current;
+          const evHash = await computeEntryHash(correctionEvent, evPrevHash);
+          lastHashRef.current = evHash;
+          setEvents((prev) => [{ ...correctionEvent, prevHash: evPrevHash, hash: evHash }, ...prev]);
+        }
+      });
+    },
+    [enqueueChainAppend, nextSeq]
+  );
+
+  // Recomputes the hash chain over every reading AND correction/
+  // resolution event in this shift (merged back into true append order by
+  // `seq`) and reports whether it's still intact — including whether every
+  // reading's cached superseded/resolvedAt flags actually match the
+  // hashed event log (Round-3 #P0-3). See hashChain.js for exactly what
+  // this does and doesn't prove.
   const verifyIntegrity = useCallback(async () => {
-    const chronological = [...readings].reverse();
-    const result = await verifyHashChain(chronological);
+    const result = await verifyLog({ readings, events });
     setIntegrityResult(result);
     return result;
-  }, [readings]);
+  }, [readings, events]);
 
   // A manager (or the cook themselves) marks a flagged reading resolved
   // once the corrective action has actually been taken — e.g. the product
   // was moved to a colder unit or discarded. This is a separate, explicit
   // step from logging the reading itself: the voice agent can't know
   // whether the corrective action really happened, only that it was
-  // stated back to the cook.
-  const toggleResolved = useCallback((id) => {
-    setReadings((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, resolvedAt: r.resolvedAt ? null : Date.now() } : r))
-    );
-  }, []);
+  // stated back to the cook. Round-3 #P0-3: this is now a hashed, appended
+  // resolution EVENT, not just a flag flipped on the reading — the cached
+  // `resolvedAt` below is still what the UI renders from directly, but
+  // verifyIntegrity cross-checks it against this event log.
+  const toggleResolved = useCallback(
+    (id) => {
+      const target = readings.find((r) => r.id === id);
+      const willResolve = !target?.resolvedAt;
+      const now = Date.now();
+      setReadings((prev) => prev.map((r) => (r.id === id ? { ...r, resolvedAt: willResolve ? now : null } : r)));
+      enqueueChainAppend(async () => {
+        const eventSeq = nextSeq();
+        const resolutionEvent = {
+          id: `res-${id}-${now}`,
+          kind: "resolution",
+          targetId: id,
+          resolved: willResolve,
+          timestamp: now,
+          seq: eventSeq,
+        };
+        const prevHash = lastHashRef.current;
+        const hash = await computeEntryHash(resolutionEvent, prevHash);
+        lastHashRef.current = hash;
+        setEvents((prev) => [{ ...resolutionEvent, prevHash, hash }, ...prev]);
+      });
+    },
+    [readings, enqueueChainAppend, nextSeq]
+  );
 
   const onTranscriptLine = useCallback((line) => {
     setTranscript((prev) => [...prev.slice(-30), line]);
@@ -286,16 +399,20 @@ export default function Home() {
       shiftStart: shiftStartRef.current,
       shiftEnd: shiftEndRef.current,
       readings,
+      events,
       coolingPending,
       cookName,
     });
-  }, [readings, isDemo, coolingPending, cookName]);
+  }, [readings, events, isDemo, coolingPending, cookName]);
 
   const startShift = useCallback(() => {
     // A brand-new shift replaces whatever was persisted, including a
     // previously-restored, already-exported shift.
     clearShift();
     setReadings([]);
+    setEvents([]);
+    seqRef.current = 0;
+    lastHashRef.current = GENESIS_HASH;
     setRestoredNotice(false);
     shiftStartRef.current = Date.now();
     shiftEndRef.current = null;
@@ -310,12 +427,13 @@ export default function Home() {
       shiftStart: shiftStartRef.current,
       shiftEnd: shiftEndRef.current,
       readings,
+      events,
       coolingPending,
       cookName,
     });
     disconnect();
     setCookName("");
-  }, [disconnect, readings, coolingPending, cookName]);
+  }, [disconnect, readings, events, coolingPending, cookName]);
 
   // "Try Demo" (backlog #7 — first-60-seconds judge experience): plays a
   // pre-recorded sample kitchen clip through the exact same real pipeline
@@ -328,6 +446,9 @@ export default function Home() {
   // a real cook's log.
   const startDemo = useCallback(() => {
     setReadings([]);
+    setEvents([]);
+    seqRef.current = 0;
+    lastHashRef.current = GENESIS_HASH;
     setRestoredNotice(false);
     shiftStartRef.current = Date.now();
     shiftEndRef.current = null;
@@ -339,6 +460,7 @@ export default function Home() {
   const endDemo = useCallback(() => {
     disconnect();
     setReadings([]);
+    setEvents([]);
     shiftStartRef.current = null;
     shiftEndRef.current = null;
     setShiftStartDisplay(null);
@@ -388,11 +510,13 @@ export default function Home() {
   const managerSummary = useMemo(() => {
     // Only "red" is an actual FDA violation that needs a manager's
     // corrective-action follow-up and a resolve click — "amber" is
-    // compliant (just close to the limit) and never gets a resolve
-    // button, so it must not count toward "still unresolved" here either.
-    // A superseded (corrected-away) reading is excluded too — it's not a
-    // live violation anymore, its correction is.
-    const flagged = readings.filter((r) => r.status === "red" && !r.superseded);
+    // compliant (just close to the limit) and never gets a resolve button.
+    // Round-3 #P0-1: a superseded (corrected-away) RED reading is NOT
+    // excluded — it was a real violation when it happened, and a cook's
+    // own later correction is not a substitute for a manager confirming
+    // it. It stays counted (and stays resolvable) until a manager
+    // explicitly marks it resolved, same as any other violation.
+    const flagged = readings.filter((r) => r.status === "red");
     const unresolved = flagged.filter((r) => !r.resolvedAt);
     const overdueUnits = isLive
       ? computeOverdueUnits({ readings, now: nowTick, intervalMs: MISSED_CHECK_INTERVAL_MS })
@@ -521,7 +645,7 @@ export default function Home() {
           <button
             onClick={verifyIntegrity}
             disabled={readings.length === 0}
-            title="Recomputes the tamper-evident hash chain over every reading this shift and confirms nothing was edited, reordered, or deleted after logging."
+            title="Recomputes the hash chain over every reading, correction, and resolution this shift, and cross-checks that nothing was edited without also being re-hashed. Detects naive edits, not an unforgeable guarantee — see README."
             className={BTN.ghost}
           >
             🔒 Verify Log
@@ -587,7 +711,7 @@ export default function Home() {
           }`}
         >
           {integrityResult.verified
-            ? "🔒 Log integrity: verified — every entry's hash chains correctly from the start of this shift, nothing edited, reordered, or deleted."
+            ? "🔒 Log integrity: no naive edits detected — every entry's hash chains correctly, and every correction/resolution matches its own hashed event."
             : `⚠️ Log integrity: BROKEN at entry ${integrityResult.brokenAt} — ${integrityResult.reason}`}
         </div>
       )}
@@ -902,21 +1026,29 @@ export default function Home() {
               {readings.map((r, i) => {
                 // Only "red" is an actual FDA violation needing a manager
                 // resolution — "amber" is compliant, just close to the
-                // limit, so it doesn't need the resolve workflow. A
-                // superseded (corrected-away) reading never needs
-                // resolving either — it's not current anymore.
-                const isFlagged = r.status === "red" && !r.superseded;
+                // limit, so it doesn't need the resolve workflow.
+                //
+                // Round-3 #P0-1: a superseded RED still needs resolving —
+                // a cook's own correction is not a substitute for a
+                // manager's confirmation, so `isFlagged` no longer excludes
+                // superseded reds. Only non-red superseded rows are
+                // visually dimmed/struck-through; a superseded red stays
+                // fully visible (with its "corrected by cook to X°F —
+                // manager to confirm" note shown inline, not just on
+                // hover) precisely because it must never look dismissed.
+                const isFlagged = r.status === "red";
+                const dimForCorrection = r.superseded && r.status !== "red";
                 return (
                   <tr
                     key={`${r.id}-${r.timestamp}`}
                     className={`border-t border-slate-800/80 hover:bg-slate-800/30 transition-colors ${
                       i % 2 === 1 ? "bg-slate-900/30" : ""
-                    } ${r.superseded ? "opacity-50" : ""}`}
+                    } ${dimForCorrection ? "opacity-50" : ""}`}
                   >
                     <td className="px-3 py-2 text-slate-400 whitespace-nowrap">
                       {new Date(r.timestamp).toLocaleTimeString()}
                     </td>
-                    <td className={`px-3 py-2 ${r.superseded ? "line-through" : ""}`}>
+                    <td className={`px-3 py-2 ${dimForCorrection ? "line-through" : ""}`}>
                       {r.location || r.foodItem || "—"}
                       {r.coolingStage && (
                         <span className="ml-1.5 text-xs text-sky-400">
@@ -931,7 +1063,10 @@ export default function Home() {
                           ⚠️ category conflict
                         </span>
                       )}
-                      {r.superseded && (
+                      {r.superseded && r.status === "red" && (
+                        <p className="text-xs text-amber-400 font-semibold not-italic mt-0.5">⚠️ {r.supersededNote}</p>
+                      )}
+                      {r.superseded && r.status !== "red" && (
                         <span className="ml-1.5 text-xs text-slate-500 not-italic no-underline" title={r.supersededNote}>
                           (superseded — corrected)
                         </span>
@@ -940,7 +1075,7 @@ export default function Home() {
                         <p className="text-xs text-sky-400 font-normal mt-0.5">↳ {r.correctionNote}</p>
                       )}
                     </td>
-                    <td className={`px-3 py-2 font-mono ${r.superseded ? "line-through" : ""}`}>
+                    <td className={`px-3 py-2 font-mono ${dimForCorrection ? "line-through" : ""}`}>
                       {Number.isFinite(r.temperatureF) ? `${r.temperatureF}°F` : "—"}
                     </td>
                     <td className="px-3 py-2">

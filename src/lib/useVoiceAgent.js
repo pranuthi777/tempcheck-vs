@@ -227,13 +227,18 @@ export function useVoiceAgent({
       // sense.
       let corrects = null;
       if (!coolingStage) {
+        // Round-3 #P0-1: correctionTracker now requires BOTH the same
+        // food_item (never location alone) AND an explicit correction cue
+        // in the cook's own words — cookText is what it scans for that
+        // cue. See correctionTracker.js for why location-only matching was
+        // a real, dangerous bug.
         corrects = correctionTrackerRef.current.checkAndRecord({
           id: readingId,
-          location: args.location,
           foodItem: args.food_item,
           temperatureF,
           status: evaluation.status,
           timestamp: readingTimestamp,
+          cookText: lastUserTextRef.current,
         });
       }
 

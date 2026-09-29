@@ -106,11 +106,19 @@ export function exportHaccpPdf(
   // compliant reading close to the limit (see ruleEngine.js) — it gets a
   // spoken confirmation in the app, but it never required a corrective
   // action, so it doesn't belong in an inspector's violations section; it
-  // still appears, correctly labeled, in the full log below. A superseded
-  // (corrected-away) reading is excluded too — its correction, not the
-  // stale original, is what's actually current; the original still
-  // appears in the full log, struck through, with its correction noted.
-  const flagged = readings.filter((r) => r.status === "red" && !r.superseded);
+  // still appears, correctly labeled, in the full log below.
+  //
+  // Round-3 critique #P0-1: a superseded (corrected-away) RED reading is
+  // deliberately NOT excluded here — it was a real, logged FDA violation
+  // when it happened, and a cook's own later spoken correction is not the
+  // same thing as a manager confirming the corrective action actually
+  // took place. Excluding it let a genuine violation vanish from an
+  // inspector's copy of the log just because someone later said a
+  // different number. It stays listed, with its "corrected by cook to
+  // X°F" note appended to Corrective Action so an inspector — or a
+  // manager reviewing before it's ever printed — sees it needs
+  // confirming, not that it disappeared.
+  const flagged = readings.filter((r) => r.status === "red");
   doc.setFontSize(12);
   doc.setTextColor(20);
   doc.text("Violations & Corrective Actions", MARGIN, y);
@@ -132,8 +140,8 @@ export function exportHaccpPdf(
         new Date(r.timestamp).toLocaleTimeString(),
         r.location || r.foodItem || "—",
         Number.isFinite(r.temperatureF) ? `${r.temperatureF}°F` : "—",
-        (r.status || "unknown").toUpperCase(),
-        r.correctiveAction || "—",
+        (r.status || "unknown").toUpperCase() + (r.superseded ? " (corrected)" : ""),
+        (r.correctiveAction || "—") + (r.superseded && r.supersededNote ? `\n${r.supersededNote}` : ""),
         r.cookText ? `"${r.cookText}"` : "—",
         r.resolvedAt ? `Yes, ${new Date(r.resolvedAt).toLocaleTimeString()}` : "No",
       ]),
@@ -151,8 +159,8 @@ export function exportHaccpPdf(
       didParseCell: (data) => {
         if (data.section === "body" && data.column.index === 3) {
           const v = String(data.cell.raw).toLowerCase();
-          if (v === "red") data.cell.styles.textColor = [185, 28, 28];
-          else if (v === "amber") data.cell.styles.textColor = [180, 120, 8];
+          if (v.startsWith("red")) data.cell.styles.textColor = [185, 28, 28];
+          else if (v.startsWith("amber")) data.cell.styles.textColor = [180, 120, 8];
         }
         if (data.section === "body" && data.column.index === 6) {
           const v = String(data.cell.raw);
@@ -173,7 +181,7 @@ export function exportHaccpPdf(
     (r.location || r.foodItem || "—") +
       (r.coolingStage ? ` (${r.coolingStage === "start" ? "cooling start" : "cooling check"})` : "") +
       (r.superseded ? " [SUPERSEDED — corrected]" : "") +
-      (r.correctionNote ? `\n${r.correctionNote}` : ""),
+      (r.supersededNote ? `\n${r.supersededNote}` : r.correctionNote ? `\n${r.correctionNote}` : ""),
     // Code always wins the category the reading was actually evaluated
     // against (see foodCategories.js) — this just marks, for a manager's
     // review, the cases where the voice agent's own guess disagreed.
@@ -241,17 +249,22 @@ export function exportHaccpPdf(
     CONTENT_WIDTH
   );
 
-  // Log integrity (Bug #5 / #26): honest about what the hash chain proves
-  // and doesn't. See hashChain.js for the full reasoning — this is a "what
-  // was said, in this order, at this time" guarantee, not proof a probe
-  // touched food at this temperature.
+  // Log integrity (Bug #5 / #26, reworded Round-3 #P0-4): honest about
+  // what the hash chain proves and doesn't. See hashChain.js for the full
+  // reasoning — this detects a NAIVE edit (a field changed in storage
+  // without also regenerating every hash after it), and cross-checks that
+  // every superseded/resolved flag matches a real, hashed correction/
+  // resolution event (#P0-3) — it is not an unforgeable guarantee: anyone
+  // willing to recompute the whole chain themselves, in their own
+  // browser, could still regenerate a new internally-consistent one from
+  // scratch. That would need a server-side secret this app doesn't have.
   const integrityHeadline = integrity
     ? integrity.verified
-      ? "Log integrity: VERIFIED — every entry's hash chains correctly from the start of this shift; nothing was edited, reordered, or deleted after logging."
+      ? "Log integrity: no naive edits detected — every entry's hash chains correctly from the start of this shift, and every correction/resolution matches its own hashed event."
       : `Log integrity: BROKEN at entry ${integrity.brokenAt} — ${integrity.reason}`
     : "Log integrity: not checked for this export.";
   const integrityCaveat =
-    "This hash chain and the server-issued timestamps on each entry prove WHEN something was said and that the record hasn't been edited since — they do not prove a thermometer probe actually touched the food at the stated temperature.";
+    "This hash chain and the server-issued timestamps on each entry detect edits made without also regenerating the rest of the chain — the realistic tampering case. They are not an unforgeable guarantee (a full chain could in principle be regenerated from scratch by someone with complete control of their own browser) and do not prove a thermometer probe actually touched the food at the stated temperature.";
   const integrityLines = doc.splitTextToSize(integrityHeadline, CONTENT_WIDTH);
   const integrityCaveatLines = doc.splitTextToSize(integrityCaveat, CONTENT_WIDTH);
 
