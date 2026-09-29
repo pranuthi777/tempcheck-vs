@@ -73,7 +73,22 @@ export default function Home() {
 
   const onReading = useCallback((record) => {
     setRestoredNotice(false);
-    setReadings((prev) => [record, ...prev]);
+    setReadings((prev) => {
+      // A reading that corrects an earlier one (see correctionTracker.js /
+      // useVoiceAgent.js) marks that earlier entry "superseded" instead of
+      // leaving two unlinked entries side by side — the old one stays in
+      // the log for the audit trail (never deleted), but is excluded from
+      // live counts/summaries so a corrected-away "safe" or "red" reading
+      // never lingers as if it were still current.
+      const next = record.correctsReadingId
+        ? prev.map((r) =>
+            r.id === record.correctsReadingId
+              ? { ...r, superseded: true, supersededAt: record.timestamp, supersededNote: record.correctionNote }
+              : r
+          )
+        : prev;
+      return [record, ...next];
+    });
     if (soundEnabledRef.current) {
       if (record.status === "amber" || record.status === "red") {
         playAlertTone(record.status);
@@ -179,9 +194,16 @@ export default function Home() {
     setShiftStartDisplay(null);
   }, [disconnect]);
 
+  // Superseded (corrected-away) readings stay in `readings` for the audit
+  // trail but must never count toward live totals — a reading the cook
+  // corrected is not "still safe" or "still a violation" anymore, its
+  // replacement is.
   const summary = useMemo(() => {
     const counts = { safe: 0, amber: 0, red: 0, unknown: 0 };
-    for (const r of readings) counts[r.status] = (counts[r.status] || 0) + 1;
+    for (const r of readings) {
+      if (r.superseded) continue;
+      counts[r.status] = (counts[r.status] || 0) + 1;
+    }
     return counts;
   }, [readings]);
 
@@ -189,6 +211,7 @@ export default function Home() {
   const latestByKey = useMemo(() => {
     const map = new Map();
     for (const r of readings) {
+      if (r.superseded) continue;
       const key = (r.location || r.foodItem || "unspecified").toLowerCase();
       if (!map.has(key)) map.set(key, r);
     }
@@ -216,7 +239,9 @@ export default function Home() {
     // corrective-action follow-up and a resolve click — "amber" is
     // compliant (just close to the limit) and never gets a resolve
     // button, so it must not count toward "still unresolved" here either.
-    const flagged = readings.filter((r) => r.status === "red");
+    // A superseded (corrected-away) reading is excluded too — it's not a
+    // live violation anymore, its correction is.
+    const flagged = readings.filter((r) => r.status === "red" && !r.superseded);
     const unresolved = flagged.filter((r) => !r.resolvedAt);
     const lastReadingAt = readings[0]?.timestamp ?? null;
     const referencePoint = lastReadingAt ?? shiftStartDisplay;
@@ -573,14 +598,19 @@ export default function Home() {
               {readings.map((r) => {
                 // Only "red" is an actual FDA violation needing a manager
                 // resolution — "amber" is compliant, just close to the
-                // limit, so it doesn't need the resolve workflow.
-                const isFlagged = r.status === "red";
+                // limit, so it doesn't need the resolve workflow. A
+                // superseded (corrected-away) reading never needs
+                // resolving either — it's not current anymore.
+                const isFlagged = r.status === "red" && !r.superseded;
                 return (
-                  <tr key={`${r.id}-${r.timestamp}`} className="border-t border-slate-800">
+                  <tr
+                    key={`${r.id}-${r.timestamp}`}
+                    className={`border-t border-slate-800 ${r.superseded ? "opacity-50" : ""}`}
+                  >
                     <td className="px-3 py-2 text-slate-400 whitespace-nowrap">
                       {new Date(r.timestamp).toLocaleTimeString()}
                     </td>
-                    <td className="px-3 py-2">
+                    <td className={`px-3 py-2 ${r.superseded ? "line-through" : ""}`}>
                       {r.location || r.foodItem || "—"}
                       {r.coolingStage && (
                         <span className="ml-1.5 text-xs text-sky-400">
@@ -595,8 +625,16 @@ export default function Home() {
                           ⚠️ category conflict
                         </span>
                       )}
+                      {r.superseded && (
+                        <span className="ml-1.5 text-xs text-slate-500 not-italic no-underline" title={r.supersededNote}>
+                          (superseded — corrected)
+                        </span>
+                      )}
+                      {r.correctionNote && (
+                        <p className="text-xs text-sky-400 font-normal mt-0.5">↳ {r.correctionNote}</p>
+                      )}
                     </td>
-                    <td className="px-3 py-2 font-mono">
+                    <td className={`px-3 py-2 font-mono ${r.superseded ? "line-through" : ""}`}>
                       {Number.isFinite(r.temperatureF) ? `${r.temperatureF}°F` : "—"}
                     </td>
                     <td className="px-3 py-2">

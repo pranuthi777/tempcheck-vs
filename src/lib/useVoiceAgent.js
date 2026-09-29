@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { evaluateReading } from "./ruleEngine";
 import { evaluateCoolingCheck, COOLING_CITATION } from "./coolingEngine";
+import { createCorrectionTracker } from "./correctionTracker";
 import { buildSessionUpdate } from "./agentConfig";
 import { PCMPlayer } from "./audioPlayer";
 import { startMicCapture, startDemoCapture } from "./micCapture";
@@ -60,6 +61,12 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
   // a reload, a known, disclosed limitation); a start not yet matched by a
   // check just means that item's cooling progress isn't being tracked.
   const coolingPendingRef = useRef(new Map());
+  // Tracks the most recent ordinary (non-cooling) reading per location/
+  // food_item so a cook correcting themselves in a follow-up turn ("wait,
+  // that's wrong, it's 48") gets linked to what it corrects instead of
+  // silently sitting in the log as a second, unrelated-looking entry next
+  // to a stale one. See correctionTracker.js.
+  const correctionTrackerRef = useRef(createCorrectionTracker());
 
   // Push-to-talk: in a very loud kitchen, always-on listening can pick up
   // too much background noise/chatter. micOpenRef gates whether captured
@@ -102,6 +109,8 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
             : args.temperature_value;
       }
 
+      const readingId = msg.call_id || crypto.randomUUID();
+      const readingTimestamp = Date.now();
       let evaluation;
       let coolingStage = null; // "start" | "check" | null, for the dashboard/log to badge
 
@@ -178,9 +187,25 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
         });
       }
 
+      // Only ordinary readings go through correction detection — a
+      // cooling_start/cooling_check pair already has its own, more precise
+      // pairing logic (coolingPendingRef) and isn't a "correction" in this
+      // sense.
+      let corrects = null;
+      if (!coolingStage) {
+        corrects = correctionTrackerRef.current.checkAndRecord({
+          id: readingId,
+          location: args.location,
+          foodItem: args.food_item,
+          temperatureF,
+          status: evaluation.status,
+          timestamp: readingTimestamp,
+        });
+      }
+
       const record = {
-        id: msg.call_id || crypto.randomUUID(),
-        timestamp: Date.now(),
+        id: readingId,
+        timestamp: readingTimestamp,
         location: args.location || null,
         foodItem: args.food_item || null,
         rawArgs: args,
@@ -188,6 +213,17 @@ export function useVoiceAgent({ onReading, onTranscriptLine }) {
         cookText: lastUserTextRef.current,
         coolingStage,
         ...evaluation,
+        // Set when this reading corrects an immediately-prior one for the
+        // same location/food_item (see correctionTracker.js) — the caller
+        // (page.js) uses this to mark the earlier entry superseded rather
+        // than leaving two unlinked, possibly-contradictory entries in the
+        // log.
+        correctsReadingId: corrects ? corrects.id : null,
+        correctionNote: corrects
+          ? `Corrected from ${corrects.temperatureF}°F (${corrects.status}) by cook at ${new Date(
+              readingTimestamp
+            ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+          : null,
       };
 
       onReading?.(record);

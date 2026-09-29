@@ -69,8 +69,11 @@ export function exportHaccpPdf(readings, { shiftStart, shiftEnd, filterDescripti
   // compliant reading close to the limit (see ruleEngine.js) — it gets a
   // spoken confirmation in the app, but it never required a corrective
   // action, so it doesn't belong in an inspector's violations section; it
-  // still appears, correctly labeled, in the full log below.
-  const flagged = readings.filter((r) => r.status === "red");
+  // still appears, correctly labeled, in the full log below. A superseded
+  // (corrected-away) reading is excluded too — its correction, not the
+  // stale original, is what's actually current; the original still
+  // appears in the full log, struck through, with its correction noted.
+  const flagged = readings.filter((r) => r.status === "red" && !r.superseded);
   doc.setFontSize(12);
   doc.setTextColor(20);
   doc.text("Violations & Corrective Actions", MARGIN, y);
@@ -131,13 +134,15 @@ export function exportHaccpPdf(readings, { shiftStart, shiftEnd, filterDescripti
   const rows = readings.map((r) => [
     new Date(r.timestamp).toLocaleTimeString(),
     (r.location || r.foodItem || "—") +
-      (r.coolingStage ? ` (${r.coolingStage === "start" ? "cooling start" : "cooling check"})` : ""),
+      (r.coolingStage ? ` (${r.coolingStage === "start" ? "cooling start" : "cooling check"})` : "") +
+      (r.superseded ? " [SUPERSEDED — corrected]" : "") +
+      (r.correctionNote ? `\n${r.correctionNote}` : ""),
     // Code always wins the category the reading was actually evaluated
     // against (see foodCategories.js) — this just marks, for a manager's
     // review, the cases where the voice agent's own guess disagreed.
     (r.categoryLabel || "—") + (r.categoryConflict ? " (⚠ category conflict)" : ""),
     Number.isFinite(r.temperatureF) ? `${r.temperatureF}°F` : "—",
-    (r.status || "unknown").toUpperCase(),
+    (r.status || "unknown").toUpperCase() + (r.superseded ? " (superseded)" : ""),
     r.correctiveAction || "—",
     r.citation || "—",
     r.cookText || "—",
