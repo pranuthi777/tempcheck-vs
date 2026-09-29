@@ -80,6 +80,7 @@ async function runClipEndToEnd(item) {
     const ws = new WebSocket(`wss://agents.assemblyai.com/v1/ws?token=${tokenData.token}`);
     let settled = false;
     let sessionReady = false;
+    let greetingDone = false;
     let toolCallTimer = null;
     let sessionReadyTimer = null;
 
@@ -124,8 +125,23 @@ async function runClipEndToEnd(item) {
       if (msg.type === "session.ready" && !sessionReady) {
         sessionReady = true;
         clearTimeout(sessionReadyTimer);
+        // Real fix, found by running this harness against the live
+        // pipeline: session.ready immediately triggers the agent's own
+        // spoken greeting (a real reply.started/reply.audio/reply.done
+        // turn). Streaming the clip's audio starting at session.ready, the
+        // same instant, overlaps that greeting — the server's turn
+        // detection does not treat audio arriving during the agent's own
+        // reply as real user speech (a real cook doesn't start talking
+        // over the greeting either), so the clip's audio was effectively
+        // getting lost, and only a stray fragment surfaced much later.
+        // Waiting for the greeting's own reply.done below, THEN streaming
+        // the clip, matches how a real shift actually starts.
+      }
 
-        // Stream the real clip audio at real-time pacing.
+      if (msg.type === "reply.done" && !greetingDone) {
+        greetingDone = true;
+        // Stream the real clip audio at real-time pacing, now that the
+        // agent has finished its own greeting.
         for (let i = 0; i < int16.length; i += CHUNK_SAMPLES) {
           const chunk = int16.subarray(i, i + CHUNK_SAMPLES);
           ws.send(JSON.stringify({ type: "input.audio", audio: int16BufferToBase64(chunk.buffer.slice(chunk.byteOffset, chunk.byteOffset + chunk.byteLength)) }));
