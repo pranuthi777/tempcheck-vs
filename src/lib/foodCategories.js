@@ -128,6 +128,27 @@ const CATEGORY_LABELS = {
   unknown: "Unrecognized item",
 };
 
+// Bug#6: plain `item.includes(key)` substring matching had no word
+// boundary, so a short key hiding inside an unrelated longer word produced
+// a wrong, silent category (e.g. "eggplant" matching the "egg" key and
+// getting evaluated as fish/seafood/eggs). Matching now requires the key to
+// appear as a whole word (or whole hyphenated/multi-word phrase), and keys
+// are tried longest-first so a more specific compound phrase (e.g.
+// "chicken breast") is preferred over a shorter key that also happens to
+// match (e.g. "chicken") whenever both are present — even though today
+// every such overlap happens to land in the same category, this keeps the
+// lookup correct if a more specific override is ever added later.
+const SORTED_ENTRIES = Object.entries(ITEM_CATEGORY_MAP).sort((a, b) => b[0].length - a[0].length);
+
+function escapeRegExp(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function wholeWordIncludes(haystack, key) {
+  const pattern = new RegExp(`(?<![a-z0-9])${escapeRegExp(key)}(?![a-z0-9])`, "i");
+  return pattern.test(haystack);
+}
+
 /**
  * Look up a category from the food_item/location text alone, via the
  * deterministic ITEM_CATEGORY_MAP — no LLM input involved. Returns null if
@@ -138,11 +159,11 @@ function codeResolvedCategory({ location, foodItem }) {
   const loc = normalize(location);
   const item = normalize(foodItem);
 
-  for (const [key, category] of Object.entries(ITEM_CATEGORY_MAP)) {
-    if (loc && loc.includes(key)) return category;
+  for (const [key, category] of SORTED_ENTRIES) {
+    if (loc && wholeWordIncludes(loc, key)) return category;
   }
-  for (const [key, category] of Object.entries(ITEM_CATEGORY_MAP)) {
-    if (item && item.includes(key)) return category;
+  for (const [key, category] of SORTED_ENTRIES) {
+    if (item && wholeWordIncludes(item, key)) return category;
   }
   return null;
 }

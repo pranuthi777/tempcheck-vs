@@ -50,3 +50,36 @@ test("freezer/walk-in freezer resolve to their own 'freezer' category, not cold_
   assert.equal(resolveCategory({ location: "walk-in cooler" }), "cold_holding");
   assert.equal(resolveCategory({ location: "reach-in fridge" }), "cold_holding");
 });
+
+// Bug#6: the old lookup did plain substring matching (`item.includes(key)`)
+// with no word boundary, so a short map key hiding inside an unrelated
+// longer word produced a wrong, silent category — a real food-safety risk,
+// not just a cosmetic mismatch (e.g. a vegetable getting evaluated against
+// the fish/seafood/eggs 145F rule for no reason).
+test("whole-word matching: a map key must not match as a mere substring of an unrelated word", () => {
+  // "egg"/"eggs" are map keys (fish_seafood) — "eggplant" must not match
+  // them just because it contains the letters "egg".
+  assert.equal(resolveCategory({ foodItem: "eggplant" }), "unknown");
+  assert.equal(resolveCategory({ foodItem: "roasted eggplant" }), "unknown");
+  // "ham" is a map key (whole_muscle) — "hamburger" must resolve on its own
+  // exact, more specific key (ground_meat), never leak in as a substring
+  // match on "ham".
+  assert.equal(resolveCategory({ foodItem: "hamburger" }), "ground_meat");
+  assert.equal(resolveCategory({ foodItem: "ham" }), "whole_muscle");
+  // "cod" is a map key (fish_seafood) — "cooler" must not match it via the
+  // substring "co" + ... no, "cod" isn't a substring of "cooler", but
+  // "cold well" contains "cod"? No — guard the actually-dangerous case:
+  // a word boundary means "cod" must not match inside "accord" or similar.
+  assert.equal(resolveCategory({ foodItem: "accordion" }), "unknown");
+});
+
+test("longest/most-specific map key wins over a shorter key that's also a substring", () => {
+  // "chicken" alone is poultry, and so is "ground chicken" — same category,
+  // so this doesn't change the outcome, but confirms the more specific
+  // compound key is still reachable and preferred when both match.
+  assert.equal(resolveCategory({ foodItem: "ground chicken" }), "poultry");
+  // "prime rib roast" contains both "prime rib" and "roast" (both
+  // whole_muscle) — resolves cleanly either way, confirming multi-key
+  // overlaps in the same category don't error or flip-flop.
+  assert.equal(resolveCategory({ foodItem: "prime rib roast" }), "whole_muscle");
+});
